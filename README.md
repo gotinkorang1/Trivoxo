@@ -147,20 +147,28 @@ per-activity metadata — all editable without code.
 
 ## Roadmap
 
-**Done (this scaffold)**
+**Done**
 
-- Combined Next.js + Payload app on Postgres, typechecks, builds, lints
-- Full admin data model + RBAC + drafts/versioning
-- Branded marketing homepage (all blueprint sections)
-- Seed for the 13 brochure tours + Capital Pulse corrected itinerary
+- Combined Next.js + Payload app on Postgres — typechecks, builds, lints
+- Full admin data model + RBAC + drafts/versioning; seed for categories, 6
+  destinations, the 13 brochure tours (Capital Pulse corrected), 3 events,
+  4 guide posts and content-page stubs
+- **Public site (content-complete):** home; experiences (browse + filters +
+  detail + booking request); destinations; events; corporate & custom-trip
+  enquiry forms; Ghana Guide; about; contact; safety; FAQs; legal pages
+- Booking request flow creates real bookings in Payload (capture only)
 
-**Next in Phase 1** (not yet built)
+Front-end pages render from the shared catalogue modules (`src/lib/data/*`),
+which are also the seed's source — so site and admin stay in sync.
 
-- Experience listing + filters, experience detail page, booking flow
-- Booking holds + Paystack checkout + verified webhook (idempotent) — the
-  transactional inventory logic (§38, §46) needs deliberate human review
-- Confirmation emails / vouchers (Resend), My Trips, manual bookings UI polish
-- Events purchase + QR tickets + check-in; corporate & custom-trip forms
+**Next (not yet built)**
+
+- **Payments:** Paystack checkout + verified idempotent webhook, and the
+  transactional booking hold (§38, §46) — needs Paystack keys; flagged for
+  deliberate human review
+- **Event ticketing:** orders model, purchase, QR tickets + check-in (§65–66)
+- Confirmation emails / vouchers (Resend); My Trips; travel-services pages
+- Swap front-end reads from the static modules to live Payload queries
 - Cloudinary storage adapter, sitemap/robots, redirects from the old site
 
 See the redesign plan in `docs/` for the full Phase 1–3 breakdown.
