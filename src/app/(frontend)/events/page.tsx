@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { MapPin, ArrowRight } from 'lucide-react'
+import { ArrowRight, MapPin } from 'lucide-react'
 import { Container } from '@/components/ui/container'
+import { PageHero } from '@/components/site/page-hero'
 import { getAllEvents, eventFromPrice } from '@/lib/payload/events'
 import { dateParts, formatFromPrice } from '@/lib/format'
 
@@ -9,7 +10,7 @@ export const revalidate = 60
 
 export const metadata: Metadata = {
   title: 'Events',
-  description: 'Trivoxo events across Ghana — sunset sessions, December nights and lake cruises. Get your tickets.',
+  description: 'Trivoxo events across Ghana — adventure weekends, sunset sessions and curated experiences.',
 }
 
 export default async function EventsPage() {
@@ -17,49 +18,46 @@ export default async function EventsPage() {
   const events = [...all].sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt))
 
   return (
-    <Container className="py-10 sm:py-14">
-      <header className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand-primary">Events</p>
-        <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Upcoming events</h1>
-        <p className="mt-2 max-w-2xl text-text-secondary">
-          Sunset sessions, December nights and lake cruises — secure your spot before they sell out.
-        </p>
-      </header>
-
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {events.map((ev) => {
-          const { day, month } = dateParts(ev.startsAt)
-          return (
-            <Link
-              key={ev.slug}
-              href={`/events/${ev.slug}`}
-              className="group flex flex-col overflow-hidden rounded-card border border-border bg-surface-elevated transition-all hover:-translate-y-1 hover:shadow-lg"
-            >
-              <div className="relative aspect-[16/10]" style={{ background: ev.gradient }}>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                <div className="absolute left-4 top-4 flex flex-col items-center rounded-xl bg-white/95 px-3 py-2 text-brand-navy shadow">
-                  <span className="text-xl font-bold leading-none">{day}</span>
-                  <span className="text-xs font-semibold">{month}</span>
+    <>
+      <PageHero
+        eyebrow="Events"
+        title="Good energy deserves a date"
+        description="Adventure weekends, sunset sessions and memorable Ghana moments — secure your spot before they sell out."
+      />
+      <Container className="py-16 sm:py-20">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {events.map((event) => {
+            const { day, month } = dateParts(event.startsAt)
+            return (
+              <Link
+                key={event.slug}
+                href={`/events/${event.slug}`}
+                className="card-lift group flex flex-col overflow-hidden rounded-card border border-border bg-surface-elevated shadow-soft"
+              >
+                <div className="relative aspect-[16/10] overflow-hidden" style={{ background: event.gradient }}>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/48 to-transparent" />
+                  <div className="absolute left-4 top-4 flex size-16 flex-col items-center justify-center rounded-2xl bg-white text-brand-navy shadow-xl">
+                    <span className="text-2xl font-black leading-none">{day}</span>
+                    <span className="mt-1 text-[0.65rem] font-bold uppercase tracking-wider">{month}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-1 flex-col p-5">
-                <h2 className="font-display text-lg leading-snug text-text-primary group-hover:text-brand-primary">
-                  {ev.title}
-                </h2>
-                <p className="mt-1 flex items-center gap-1.5 text-sm text-text-muted">
-                  <MapPin className="size-3.5" /> {ev.venue}, {ev.location}
-                </p>
-                <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
-                  <span className="text-sm font-semibold text-text-primary">{formatFromPrice(eventFromPrice(ev))}</span>
-                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary">
-                    Get tickets <ArrowRight className="size-3.5" />
-                  </span>
+                <div className="flex flex-1 flex-col p-6">
+                  <h2 className="text-xl font-semibold leading-snug text-text-primary transition-colors group-hover:text-brand-link">{event.title}</h2>
+                  <p className="mt-2 flex items-center gap-1.5 text-sm text-text-muted">
+                    <MapPin className="size-3.5 text-brand-link" aria-hidden="true" /> {event.venue}, {event.location}
+                  </p>
+                  <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
+                    <span className="font-bold text-text-primary">{formatFromPrice(eventFromPrice(event))}</span>
+                    <span className="inline-flex items-center gap-1 text-sm font-bold text-brand-link">
+                      Get tickets <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          )
-        })}
-      </div>
-    </Container>
+              </Link>
+            )
+          })}
+        </div>
+      </Container>
+    </>
   )
 }

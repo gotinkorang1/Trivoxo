@@ -81,7 +81,7 @@ export default async function GuideArticlePage({ params }: { params: Promise<{ s
                     href={`/guide/${r.slug}`}
                     className="group flex items-center justify-between gap-4 rounded-card border border-border bg-surface-elevated p-4 hover:border-brand-primary"
                   >
-                    <span className="font-medium text-text-primary group-hover:text-brand-primary">{r.title}</span>
+                    <span className="font-medium text-text-primary group-hover:text-brand-link">{r.title}</span>
                     <ArrowRight className="size-4 shrink-0 text-brand-primary" />
                   </Link>
                 </li>

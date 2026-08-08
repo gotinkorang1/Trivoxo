@@ -19,7 +19,7 @@ export default function SafetyPage() {
   return (
     <Container className="py-12 sm:py-16">
       <header className="max-w-2xl">
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand-primary">Safety</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-brand-link">Safety</p>
         <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Adventure with confidence</h1>
         <p className="mt-3 text-text-secondary">
           Great experiences should also be well-run and safe. Here’s how we plan and coordinate every trip so you

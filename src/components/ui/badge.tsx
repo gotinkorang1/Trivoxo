@@ -1,8 +1,8 @@
 import { cn } from '@/lib/utils'
 
 const TONES: Record<string, string> = {
-  bestseller: 'bg-brand-primary text-white',
-  new: 'bg-brand-accent text-white',
+  bestseller: 'bg-brand-primary text-brand-navy',
+  new: 'bg-success text-white',
   popular: 'bg-brand-secondary text-brand-navy',
   limited: 'bg-brand-navy text-white',
   neutral: 'bg-white/90 text-brand-navy',

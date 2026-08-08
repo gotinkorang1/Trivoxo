@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { SlidersHorizontal, X } from 'lucide-react'
 import { Container } from '@/components/ui/container'
+import { PageHero } from '@/components/site/page-hero'
 import { Button } from '@/components/ui/button'
 import { ExperienceCard } from '@/components/experiences/experience-card'
 import type { Experience } from '@/lib/data/experiences'
@@ -70,18 +71,18 @@ export default async function ExperiencesPage({ searchParams }: { searchParams: 
   const destinations = Array.from(new Set(experiences.map((e) => e.destination))).sort()
 
   return (
-    <Container className="py-10 sm:py-14">
-      <header className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand-primary">Experiences</p>
-        <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">
-          {activeCategory ? activeCategory.title : 'Find an experience'}
-        </h1>
-        <p className="mt-2 text-text-secondary">
+    <>
+      <PageHero
+        eyebrow="Experiences"
+        title={activeCategory ? activeCategory.title : 'Find your next Ghana story'}
+        description="Browse curated tours, outdoor adventures, culture, cruises and premium escapes across Ghana."
+      >
+        <p className="inline-flex rounded-full border border-white/18 bg-white/10 px-4 py-2 text-sm font-semibold text-white/82 backdrop-blur-sm">
           {results.length} experience{results.length === 1 ? '' : 's'}
           {activeCategory ? ` in ${activeCategory.title}` : ' across Ghana'}
         </p>
-      </header>
-
+      </PageHero>
+      <Container className="py-16 sm:py-20">
       <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
         <FilterSidebar sp={sp} hasFilters={hasFilters} durations={durations} destinations={destinations} />
 
@@ -90,7 +91,7 @@ export default async function ExperiencesPage({ searchParams }: { searchParams: 
             <div className="rounded-card border border-dashed border-border-strong p-12 text-center">
               <p className="font-semibold text-text-primary">No experiences match those filters.</p>
               <p className="mt-1 text-sm text-text-muted">Try widening your search.</p>
-              <Link href="/experiences" className="mt-4 inline-block text-sm font-semibold text-brand-primary">
+              <Link href="/experiences" className="mt-4 inline-block text-sm font-semibold text-brand-link">
                 Clear all filters
               </Link>
             </div>
@@ -103,7 +104,8 @@ export default async function ExperiencesPage({ searchParams }: { searchParams: 
           )}
         </div>
       </div>
-    </Container>
+      </Container>
+    </>
   )
 }
 
@@ -121,13 +123,13 @@ function FilterSidebar({
 }) {
   return (
     <aside className="lg:sticky lg:top-24 lg:self-start">
-      <form action="/experiences" method="get" className="space-y-5 rounded-card border border-border bg-surface p-5">
+      <form action="/experiences" method="get" className="space-y-5 rounded-card border border-border bg-surface-elevated p-5 shadow-soft">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2 font-semibold text-text-primary">
             <SlidersHorizontal className="size-4" /> Filters
           </span>
           {hasFilters && (
-            <Link href="/experiences" className="flex items-center gap-1 text-xs font-medium text-text-muted hover:text-brand-primary">
+            <Link href="/experiences" className="flex items-center gap-1 text-xs font-medium text-text-muted hover:text-brand-link">
               <X className="size-3" /> Clear
             </Link>
           )}
@@ -138,7 +140,7 @@ function FilterSidebar({
             name="q"
             defaultValue={sp.q ?? ''}
             placeholder="Name or keyword"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand-primary"
+            className="min-h-11 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand-primary"
           />
         </FilterField>
 
@@ -162,7 +164,7 @@ function FilterSidebar({
             step={100}
             defaultValue={sp.maxPrice ?? ''}
             placeholder="Any"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand-primary"
+            className="min-h-11 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand-primary"
           />
         </FilterField>
 
@@ -207,7 +209,7 @@ function FilterSelect({
       <select
         name={name}
         defaultValue={value ?? ''}
-        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand-primary"
+        className="min-h-11 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand-primary"
       >
         <option value="">{anyLabel}</option>
         {options.map((o) => (

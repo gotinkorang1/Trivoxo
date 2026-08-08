@@ -1,104 +1,99 @@
 @import 'tailwindcss';
 
-/*
-  Trivoxo design tokens.
-  Style direction: "Modern Ghanaian Adventure × Premium Travel Editorial".
-  Palette matched to the Trivoxo logo — vivid orange wordmark, golden-yellow
-  "v", deep navy and warm neutrals — with an adventure-green accent for eco /
-  nature contexts. Every component reads these tokens, so brand tweaks are a
-  one-file change.
-*/
+/* Trivoxo V2 — Modern Ghanaian Adventure × Premium Travel Editorial */
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 :root {
-  /* Brand ramp — orange (logo wordmark) */
+  color-scheme: light;
+
   --brand-primary: #f15a29;
-  --brand-primary-hover: #d94e20;
-  --brand-primary-soft: #fdeee6;
+  --brand-primary-hover: #d94a1c;
+  --brand-primary-soft: #fff0e9;
+  --brand-link: #b83b14;
 
-  /* Brand ramp — golden yellow (logo "v") */
   --brand-secondary: #f9b233;
-  --brand-secondary-hover: #e79c1e;
-  --brand-secondary-soft: #fdf3dd;
+  --brand-secondary-hover: #e39b1e;
+  --brand-secondary-soft: #fff5de;
 
-  /* Deep navy — the "premium" anchor */
   --brand-navy: #0e1c2b;
-  --brand-navy-700: #13273a;
+  --brand-navy-700: #162d42;
+  --brand-accent: #167d62;
+  --brand-accent-soft: #e5f5ef;
 
-  /* Adventure green accent — eco / nature */
-  --brand-accent: #1e9e7a;
-  --brand-accent-soft: #e4f4ee;
-
-  /* Semantic surfaces (light) */
-  --background: #ffffff;
-  --surface: #f7f6f3;
+  --background: #fbfaf7;
+  --surface: #f1f3ef;
   --surface-elevated: #ffffff;
+  --surface-strong: #e8ece7;
 
-  /* Text */
-  --text-primary: #14202c;
-  --text-secondary: #4a5866;
-  --text-muted: #7c8894;
-  --text-on-brand: #ffffff;
+  --text-primary: #101e2b;
+  --text-secondary: #3f4f5e;
+  --text-muted: #5f6f7c;
+  --text-on-brand: #0e1c2b;
 
-  /* Lines */
-  --border: #e6e4df;
-  --border-strong: #d3d0c9;
+  --border: #deddd7;
+  --border-strong: #cbc9c0;
 
-  /* Status */
-  --success: #1e9e7a;
-  --warning: #f9b233;
-  --danger: #d64545;
+  --success: #167d62;
+  --warning: #b96d00;
+  --danger: #b83535;
+  --ring: #d94a1c;
 
-  --ring: var(--brand-primary);
-  --radius: 0.75rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0b1621;
-    --surface: #10202e;
-    --surface-elevated: #142838;
-    --brand-primary-soft: #2a1a12;
-    --brand-secondary-soft: #2a2412;
-    --brand-accent-soft: #10241d;
-
-    --text-primary: #f2f4f6;
-    --text-secondary: #b7c1cb;
-    --text-muted: #8695a2;
-
-    --border: #1f3242;
-    --border-strong: #2a4257;
-  }
-}
-
-/* Explicit theme override (wins over the media query when set on <html>) */
-:root[data-theme='light'] {
-  --background: #ffffff;
-  --surface: #f7f6f3;
-  --surface-elevated: #ffffff;
-  --text-primary: #14202c;
-  --text-secondary: #4a5866;
-  --text-muted: #7c8894;
-  --border: #e6e4df;
-  --border-strong: #d3d0c9;
+  --shadow-rgb: 14 28 43;
+  --radius: 1.25rem;
 }
 
 :root[data-theme='dark'] {
-  --background: #0b1621;
-  --surface: #10202e;
-  --surface-elevated: #142838;
-  --text-primary: #f2f4f6;
-  --text-secondary: #b7c1cb;
-  --text-muted: #8695a2;
-  --border: #1f3242;
-  --border-strong: #2a4257;
+  color-scheme: dark;
+
+  --brand-primary-soft: #361d14;
+  --brand-secondary-soft: #352912;
+  --brand-accent: #58d3ae;
+  --brand-accent-soft: #102c25;
+  --brand-link: #ff9a70;
+
+  --background: #07131e;
+  --surface: #0c1d2a;
+  --surface-elevated: #112636;
+  --surface-strong: #193247;
+
+  --text-primary: #f7f9f7;
+  --text-secondary: #c4cfd8;
+  --text-muted: #9babb7;
+
+  --border: #244053;
+  --border-strong: #36566b;
+  --ring: #ff8a5b;
+  --shadow-rgb: 0 0 0;
 }
 
-/* Map our tokens onto Tailwind's theme so `bg-brand-primary`, `text-muted`,
-   `rounded-card`, `font-display` etc. all work as utilities. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --brand-primary-soft: #361d14;
+    --brand-secondary-soft: #352912;
+    --brand-accent: #58d3ae;
+    --brand-accent-soft: #102c25;
+    --brand-link: #ff9a70;
+    --background: #07131e;
+    --surface: #0c1d2a;
+    --surface-elevated: #112636;
+    --surface-strong: #193247;
+    --text-primary: #f7f9f7;
+    --text-secondary: #c4cfd8;
+    --text-muted: #9babb7;
+    --border: #244053;
+    --border-strong: #36566b;
+    --ring: #ff8a5b;
+    --shadow-rgb: 0 0 0;
+  }
+}
+
 @theme inline {
   --color-brand-primary: var(--brand-primary);
   --color-brand-primary-hover: var(--brand-primary-hover);
   --color-brand-primary-soft: var(--brand-primary-soft);
+  --color-brand-link: var(--brand-link);
   --color-brand-secondary: var(--brand-secondary);
   --color-brand-secondary-hover: var(--brand-secondary-hover);
   --color-brand-secondary-soft: var(--brand-secondary-soft);
@@ -110,6 +105,7 @@
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
+  --color-surface-strong: var(--surface-strong);
 
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
@@ -118,7 +114,6 @@
 
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
-
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
@@ -127,27 +122,155 @@
   --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
 
   --radius-card: var(--radius);
+  --shadow-soft: 0 18px 55px -30px rgb(var(--shadow-rgb) / 0.38);
+  --shadow-lift: 0 28px 70px -28px rgb(var(--shadow-rgb) / 0.46);
 }
 
 @layer base {
   * {
     border-color: var(--border);
   }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 7rem;
+  }
+
   body {
+    min-width: 320px;
     background-color: var(--background);
     color: var(--text-primary);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    transition: background-color 260ms ease, color 260ms ease;
   }
-  h1, h2, h3, h4 {
-    font-family: var(--font-display);
+
+  h1,
+  h2,
+  h3,
+  h4 {
     color: var(--text-primary);
-    letter-spacing: -0.01em;
+    font-family: var(--font-display);
+    letter-spacing: -0.025em;
+    text-wrap: balance;
   }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  input,
+  select,
+  textarea {
+    color: var(--text-primary);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+  }
+
   ::selection {
     background-color: var(--brand-primary);
-    color: #fff;
+    color: var(--brand-navy);
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    border: 1px solid rgb(255 255 255 / 0.2);
+    background: rgb(255 255 255 / 0.12);
+    box-shadow: 0 24px 80px -32px rgb(0 0 0 / 0.55);
+    backdrop-filter: blur(18px);
+  }
+
+  .text-gradient-brand {
+    background: linear-gradient(105deg, #f9b233 0%, #ff8152 52%, #f15a29 100%);
+    background-clip: text;
+    color: transparent;
+  }
+
+  .soft-grid {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.035) 1px, transparent 1px);
+    background-size: 42px 42px;
+  }
+
+  .card-lift {
+    transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 350ms ease,
+      border-color 250ms ease;
+  }
+
+  .card-lift:hover {
+    border-color: color-mix(in srgb, var(--brand-primary) 48%, var(--border));
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-6px);
+  }
+
+  .hero-ken-burns {
+    animation: ken-burns 9s ease-out both;
+  }
+
+  .animate-float {
+    animation: float 5s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: float 6s 1.2s ease-in-out infinite;
+  }
+
+  .animate-marquee {
+    animation: marquee 26s linear infinite;
+  }
+
+  .content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 700px;
+  }
+}
+
+@keyframes ken-burns {
+  from {
+    transform: scale(1.01);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
   }
 }
 
@@ -157,7 +280,7 @@
   *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
   }
 }

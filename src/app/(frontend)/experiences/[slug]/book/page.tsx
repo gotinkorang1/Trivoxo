@@ -26,7 +26,7 @@ export default async function BookExperiencePage({ params }: { params: Promise<{
     <Container className="py-10 sm:py-14">
       <Link
         href={`/experiences/${exp.slug}`}
-        className="mb-6 inline-flex items-center gap-1 text-sm font-medium text-text-muted hover:text-brand-primary"
+        className="mb-6 inline-flex items-center gap-1 text-sm font-medium text-text-muted hover:text-brand-link"
       >
         <ChevronLeft className="size-4" /> Back to {exp.name}
       </Link>
@@ -48,7 +48,7 @@ export default async function BookExperiencePage({ params }: { params: Promise<{
           <div className="overflow-hidden rounded-card border border-border bg-surface-elevated shadow-sm">
             <div className="h-28" style={{ background: gradientFor(exp.categorySlug) }} />
             <div className="p-5">
-              <p className="text-xs font-semibold uppercase tracking-wide text-brand-primary">{exp.categoryLabel}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-link">{exp.categoryLabel}</p>
               <h2 className="mt-1 font-display text-lg">{exp.name}</h2>
               <dl className="mt-4 space-y-2 text-sm text-text-secondary">
                 <div className="flex items-center gap-2">

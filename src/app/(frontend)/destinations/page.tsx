@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { MapPin } from 'lucide-react'
+import { ArrowRight, MapPin } from 'lucide-react'
 import { Container } from '@/components/ui/container'
+import { PageHero } from '@/components/site/page-hero'
 import { getAllDestinations } from '@/lib/payload/destinations'
 
 export const revalidate = 60
@@ -13,42 +14,46 @@ export const metadata: Metadata = {
 
 export default async function DestinationsPage() {
   const destinations = await getAllDestinations()
-  return (
-    <Container className="py-10 sm:py-14">
-      <header className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand-primary">Destinations</p>
-        <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Explore Ghana</h1>
-        <p className="mt-2 max-w-2xl text-text-secondary">
-          Pick a place to see the experiences waiting there — from the capital’s pulse to highland waterfalls and
-          lakeside escapes.
-        </p>
-      </header>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {destinations.map((dest) => {
-          const count = dest.experienceSlugs.length
-          return (
-            <Link
-              key={dest.slug}
-              href={`/destinations/${dest.slug}`}
-              className="group relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-card p-6 text-white transition-transform hover:-translate-y-1"
-              style={{ background: dest.gradient }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent transition-opacity group-hover:from-black/75" />
-              <div className="relative">
-                <p className="flex items-center gap-1 text-xs uppercase tracking-wide text-white/80">
-                  <MapPin className="size-3.5" /> {dest.region}
-                </p>
-                <p className="mt-1 font-display text-2xl font-semibold">{dest.title}</p>
-                <p className="mt-1 line-clamp-2 text-sm text-white/85">{dest.blurb}</p>
-                <p className="mt-3 text-xs font-semibold text-white/90">
-                  {count} experience{count === 1 ? '' : 's'}
-                </p>
-              </div>
-            </Link>
-          )
-        })}
-      </div>
-    </Container>
+  return (
+    <>
+      <PageHero
+        eyebrow="Destinations"
+        title="Explore Ghana, one rhythm at a time"
+        description="Follow the capital’s pulse, the coast’s stories, highland waterfalls and slow lakeside escapes."
+      />
+      <Container className="py-16 sm:py-20">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {destinations.map((destination) => {
+            const count = destination.experienceSlugs.length
+            return (
+              <Link
+                key={destination.slug}
+                href={`/destinations/${destination.slug}`}
+                className="card-lift group relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-card border border-white/10 p-6 text-white shadow-soft"
+                style={{ background: destination.gradient }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/15 to-transparent transition group-hover:from-black/62" />
+                <div className="relative">
+                  <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.14em] text-white/82">
+                    <MapPin className="size-3.5" aria-hidden="true" /> {destination.region}
+                  </p>
+                  <h2 className="mt-1 text-2xl font-semibold text-white">{destination.title}</h2>
+                  <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/82">{destination.blurb}</p>
+                  <div className="mt-4 flex items-center justify-between gap-4">
+                    <p className="text-xs font-bold text-white/86">
+                      {count} experience{count === 1 ? '' : 's'}
+                    </p>
+                    <span className="inline-flex items-center gap-1.5 text-sm font-bold text-white">
+                      Explore <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+      </Container>
+    </>
   )
 }

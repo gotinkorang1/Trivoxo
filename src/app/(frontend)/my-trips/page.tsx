@@ -29,7 +29,7 @@ export default function MyTripsPage() {
 
       <p className="mt-6 text-center text-sm text-text-muted">
         Can’t find your reference? It’s in your booking confirmation — or{' '}
-        <Link href="/contact" className="font-medium text-brand-primary hover:underline">
+        <Link href="/contact" className="font-medium text-brand-link hover:underline">
           contact us
         </Link>{' '}
         and we’ll help.

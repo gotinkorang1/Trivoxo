@@ -59,7 +59,7 @@ export default async function DestinationDetailPage({ params }: { params: Promis
               ({experiences.length})
             </span>
           </h2>
-          <Link href="/experiences" className="text-sm font-semibold text-brand-primary hover:underline">
+          <Link href="/experiences" className="text-sm font-semibold text-brand-link hover:underline">
             All experiences
           </Link>
         </div>

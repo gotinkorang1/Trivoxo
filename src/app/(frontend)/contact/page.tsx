@@ -14,7 +14,7 @@ export default function ContactPage() {
   return (
     <Container className="py-12 sm:py-16">
       <header className="mb-10 max-w-2xl">
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand-primary">Contact</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-brand-link">Contact</p>
         <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Let’s talk</h1>
         <p className="mt-2 text-text-secondary">
           Questions, bookings or a big idea for an event? We’re happy to help — WhatsApp is usually fastest.
@@ -90,7 +90,7 @@ function Social({ icon: Icon, href, label }: { icon: typeof Phone; href: string;
       aria-label={label}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex size-10 items-center justify-center rounded-full border border-border text-text-secondary hover:border-brand-primary hover:text-brand-primary"
+      className="inline-flex size-11 items-center justify-center rounded-full border border-border text-text-secondary hover:border-brand-primary hover:text-brand-link"
     >
       <Icon className="size-4" />
     </a>

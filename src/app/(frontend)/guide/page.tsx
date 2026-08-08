@@ -23,7 +23,7 @@ export default async function GuidePage({ searchParams }: { searchParams: Promis
   return (
     <Container className="py-10 sm:py-14">
       <header className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand-primary">Ghana Guide</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-brand-link">Ghana Guide</p>
         <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Plan like a local</h1>
         <p className="mt-2 max-w-2xl text-text-secondary">
           Practical tips, destination know-how and the stories behind the experiences.
@@ -47,8 +47,8 @@ export default async function GuidePage({ searchParams }: { searchParams: Promis
           >
             <div className="aspect-[16/9]" style={{ background: a.gradient }} />
             <div className="flex flex-1 flex-col p-5">
-              <p className="text-xs font-semibold uppercase tracking-wide text-brand-primary">{a.categoryLabel}</p>
-              <h2 className="mt-2 font-display text-lg leading-snug text-text-primary group-hover:text-brand-primary">
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-link">{a.categoryLabel}</p>
+              <h2 className="mt-2 font-display text-lg leading-snug text-text-primary group-hover:text-brand-link">
                 {a.title}
               </h2>
               <p className="mt-2 line-clamp-2 text-sm text-text-secondary">{a.excerpt}</p>
@@ -73,7 +73,7 @@ function Chip({ href, active, label }: { href: string; active: boolean; label: s
       className={cn(
         'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
         active
-          ? 'border-brand-primary bg-brand-primary text-white'
+          ? 'border-brand-primary bg-brand-primary text-brand-navy'
           : 'border-border bg-background text-text-secondary hover:border-border-strong',
       )}
     >

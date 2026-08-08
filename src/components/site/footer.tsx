@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react'
+import { ArrowRight, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { Wordmark } from '@/components/site/wordmark'
 import { BRAND, CONTACT, SOCIALS } from '@/lib/constants'
@@ -45,13 +45,32 @@ const COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
 
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-white/10 bg-brand-navy text-white">
-      <Container className="py-14">
+    <footer className="relative mt-24 overflow-hidden border-t border-white/10 bg-brand-navy text-white">
+      <div className="soft-grid absolute inset-0 opacity-50" aria-hidden="true" />
+      <div className="absolute -right-28 -top-36 size-96 rounded-full bg-brand-primary/10 blur-3xl" aria-hidden="true" />
+      <Container className="relative py-14 sm:py-18">
+        <div className="mb-14 flex flex-col gap-6 rounded-[1.75rem] border border-white/12 bg-white/[0.06] px-6 py-7 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:px-8">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-secondary">Ready when you are</p>
+            <h2 className="mt-2 max-w-2xl text-2xl font-semibold text-white sm:text-3xl">
+              Your next Ghana story starts with one conversation.
+            </h2>
+          </div>
+          <Link
+            href="/contact"
+            className="group inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-brand-primary px-6 font-bold text-brand-navy transition hover:-translate-y-0.5 hover:bg-brand-secondary"
+          >
+            Plan with us <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+          </Link>
+        </div>
+
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-6">
           <div className="lg:col-span-2">
             <Wordmark variant="white" className="h-12 w-auto" />
-            <p className="mt-3 max-w-xs text-sm text-white/70">{BRAND.tagline}</p>
-            <div className="mt-5 space-y-2 text-sm text-white/70">
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/72">
+              {BRAND.tagline} Tours, events and travel support designed with care in Accra, Ghana.
+            </p>
+            <div className="mt-6 space-y-3 text-sm text-white/72">
               <a href={`tel:${CONTACT.primaryPhone}`} className="flex items-center gap-2 hover:text-brand-secondary">
                 <Phone className="size-4" /> {CONTACT.primaryPhone}
               </a>
@@ -68,7 +87,7 @@ export function Footer() {
                 aria-label="Instagram"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex size-9 items-center justify-center rounded-full border border-white/20 text-white/70 hover:border-brand-secondary hover:text-brand-secondary"
+                className="inline-flex size-11 items-center justify-center rounded-full border border-white/20 text-white/75 transition hover:-translate-y-0.5 hover:border-brand-secondary hover:text-brand-secondary"
               >
                 <Instagram className="size-4" />
               </a>
@@ -77,7 +96,7 @@ export function Footer() {
                 aria-label="LinkedIn"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex size-9 items-center justify-center rounded-full border border-white/20 text-white/70 hover:border-brand-secondary hover:text-brand-secondary"
+                className="inline-flex size-11 items-center justify-center rounded-full border border-white/20 text-white/75 transition hover:-translate-y-0.5 hover:border-brand-secondary hover:text-brand-secondary"
               >
                 <Linkedin className="size-4" />
               </a>
@@ -86,11 +105,11 @@ export function Footer() {
 
           {COLUMNS.map((col) => (
             <div key={col.title}>
-              <p className="text-sm font-semibold text-white">{col.title}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-secondary">{col.title}</p>
               <ul className="mt-4 space-y-2.5">
                 {col.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-white/65 hover:text-brand-secondary">
+                    <Link href={link.href} className="inline-flex min-h-11 items-center text-sm text-white/68 transition hover:translate-x-1 hover:text-white sm:min-h-9">
                       {link.label}
                     </Link>
                   </li>
@@ -100,7 +119,7 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-sm text-white/50 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-sm text-white/55 sm:flex-row">
           <p>
             © {new Date().getFullYear()} {BRAND.name}. All rights reserved.
           </p>

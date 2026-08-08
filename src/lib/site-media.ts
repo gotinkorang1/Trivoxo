@@ -4,9 +4,9 @@ export const SITE_MEDIA = {
     src: '/images/Clusters-Fotografy80September-15-2024-e1771862173969.webp',
     alt: 'Trivoxo cycling group enjoying an outdoor experience in Ghana',
   },
-  hiking: {
+  outdoorGroup: {
     src: '/images/Clusters-Fotografy174March-30-2025.webp',
-    alt: 'Trivoxo hiking group celebrating together on a nature trail',
+    alt: 'Trivoxo outdoor group celebrating together on a green trail',
   },
   hotel: {
     src: '/images/Untitled-2Artboard-1-copy-5.jpg',
@@ -24,7 +24,6 @@ export const SITE_MEDIA = {
 
 export function experienceImage(categorySlug?: string) {
   if (categorySlug === 'cycling') return SITE_MEDIA.hero
-  if (categorySlug === 'hiking-adventure' || categorySlug === 'nature-wildlife') return SITE_MEDIA.hiking
   return undefined
 }
 

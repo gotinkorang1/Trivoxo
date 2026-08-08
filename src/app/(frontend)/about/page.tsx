@@ -86,7 +86,7 @@ export default function AboutPage() {
             </div>
           </div>
           <div className="rounded-card border border-border bg-surface p-6">
-            <p className="text-sm font-semibold uppercase tracking-wide text-brand-primary">Part of the group</p>
+            <p className="text-sm font-semibold uppercase tracking-wide text-brand-link">Part of the group</p>
             <p className="mt-2 text-text-secondary">
               Trivoxo operates as a subsidiary under <strong className="text-text-primary">Nii Plants Group</strong>,
               built to deliver premium experience services with the same commitment to quality, structure and

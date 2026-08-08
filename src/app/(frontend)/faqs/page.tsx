@@ -51,7 +51,7 @@ export default function FaqsPage() {
   return (
     <Container className="max-w-3xl py-12 sm:py-16">
       <header className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand-primary">FAQs</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-brand-link">FAQs</p>
         <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Frequently asked questions</h1>
       </header>
 

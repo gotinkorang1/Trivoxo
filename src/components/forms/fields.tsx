@@ -46,7 +46,7 @@ export function CheckboxChips({
       {options.map((o) => (
         <label
           key={o.value}
-          className="cursor-pointer rounded-full border border-border bg-background px-3.5 py-1.5 text-sm text-text-secondary transition-colors has-[:checked]:border-brand-primary has-[:checked]:bg-brand-primary-soft has-[:checked]:text-brand-primary hover:border-border-strong"
+          className="cursor-pointer rounded-full border border-border bg-background px-3.5 py-1.5 text-sm text-text-secondary transition-colors has-[:checked]:border-brand-primary has-[:checked]:bg-brand-primary-soft has-[:checked]:text-brand-link hover:border-border-strong"
         >
           <input type="checkbox" name={name} value={o.value} className="sr-only" />
           {o.label}

@@ -117,7 +117,7 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
                   {exp.itinerary.map((stop, i) => (
                     <li key={i} className="relative">
                       <span className="absolute -left-[27px] top-1 size-3 rounded-full border-2 border-brand-primary bg-background" />
-                      {stop.time && <p className="text-xs font-semibold text-brand-primary">{stop.time}</p>}
+                      {stop.time && <p className="text-xs font-semibold text-brand-link">{stop.time}</p>}
                       <p className="font-semibold text-text-primary">{stop.title}</p>
                       {stop.description && <p className="mt-0.5 text-sm text-text-muted">{stop.description}</p>}
                     </li>
