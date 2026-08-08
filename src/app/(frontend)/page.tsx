@@ -24,9 +24,10 @@ import { SectionHeading } from '@/components/ui/section-heading'
 import { ExperienceCard } from '@/components/experiences/experience-card'
 import { BRAND, EXPERIENCE_CATEGORIES } from '@/lib/constants'
 import { getFeaturedExperiences } from '@/lib/data/experiences'
-import { formatFromPrice } from '@/lib/format'
-import { HOME_EVENTS, HOME_REVIEWS, HOME_GUIDE, WHY_TRIVOXO } from '@/lib/data/home-samples'
+import { formatFromPrice, dateParts } from '@/lib/format'
+import { HOME_REVIEWS, HOME_GUIDE, WHY_TRIVOXO } from '@/lib/data/home-samples'
 import { getFeaturedDestinations } from '@/lib/data/destinations'
+import { getUpcomingEvents, eventFromPrice } from '@/lib/data/events'
 
 const ICONS: Record<string, LucideIcon> = {
   Mountain,
@@ -280,29 +281,32 @@ function UpcomingEvents() {
         link={{ href: '/events', label: 'All events' }}
       />
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {HOME_EVENTS.map((ev) => (
-          <div
-            key={ev.slug}
-            className="flex items-center gap-4 rounded-card border border-border bg-surface-elevated p-4"
-          >
-            <div className="flex size-16 shrink-0 flex-col items-center justify-center rounded-xl bg-brand-primary-soft text-brand-primary">
-              <span className="text-xl font-bold leading-none">{ev.day}</span>
-              <span className="text-xs font-semibold">{ev.month}</span>
+        {getUpcomingEvents(3).map((ev) => {
+          const { day, month } = dateParts(ev.startsAt)
+          return (
+            <div
+              key={ev.slug}
+              className="flex items-center gap-4 rounded-card border border-border bg-surface-elevated p-4"
+            >
+              <div className="flex size-16 shrink-0 flex-col items-center justify-center rounded-xl bg-brand-primary-soft text-brand-primary">
+                <span className="text-xl font-bold leading-none">{day}</span>
+                <span className="text-xs font-semibold">{month}</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold text-text-primary">{ev.title}</p>
+                <p className="text-sm text-text-muted">
+                  {ev.location} · {formatFromPrice(eventFromPrice(ev))}
+                </p>
+                <Link
+                  href={`/events/${ev.slug}`}
+                  className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
+                >
+                  Get tickets <ArrowRight className="size-3.5" />
+                </Link>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-semibold text-text-primary">{ev.title}</p>
-              <p className="text-sm text-text-muted">
-                {ev.location} · {formatFromPrice(ev.priceFrom)}
-              </p>
-              <Link
-                href={`/events/${ev.slug}`}
-                className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
-              >
-                Get tickets <ArrowRight className="size-3.5" />
-              </Link>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </Container>
   )

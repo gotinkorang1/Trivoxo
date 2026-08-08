@@ -14,6 +14,7 @@ import config from '../payload.config'
 import { EXPERIENCE_CATEGORIES } from '../lib/constants'
 import { EXPERIENCES, type Experience } from '../lib/data/experiences'
 import { DESTINATIONS, EXPERIENCE_TO_DESTINATION } from '../lib/data/destinations'
+import { EVENTS } from '../lib/data/events'
 
 const strings = (values?: string[]) => (values ?? []).map((text) => ({ text }))
 
@@ -103,6 +104,29 @@ async function run() {
     await payload.delete({ collection: 'destinations', id: d.id })
   }
   if (stale.totalDocs > 0) payload.logger.info(`Removed ${stale.totalDocs} stale destinations`)
+
+  // ── Events ─────────────────────────────────────────────────
+  let eventCount = 0
+  for (const ev of EVENTS) {
+    const found = await payload.find({ collection: 'events', where: { slug: { equals: ev.slug } }, limit: 1 })
+    const data = {
+      title: ev.title,
+      slug: ev.slug,
+      shortDescription: ev.blurb,
+      startsAt: ev.startsAt,
+      venue: ev.venue,
+      featured: Boolean(ev.featured),
+      ticketTypes: ev.ticketTypes.map((t) => ({ name: t.name, price: t.price, soldOut: Boolean(t.soldOut) })),
+      _status: 'published' as const,
+    }
+    if (found.docs[0]) {
+      await payload.update({ collection: 'events', id: found.docs[0].id, data })
+    } else {
+      await payload.create({ collection: 'events', data })
+    }
+    eventCount++
+  }
+  payload.logger.info(`Seeded ${eventCount} events`)
 
   payload.logger.info('✅ Seed complete')
   process.exit(0)

@@ -1,15 +1,9 @@
 /**
  * Placeholder content for homepage sections whose Payload collections start
- * empty (events, reviews, guide articles). Replace with live Payload queries
- * once staff have added real records. Kept separate so the swap is obvious and
- * low-risk. (Destination tiles now come from src/lib/data/destinations.ts.)
+ * empty (reviews, guide articles). Replace with live Payload queries once staff
+ * have added real records. Kept separate so the swap is obvious and low-risk.
+ * (Destination tiles come from destinations.ts; events from events.ts.)
  */
-
-export const HOME_EVENTS: { day: string; month: string; title: string; location: string; priceFrom: number; slug: string }[] = [
-  { day: '19', month: 'DEC', title: 'Trivoxo Sunset Experience', location: 'Ada', priceFrom: 250, slug: 'trivoxo-sunset-experience' },
-  { day: '27', month: 'DEC', title: 'Detty December: Capital Glow', location: 'Accra', priceFrom: 350, slug: 'detty-december-capital-glow' },
-  { day: '01', month: 'JAN', title: 'New Year Volta Cruise', location: 'Akosombo', priceFrom: 600, slug: 'new-year-volta-cruise' },
-]
 
 export const HOME_REVIEWS: { name: string; type: string; rating: number; body: string }[] = [
   {
