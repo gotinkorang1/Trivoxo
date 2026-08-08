@@ -25,7 +25,8 @@ import { ExperienceCard } from '@/components/experiences/experience-card'
 import { BRAND, EXPERIENCE_CATEGORIES } from '@/lib/constants'
 import { getFeaturedExperiences } from '@/lib/data/experiences'
 import { formatFromPrice } from '@/lib/format'
-import { HOME_DESTINATIONS, HOME_EVENTS, HOME_REVIEWS, HOME_GUIDE, WHY_TRIVOXO } from '@/lib/data/home-samples'
+import { HOME_EVENTS, HOME_REVIEWS, HOME_GUIDE, WHY_TRIVOXO } from '@/lib/data/home-samples'
+import { getFeaturedDestinations } from '@/lib/data/destinations'
 
 const ICONS: Record<string, LucideIcon> = {
   Mountain,
@@ -196,7 +197,7 @@ function ExploreGhana() {
         link={{ href: '/destinations', label: 'All destinations' }}
       />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        {HOME_DESTINATIONS.map((dest) => (
+        {getFeaturedDestinations(6).map((dest) => (
           <Link
             key={dest.slug}
             href={`/destinations/${dest.slug}`}
@@ -206,7 +207,7 @@ function ExploreGhana() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent transition-opacity group-hover:opacity-80" />
             <div className="relative">
               <p className="text-xs uppercase tracking-wide text-white/80">{dest.region}</p>
-              <p className="font-display text-xl font-semibold">{dest.name}</p>
+              <p className="font-display text-xl font-semibold">{dest.title}</p>
             </div>
           </Link>
         ))}

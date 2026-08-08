@@ -13,6 +13,7 @@ import { getPayload } from 'payload'
 import config from '../payload.config'
 import { EXPERIENCE_CATEGORIES } from '../lib/constants'
 import { EXPERIENCES, type Experience } from '../lib/data/experiences'
+import { DESTINATIONS, EXPERIENCE_TO_DESTINATION } from '../lib/data/destinations'
 
 const strings = (values?: string[]) => (values ?? []).map((text) => ({ text }))
 
@@ -51,27 +52,27 @@ async function run() {
   }
   payload.logger.info(`Seeded ${categoryIds.size} categories`)
 
-  // ── Destinations (derived from the catalogue) ──────────────
+  // ── Destinations (curated hubs) ────────────────────────────
   const destinationIds = new Map<string, number>()
-  const seenDestinations = new Map<string, { title: string; region: string }>()
-  for (const exp of EXPERIENCES) {
-    const slug = exp.destination.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
-    if (!seenDestinations.has(slug)) seenDestinations.set(slug, { title: exp.destination, region: exp.region })
-  }
-  for (const [slug, { title, region }] of seenDestinations) {
+  for (const dest of DESTINATIONS) {
     const found = await payload.find({
       collection: 'destinations',
-      where: { slug: { equals: slug } },
+      where: { slug: { equals: dest.slug } },
       limit: 1,
     })
-    const data = { title, slug, region: region as never }
+    const data = {
+      title: dest.title,
+      slug: dest.slug,
+      region: dest.region as never,
+      shortDescription: dest.blurb,
+      featured: Boolean(dest.featured),
+    }
     const doc = found.docs[0]
       ? await payload.update({ collection: 'destinations', id: found.docs[0].id, data })
       : await payload.create({ collection: 'destinations', data })
-    destinationIds.set(exp_destinationSlug(title), doc.id)
-    destinationIds.set(slug, doc.id)
+    destinationIds.set(dest.slug, doc.id)
   }
-  payload.logger.info(`Seeded ${seenDestinations.size} destinations`)
+  payload.logger.info(`Seeded ${destinationIds.size} destinations`)
 
   // ── Experiences ────────────────────────────────────────────
   let count = 0
@@ -91,12 +92,20 @@ async function run() {
   }
   payload.logger.info(`Seeded ${count} experiences`)
 
+  // ── Remove stale (previously auto-derived) destinations ────
+  const curatedSlugs = DESTINATIONS.map((d) => d.slug)
+  const stale = await payload.find({
+    collection: 'destinations',
+    where: { slug: { not_in: curatedSlugs } },
+    limit: 100,
+  })
+  for (const d of stale.docs) {
+    await payload.delete({ collection: 'destinations', id: d.id })
+  }
+  if (stale.totalDocs > 0) payload.logger.info(`Removed ${stale.totalDocs} stale destinations`)
+
   payload.logger.info('✅ Seed complete')
   process.exit(0)
-}
-
-function exp_destinationSlug(title: string) {
-  return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
 }
 
 function mapExperience(
@@ -124,7 +133,7 @@ function mapExperience(
     excluded: strings(exp.excluded),
     itinerary: (exp.itinerary ?? []).map((s) => ({ time: s.time, title: s.title, description: s.description })),
     category: categoryIds.get(exp.categorySlug),
-    destination: destinationIds.get(exp_destinationSlug(exp.destination)),
+    destination: destinationIds.get(EXPERIENCE_TO_DESTINATION[exp.slug]),
     _status: 'published' as const,
   }
 }

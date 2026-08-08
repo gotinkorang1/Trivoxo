@@ -1,18 +1,9 @@
 /**
  * Placeholder content for homepage sections whose Payload collections start
- * empty (events, reviews, guide articles, destination tiles). Replace with live
- * Payload queries once staff have added real records. Kept separate so the swap
- * is obvious and low-risk.
+ * empty (events, reviews, guide articles). Replace with live Payload queries
+ * once staff have added real records. Kept separate so the swap is obvious and
+ * low-risk. (Destination tiles now come from src/lib/data/destinations.ts.)
  */
-
-export const HOME_DESTINATIONS: { name: string; region: string; gradient: string; slug: string }[] = [
-  { name: 'Accra', region: 'Greater Accra', slug: 'accra', gradient: 'linear-gradient(135deg,#7a2e12,#e85d2a)' },
-  { name: 'Cape Coast', region: 'Central Region', slug: 'cape-coast', gradient: 'linear-gradient(135deg,#0e2a4d,#2f7fb8)' },
-  { name: 'Volta', region: 'Volta Region', slug: 'volta', gradient: 'linear-gradient(135deg,#0f3d2e,#1e9e7a)' },
-  { name: 'Akosombo', region: 'Eastern Region', slug: 'akosombo', gradient: 'linear-gradient(135deg,#133a4d,#2a9fb8)' },
-  { name: 'Eastern Region', region: 'Eastern Region', slug: 'eastern-region', gradient: 'linear-gradient(135deg,#3d4a12,#8bae2a)' },
-  { name: 'Ada', region: 'Greater Accra', slug: 'ada', gradient: 'linear-gradient(135deg,#4d3a12,#f5b133)' },
-]
 
 export const HOME_EVENTS: { day: string; month: string; title: string; location: string; priceFrom: number; slug: string }[] = [
   { day: '19', month: 'DEC', title: 'Trivoxo Sunset Experience', location: 'Ada', priceFrom: 250, slug: 'trivoxo-sunset-experience' },
