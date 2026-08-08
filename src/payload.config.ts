@@ -40,6 +40,9 @@ export default buildConfig({
     meta: {
       titleSuffix: '— Trivoxo Admin',
     },
+    components: {
+      beforeDashboard: ['/components/admin/dashboard-stats#DashboardStats'],
+    },
   },
   collections: [
     // System
