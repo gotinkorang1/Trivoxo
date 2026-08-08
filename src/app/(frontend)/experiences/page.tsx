@@ -1,0 +1,208 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { SlidersHorizontal, X } from 'lucide-react'
+import { Container } from '@/components/ui/container'
+import { Button } from '@/components/ui/button'
+import { ExperienceCard } from '@/components/experiences/experience-card'
+import { EXPERIENCES, type Experience } from '@/lib/data/experiences'
+import { EXPERIENCE_CATEGORIES } from '@/lib/constants'
+
+export const metadata: Metadata = {
+  title: 'Find an Experience',
+  description: 'Browse curated tours, hikes, cruises and cultural journeys across Ghana.',
+}
+
+const DURATIONS = Array.from(new Set(EXPERIENCES.map((e) => e.duration))).sort()
+const DESTINATIONS = Array.from(new Set(EXPERIENCES.map((e) => e.destination))).sort()
+const DIFFICULTIES = ['Easy', 'Moderate', 'Challenging']
+
+type SP = Record<string, string | undefined>
+
+function applyFilters(sp: SP): Experience[] {
+  const q = (sp.q ?? sp.destination ?? '').trim().toLowerCase()
+  const category = sp.category
+  const destination = sp.destination
+  const difficulty = sp.difficulty
+  const duration = sp.duration
+  const maxPrice = sp.maxPrice ? Number(sp.maxPrice) : undefined
+
+  let results = EXPERIENCES.filter((e) => {
+    if (category && e.categorySlug !== category) return false
+    if (difficulty && e.difficulty !== difficulty) return false
+    if (duration && e.duration !== duration) return false
+    if (maxPrice != null && !Number.isNaN(maxPrice) && e.priceFrom > maxPrice) return false
+    if (destination && !e.destination.toLowerCase().includes(destination.toLowerCase())) {
+      // fall through to free-text match below
+      if (!q) return false
+    }
+    if (q) {
+      const hay = `${e.name} ${e.destination} ${e.region} ${e.categoryLabel} ${e.blurb}`.toLowerCase()
+      if (!hay.includes(q)) return false
+    }
+    return true
+  })
+
+  switch (sp.sort) {
+    case 'price-asc':
+      results = [...results].sort((a, b) => a.priceFrom - b.priceFrom)
+      break
+    case 'price-desc':
+      results = [...results].sort((a, b) => b.priceFrom - a.priceFrom)
+      break
+    case 'rating':
+      results = [...results].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+      break
+    default:
+      break
+  }
+  return results
+}
+
+export default async function ExperiencesPage({ searchParams }: { searchParams: Promise<SP> }) {
+  const sp = await searchParams
+  const results = applyFilters(sp)
+  const activeCategory = EXPERIENCE_CATEGORIES.find((c) => c.slug === sp.category)
+  const hasFilters = Boolean(
+    sp.q || sp.category || sp.destination || sp.difficulty || sp.duration || sp.maxPrice || sp.sort,
+  )
+
+  return (
+    <Container className="py-10 sm:py-14">
+      <header className="mb-8">
+        <p className="text-sm font-semibold uppercase tracking-widest text-brand-primary">Experiences</p>
+        <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">
+          {activeCategory ? activeCategory.title : 'Find an experience'}
+        </h1>
+        <p className="mt-2 text-text-secondary">
+          {results.length} experience{results.length === 1 ? '' : 's'}
+          {activeCategory ? ` in ${activeCategory.title}` : ' across Ghana'}
+        </p>
+      </header>
+
+      <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
+        <FilterSidebar sp={sp} hasFilters={hasFilters} />
+
+        <div>
+          {results.length === 0 ? (
+            <div className="rounded-card border border-dashed border-border-strong p-12 text-center">
+              <p className="font-semibold text-text-primary">No experiences match those filters.</p>
+              <p className="mt-1 text-sm text-text-muted">Try widening your search.</p>
+              <Link href="/experiences" className="mt-4 inline-block text-sm font-semibold text-brand-primary">
+                Clear all filters
+              </Link>
+            </div>
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {results.map((exp) => (
+                <ExperienceCard key={exp.slug} experience={exp} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </Container>
+  )
+}
+
+/* Server-rendered GET filter form — works without client JS. */
+function FilterSidebar({ sp, hasFilters }: { sp: SP; hasFilters: boolean }) {
+  return (
+    <aside className="lg:sticky lg:top-24 lg:self-start">
+      <form action="/experiences" method="get" className="space-y-5 rounded-card border border-border bg-surface p-5">
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-2 font-semibold text-text-primary">
+            <SlidersHorizontal className="size-4" /> Filters
+          </span>
+          {hasFilters && (
+            <Link href="/experiences" className="flex items-center gap-1 text-xs font-medium text-text-muted hover:text-brand-primary">
+              <X className="size-3" /> Clear
+            </Link>
+          )}
+        </div>
+
+        <FilterField label="Search">
+          <input
+            name="q"
+            defaultValue={sp.q ?? ''}
+            placeholder="Name or keyword"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand-primary"
+          />
+        </FilterField>
+
+        <FilterSelect name="category" label="Category" value={sp.category}
+          options={EXPERIENCE_CATEGORIES.map((c) => ({ value: c.slug, label: c.title }))} />
+
+        <FilterSelect name="destination" label="Destination" value={sp.destination}
+          options={DESTINATIONS.map((d) => ({ value: d, label: d }))} />
+
+        <FilterSelect name="difficulty" label="Difficulty" value={sp.difficulty}
+          options={DIFFICULTIES.map((d) => ({ value: d, label: d }))} />
+
+        <FilterSelect name="duration" label="Duration" value={sp.duration}
+          options={DURATIONS.map((d) => ({ value: d, label: d }))} />
+
+        <FilterField label="Max price (GHS)">
+          <input
+            name="maxPrice"
+            type="number"
+            min={0}
+            step={100}
+            defaultValue={sp.maxPrice ?? ''}
+            placeholder="Any"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand-primary"
+          />
+        </FilterField>
+
+        <FilterSelect name="sort" label="Sort by" value={sp.sort}
+          options={[
+            { value: 'price-asc', label: 'Price: low to high' },
+            { value: 'price-desc', label: 'Price: high to low' },
+            { value: 'rating', label: 'Rating' },
+          ]}
+          anyLabel="Recommended" />
+
+        <Button type="submit" className="w-full">Apply filters</Button>
+      </form>
+    </aside>
+  )
+}
+
+function FilterField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-muted">{label}</span>
+      {children}
+    </label>
+  )
+}
+
+function FilterSelect({
+  name,
+  label,
+  value,
+  options,
+  anyLabel = 'Any',
+}: {
+  name: string
+  label: string
+  value?: string
+  options: { value: string; label: string }[]
+  anyLabel?: string
+}) {
+  return (
+    <FilterField label={label}>
+      <select
+        name={name}
+        defaultValue={value ?? ''}
+        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand-primary"
+      >
+        <option value="">{anyLabel}</option>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </FilterField>
+  )
+}
