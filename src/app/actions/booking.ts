@@ -3,7 +3,8 @@
 import { getPayload } from 'payload'
 import { redirect } from 'next/navigation'
 import config from '@payload-config'
-import { quoteBooking } from '@/lib/policies'
+import { evaluateDateAvailability, getBookingWindow, isIsoDate } from '@/lib/availability'
+import { CAPACITY, quoteBooking } from '@/lib/policies'
 
 export type BookingFormState = {
   error?: string
@@ -41,10 +42,22 @@ export async function createBookingAction(
   const date = get('date')
   const pickup = get('pickup')
   const specialRequest = get('specialRequest')
-  const adults = Math.max(1, Number(formData.get('adults') ?? 2) || 2)
-  const children = Math.max(0, Number(formData.get('children') ?? 0) || 0)
+  const adults = Number(formData.get('adults') ?? 2)
+  const children = Number(formData.get('children') ?? 0)
+  const partySize = adults + children
 
-  const values = { firstName, lastName, email, phone, country, date, pickup, specialRequest }
+  const values = {
+    firstName,
+    lastName,
+    email,
+    phone,
+    country,
+    date,
+    pickup,
+    specialRequest,
+    adults: String(adults),
+    children: String(children),
+  }
   const fieldErrors: Record<string, string> = {}
   if (!firstName) fieldErrors.firstName = 'Required'
   if (!lastName) fieldErrors.lastName = 'Required'
@@ -52,7 +65,14 @@ export async function createBookingAction(
   else if (!EMAIL_RE.test(email)) fieldErrors.email = 'Enter a valid email'
   if (!phone) fieldErrors.phone = 'Required'
   if (!date) fieldErrors.date = 'Choose a date'
-  else if (Number.isNaN(Date.parse(date))) fieldErrors.date = 'Invalid date'
+  else if (!isIsoDate(date)) fieldErrors.date = 'Choose a valid date'
+  if (!Number.isInteger(adults) || adults < 1 || !Number.isInteger(children) || children < 0) {
+    fieldErrors.party = 'Choose a valid number of travellers'
+  } else if (partySize < CAPACITY.minGuests) {
+    fieldErrors.party = `A minimum of ${CAPACITY.minGuests} travellers is required`
+  } else if (partySize > CAPACITY.maxGuests) {
+    fieldErrors.party = `Online requests are limited to ${CAPACITY.maxGuests} travellers`
+  }
 
   if (Object.keys(fieldErrors).length > 0) {
     return { error: 'Please correct the highlighted fields.', fieldErrors, values }
@@ -72,13 +92,48 @@ export async function createBookingAction(
       return { error: 'That experience could not be found.', values }
     }
 
+    const minGuests = experience.minGuests ?? CAPACITY.minGuests
+    const maxGuests = experience.maxGuests ?? CAPACITY.maxGuests
+    if (partySize < minGuests || partySize > maxGuests) {
+      return {
+        error: 'Please adjust the number of travellers.',
+        fieldErrors: {
+          party:
+            partySize < minGuests
+              ? `This experience requires at least ${minGuests} travellers.`
+              : `Online requests are limited to ${maxGuests} travellers. Contact Trivoxo for a larger group.`,
+        },
+        values,
+      }
+    }
+
+    const availabilityRules = {
+      availabilityType: experience.availabilityType,
+      weekdays: experience.weekdays ?? undefined,
+      minNoticeHours: experience.minNoticeHours ?? undefined,
+      maxAdvanceDays: experience.maxAdvanceDays ?? undefined,
+      soldOut: Boolean(experience.soldOut),
+    }
+    const dateAvailability = evaluateDateAvailability(
+      date,
+      availabilityRules,
+      getBookingWindow(availabilityRules),
+    )
+    if (!dateAvailability.requestable) {
+      return {
+        error: 'That date cannot be requested for this experience.',
+        fieldErrors: { date: dateAvailability.reason ?? 'Choose another date.' },
+        values,
+      }
+    }
+
     const booking = await payload.create({
       collection: 'bookings',
       data: {
         status: 'pending_payment',
         source: 'website',
         experience: experience.id,
-        departureDate: new Date(date).toISOString(),
+        departureDate: new Date(`${date}T12:00:00.000Z`).toISOString(),
         adults,
         children,
         booker: { firstName, lastName, email, phone, country: country || undefined },
@@ -96,7 +151,10 @@ export async function createBookingAction(
   }
 
   if (!reference) {
-    return { error: 'Booking was created but no reference was returned. Please contact us.', values }
+    return {
+      error: 'Booking was created but no reference was returned. Please contact us.',
+      values,
+    }
   }
 
   // Must be outside try/catch — redirect() throws a control-flow signal.

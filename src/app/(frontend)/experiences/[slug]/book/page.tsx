@@ -1,81 +1,98 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ChevronLeft, MapPin, Clock, ShieldCheck } from 'lucide-react'
-import { Container } from '@/components/ui/container'
+import { ChevronLeft, LockKeyhole, ShieldCheck, Sparkles } from 'lucide-react'
 import { BookingForm } from '@/components/booking/booking-form'
-import { GroupPricingTable } from '@/components/experiences/group-pricing'
+import { Container } from '@/components/ui/container'
+import { evaluateDateAvailability, getBookingWindow, isIsoDate } from '@/lib/availability'
 import { getExperienceBySlug } from '@/lib/payload/experiences'
-import { gradientFor } from '@/lib/visuals'
-import { formatPrice } from '@/lib/format'
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<'/experiences/[slug]/book'>): Promise<Metadata> {
   const { slug } = await params
-  const exp = await getExperienceBySlug(slug)
-  return { title: exp ? `Book ${exp.name}` : 'Book', robots: { index: false } }
+  const experience = await getExperienceBySlug(slug)
+  return { title: experience ? `Book ${experience.name}` : 'Book', robots: { index: false } }
 }
 
-export default async function BookExperiencePage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const exp = await getExperienceBySlug(slug)
-  if (!exp) notFound()
+export default async function BookExperiencePage({
+  params,
+  searchParams,
+}: PageProps<'/experiences/[slug]/book'>) {
+  const [{ slug }, query] = await Promise.all([params, searchParams])
+  const experience = await getExperienceBySlug(slug)
+  if (!experience) notFound()
 
-  const minDate = new Date().toISOString().slice(0, 10)
+  const availabilityRules = {
+    availabilityType: experience.availabilityType,
+    weekdays: experience.weekdays,
+    minNoticeHours: experience.minNoticeHours,
+    maxAdvanceDays: experience.maxAdvanceDays,
+    soldOut: experience.soldOut,
+  }
+  const bookingWindow = getBookingWindow(availabilityRules)
+  const requestedDate = typeof query.date === 'string' ? query.date : ''
+  const initialDate =
+    isIsoDate(requestedDate) &&
+    evaluateDateAvailability(requestedDate, availabilityRules, bookingWindow).requestable
+      ? requestedDate
+      : ''
 
   return (
-    <Container className="py-10 sm:py-14">
-      <Link
-        href={`/experiences/${exp.slug}`}
-        className="mb-6 inline-flex items-center gap-1 text-sm font-medium text-text-muted hover:text-brand-link"
-      >
-        <ChevronLeft className="size-4" /> Back to {exp.name}
-      </Link>
+    <div className="relative overflow-hidden pb-28 lg:pb-0">
+      <div className="absolute inset-x-0 top-0 h-80 bg-brand-navy" />
+      <div className="soft-grid absolute inset-x-0 top-0 h-80 opacity-30" />
+      <Container className="relative py-9 sm:py-12 lg:py-16">
+        <Link
+          href={`/experiences/${experience.slug}`}
+          className="inline-flex min-h-10 items-center gap-1 rounded-full px-2 text-sm font-semibold text-white/70 transition hover:bg-white/10 hover:text-white"
+        >
+          <ChevronLeft className="size-4" /> Back to {experience.name}
+        </Link>
 
-      <div className="grid gap-10 lg:grid-cols-[1fr_360px]">
-        <div className="min-w-0">
-          <h1 className="text-3xl font-semibold">Request your booking</h1>
-          <p className="mt-2 text-text-secondary">
-            Tell us your dates and details. We’ll confirm availability and send secure payment options — you won’t
-            be charged now.
+        <div className="mt-6 max-w-3xl text-white">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-secondary">
+            Booking request
           </p>
-          <div className="mt-8 rounded-card border border-border bg-surface-elevated p-6">
-            <BookingForm slug={exp.slug} minDate={minDate} />
+          <h1 className="mt-3 text-4xl font-semibold text-white sm:text-5xl">
+            Plan your Trivoxo experience
+          </h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-white/75">
+            Choose your date and travellers, add your contact details, then review everything before
+            sending the request. You will not be charged at this stage.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/75">
+            <span className="inline-flex items-center gap-2">
+              <ShieldCheck className="size-4 text-brand-secondary" /> Availability checked by
+              Trivoxo
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <LockKeyhole className="size-4 text-brand-secondary" /> Secure details
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <Sparkles className="size-4 text-brand-secondary" /> Group savings calculated live
+            </span>
           </div>
         </div>
 
-        {/* Summary */}
-        <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="overflow-hidden rounded-card border border-border bg-surface-elevated shadow-sm">
-            <div className="h-28" style={{ background: gradientFor(exp.categorySlug) }} />
-            <div className="p-5">
-              <p className="text-xs font-semibold uppercase tracking-wide text-brand-link">{exp.categoryLabel}</p>
-              <h2 className="mt-1 font-display text-lg">{exp.name}</h2>
-              <dl className="mt-4 space-y-2 text-sm text-text-secondary">
-                <div className="flex items-center gap-2">
-                  <MapPin className="size-4 text-text-muted" /> {exp.destination}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="size-4 text-text-muted" /> {exp.duration}
-                </div>
-              </dl>
-              <div className="mt-4 flex items-baseline justify-between border-t border-border pt-4">
-                <span className="text-sm text-text-muted">From</span>
-                <span className="text-xl font-semibold text-text-primary">
-                  {formatPrice(exp.priceFrom)}
-                  <span className="text-sm font-normal text-text-muted"> / person</span>
-                </span>
-              </div>
-              <div className="mt-4 border-t border-border pt-4">
-                <GroupPricingTable baseFrom={exp.priceFrom} />
-              </div>
-              <p className="mt-4 flex items-start gap-2 text-xs text-text-muted">
-                <ShieldCheck className="mt-0.5 size-4 shrink-0 text-brand-accent" />
-                Final price is confirmed with your booking.
-              </p>
-            </div>
-          </div>
-        </aside>
-      </div>
-    </Container>
+        <BookingForm
+          slug={experience.slug}
+          experienceName={experience.name}
+          categoryLabel={experience.categoryLabel}
+          destination={experience.destination}
+          duration={experience.duration || 'On request'}
+          baseFrom={experience.priceFrom}
+          minDate={bookingWindow.minDate}
+          maxDate={bookingWindow.maxDate}
+          initialDate={initialDate}
+          availabilityType={experience.availabilityType}
+          weekdays={experience.weekdays}
+          minNoticeHours={experience.minNoticeHours}
+          soldOut={experience.soldOut}
+          minGuests={experience.minGuests ?? 2}
+          maxGuests={experience.maxGuests ?? 15}
+        />
+      </Container>
+    </div>
   )
 }

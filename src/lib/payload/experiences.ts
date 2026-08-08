@@ -12,8 +12,8 @@
 import { cache } from 'react'
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import type { Experience, ItineraryStop, Difficulty } from '@/lib/data/experiences'
-import type { Experience as ExperienceDoc } from '@/payload-types'
+import type { Experience, ItineraryStop, Difficulty, ExperienceImage } from '@/lib/data/experiences'
+import type { Experience as ExperienceDoc, Media } from '@/payload-types'
 
 const BADGE_LABEL: Record<string, NonNullable<Experience['badge']>> = {
   bestseller: 'Bestseller',
@@ -28,10 +28,21 @@ const DIFFICULTY_LABEL: Record<string, Difficulty> = {
   challenging: 'Challenging',
 }
 
+function toImage(media: number | Media | null | undefined): ExperienceImage | undefined {
+  if (!media || typeof media === 'number' || !media.url) return undefined
+  return {
+    src: media.url,
+    alt: media.alt,
+    width: media.width ?? undefined,
+    height: media.height ?? undefined,
+  }
+}
+
 function toExperience(doc: ExperienceDoc): Experience | null {
   if (!doc.slug) return null
   const category = typeof doc.category === 'object' && doc.category ? doc.category : null
-  const destination = typeof doc.destination === 'object' && doc.destination ? doc.destination : null
+  const destination =
+    typeof doc.destination === 'object' && doc.destination ? doc.destination : null
 
   return {
     slug: doc.slug,
@@ -50,9 +61,39 @@ function toExperience(doc: ExperienceDoc): Experience | null {
     highlights: doc.highlights?.map((h) => h.text),
     included: doc.included?.map((h) => h.text),
     excluded: doc.excluded?.map((h) => h.text),
-    itinerary: doc.itinerary?.map(
-      (s): ItineraryStop => ({ time: s.time ?? undefined, title: s.title, description: s.description ?? undefined }),
-    ),
+    whatToBring: doc.whatToBring?.map((h) => h.text),
+    whoFor: doc.whoFor ?? undefined,
+    itinerary: doc.itinerary?.map((s): ItineraryStop => ({
+      time: s.time ?? undefined,
+      title: s.title,
+      description: s.description ?? undefined,
+    })),
+    availabilityType: doc.availabilityType,
+    weekdays: doc.weekdays ?? undefined,
+    includePublicHolidays: Boolean(doc.includePublicHolidays),
+    minGuests: doc.minGuests ?? undefined,
+    maxGuests: doc.maxGuests ?? undefined,
+    minNoticeHours: doc.minNoticeHours ?? undefined,
+    maxAdvanceDays: doc.maxAdvanceDays ?? undefined,
+    soldOut: Boolean(doc.soldOut),
+    meetingPoint: doc.meetingPoint ?? undefined,
+    pickupInfo: doc.pickupInfo ?? undefined,
+    activityDetails: doc.activityDetails
+      ? {
+          distanceKm: doc.activityDetails.distanceKm ?? undefined,
+          elevationM: doc.activityDetails.elevationM ?? undefined,
+          terrain: doc.activityDetails.terrain ?? undefined,
+          fitnessNote: doc.activityDetails.fitnessNote ?? undefined,
+          equipmentProvided: doc.activityDetails.equipmentProvided ?? undefined,
+          minimumAge: doc.activityDetails.minimumAge ?? undefined,
+          mealIncluded: doc.activityDetails.mealIncluded ?? undefined,
+        }
+      : undefined,
+    faqs: doc.faqs?.map((faq) => ({ question: faq.question, answer: faq.answer })),
+    heroImage: toImage(doc.heroImage),
+    gallery: doc.gallery
+      ?.map((item) => toImage(item.image))
+      .filter((image): image is ExperienceImage => Boolean(image)),
     featured: Boolean(doc.featured),
   }
 }
@@ -88,14 +129,16 @@ export async function getFeaturedExperiences(limit = 6): Promise<Experience[]> {
 }
 
 /** Used by the destinations data layer to resolve "experiences at this place". */
-export const getExperiencesForDestinationId = cache(async (destinationId: number): Promise<Experience[]> => {
-  const payload = await getPayload({ config })
-  const { docs } = await payload.find({
-    collection: 'experiences',
-    where: { destination: { equals: destinationId }, _status: { equals: 'published' } },
-    depth: 1,
-    limit: 200,
-    sort: 'title',
-  })
-  return docs.map(toExperience).filter((e): e is Experience => e !== null)
-})
+export const getExperiencesForDestinationId = cache(
+  async (destinationId: number): Promise<Experience[]> => {
+    const payload = await getPayload({ config })
+    const { docs } = await payload.find({
+      collection: 'experiences',
+      where: { destination: { equals: destinationId }, _status: { equals: 'published' } },
+      depth: 1,
+      limit: 200,
+      sort: 'title',
+    })
+    return docs.map(toExperience).filter((e): e is Experience => e !== null)
+  },
+)

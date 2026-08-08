@@ -26,6 +26,27 @@ export type ItineraryStop = {
   description?: string
 }
 
+export type AvailabilityType =
+  'everyday' | 'weekdays' | 'specific-dates' | 'on-request' | 'private-only'
+export type Weekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
+
+export type ExperienceImage = {
+  src: string
+  alt: string
+  width?: number
+  height?: number
+}
+
+export type ActivityDetails = {
+  distanceKm?: number
+  elevationM?: number
+  terrain?: string
+  fitnessNote?: string
+  equipmentProvided?: string
+  minimumAge?: number
+  mealIncluded?: boolean
+}
+
 export type Experience = {
   slug: string
   name: string
@@ -44,7 +65,23 @@ export type Experience = {
   highlights?: string[]
   included?: string[]
   excluded?: string[]
+  whatToBring?: string[]
+  whoFor?: string
   itinerary?: ItineraryStop[]
+  availabilityType?: AvailabilityType
+  weekdays?: Weekday[]
+  includePublicHolidays?: boolean
+  minGuests?: number
+  maxGuests?: number
+  minNoticeHours?: number
+  maxAdvanceDays?: number
+  soldOut?: boolean
+  meetingPoint?: string
+  pickupInfo?: string
+  activityDetails?: ActivityDetails
+  faqs?: { question: string; answer: string }[]
+  heroImage?: ExperienceImage
+  gallery?: ExperienceImage[]
   /** True where region/category/duration/difficulty/rating are inferred, not confirmed. */
   provisional?: boolean
   featured?: boolean
@@ -93,9 +130,15 @@ export const EXPERIENCES: Experience[] = [
       { title: 'Makola Market', description: 'The trading pulse of the capital.' },
       { title: 'Historic Jamestown', description: 'Colonial-era harbour district and lighthouse.' },
       { title: 'Black Star / Independence Square', description: "Ghana's ceremonial heart." },
-      { title: 'Kwame Nkrumah Memorial Park & Mausoleum', description: 'Resting place of the founding leader.' },
+      {
+        title: 'Kwame Nkrumah Memorial Park & Mausoleum',
+        description: 'Resting place of the founding leader.',
+      },
       { title: 'National Museum of Ghana', description: 'Art, archaeology and ethnography.' },
-      { title: 'Arts Centre / Centre for National Culture', description: 'Craft, colour and local makers.' },
+      {
+        title: 'Arts Centre / Centre for National Culture',
+        description: 'Craft, colour and local makers.',
+      },
     ],
   },
   {
@@ -161,7 +204,8 @@ export const EXPERIENCES: Experience[] = [
     featured: true,
     provisional: true,
     // §36 — weekends & public holidays only
-    blurb: 'A festive cruise across Volta Lake to Dodi Island. Runs weekends and public holidays only.',
+    blurb:
+      'A festive cruise across Volta Lake to Dodi Island. Runs weekends and public holidays only.',
   },
   {
     slug: 'mountain-mist-canopy-cascade',
@@ -289,4 +333,3 @@ export const EXPERIENCES: Experience[] = [
     blurb: 'The capital after dark — food, music and the glow of the city.',
   },
 ]
-
