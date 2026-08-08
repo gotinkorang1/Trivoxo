@@ -520,6 +520,11 @@ export interface Experience {
    * Surface in "Popular Experiences" on the homepage.
    */
   featured?: boolean | null;
+  /**
+   * Leave blank until real review data exists.
+   */
+  rating?: number | null;
+  reviewCount?: number | null;
   heroImage?: (number | null) | Media;
   gallery?:
     | {
@@ -680,7 +685,27 @@ export interface Event {
   startsAt: string;
   endsAt?: string | null;
   venue?: string | null;
+  /**
+   * City/area shown to customers, e.g. "Aburi".
+   */
+  location?: string | null;
   destination?: (number | null) | Destination;
+  about?: string | null;
+  highlights?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  included?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Optional long-form alternative to the bullet list above.
+   */
   whatToExpect?: {
     root: {
       type: string;
@@ -746,6 +771,19 @@ export interface Post {
   title: string;
   excerpt?: string | null;
   coverImage?: (number | null) | Media;
+  /**
+   * Structured content blocks — an optional heading plus a paragraph.
+   */
+  body?:
+    | {
+        heading?: string | null;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Optional long-form alternative to the body blocks above.
+   */
   content?: {
     root: {
       type: string;
@@ -1447,6 +1485,8 @@ export interface ExperiencesSelect<T extends boolean = true> {
   destination?: T;
   badge?: T;
   featured?: T;
+  rating?: T;
+  reviewCount?: T;
   heroImage?: T;
   gallery?:
     | T
@@ -1560,7 +1600,21 @@ export interface EventsSelect<T extends boolean = true> {
   startsAt?: T;
   endsAt?: T;
   venue?: T;
+  location?: T;
   destination?: T;
+  about?: T;
+  highlights?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  included?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   whatToExpect?: T;
   ticketTypes?:
     | T
@@ -1595,6 +1649,13 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   excerpt?: T;
   coverImage?: T;
+  body?:
+    | T
+    | {
+        heading?: T;
+        text?: T;
+        id?: T;
+      };
   content?: T;
   meta?:
     | T

@@ -4,19 +4,19 @@ import { notFound } from 'next/navigation'
 import { ChevronLeft, MapPin, Clock, ShieldCheck } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { BookingForm } from '@/components/booking/booking-form'
-import { getExperienceBySlug } from '@/lib/data/experiences'
+import { getExperienceBySlug } from '@/lib/payload/experiences'
 import { gradientFor } from '@/lib/visuals'
 import { formatPrice } from '@/lib/format'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const exp = getExperienceBySlug(slug)
+  const exp = await getExperienceBySlug(slug)
   return { title: exp ? `Book ${exp.name}` : 'Book', robots: { index: false } }
 }
 
 export default async function BookExperiencePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const exp = getExperienceBySlug(slug)
+  const exp = await getExperienceBySlug(slug)
   if (!exp) notFound()
 
   const minDate = new Date().toISOString().slice(0, 10)

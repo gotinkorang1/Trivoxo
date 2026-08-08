@@ -5,25 +5,28 @@ import { ChevronRight, MapPin } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { ButtonLink } from '@/components/ui/button'
 import { ExperienceCard } from '@/components/experiences/experience-card'
-import { DESTINATIONS, getDestinationBySlug, getDestinationExperiences } from '@/lib/data/destinations'
+import { getAllDestinations, getDestinationBySlug, getDestinationExperiences } from '@/lib/payload/destinations'
 
-export function generateStaticParams() {
-  return DESTINATIONS.map((d) => ({ slug: d.slug }))
+export const revalidate = 60
+
+export async function generateStaticParams() {
+  const destinations = await getAllDestinations()
+  return destinations.map((d) => ({ slug: d.slug }))
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const dest = getDestinationBySlug(slug)
+  const dest = await getDestinationBySlug(slug)
   if (!dest) return { title: 'Destination not found' }
   return { title: dest.title, description: dest.blurb, openGraph: { title: dest.title, description: dest.blurb } }
 }
 
 export default async function DestinationDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const dest = getDestinationBySlug(slug)
+  const dest = await getDestinationBySlug(slug)
   if (!dest) notFound()
 
-  const experiences = getDestinationExperiences(slug)
+  const experiences = await getDestinationExperiences(slug)
 
   return (
     <article>

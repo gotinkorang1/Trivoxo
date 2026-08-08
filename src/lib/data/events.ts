@@ -1,6 +1,7 @@
 /**
- * Events (§62–§64). Real Trivoxo events. Source of truth shared by the events
- * pages and the seed (so the admin matches the site).
+ * Events (§62–§64). Real Trivoxo events. The public site now reads live from
+ * Payload (src/lib/payload/events.ts); this module remains the seed's source
+ * of truth and defines the `EventItem` shape the live layer maps into.
  *
  * Ticket PURCHASE (orders, QR tickets, check-in — §65, §66) is deferred: it
  * needs Paystack and an orders model, and sits with the payment work. For now
@@ -88,14 +89,3 @@ export const EVENTS: EventItem[] = [
   },
 ]
 
-export function getEventBySlug(slug: string): EventItem | undefined {
-  return EVENTS.find((e) => e.slug === slug)
-}
-
-export function getUpcomingEvents(limit = 3): EventItem[] {
-  return [...EVENTS].sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt)).slice(0, limit)
-}
-
-export function eventFromPrice(event: EventItem): number {
-  return Math.min(...event.ticketTypes.map((t) => t.price))
-}

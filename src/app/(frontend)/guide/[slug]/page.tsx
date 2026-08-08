@@ -3,16 +3,20 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ChevronRight, Clock, ArrowRight } from 'lucide-react'
 import { Container } from '@/components/ui/container'
-import { GUIDE_ARTICLES, getArticleBySlug } from '@/lib/data/guide'
+import { getAllArticles, getArticleBySlug } from '@/lib/payload/guide'
 import { formatDate } from '@/lib/format'
+import { JsonLd, articleSchema } from '@/components/seo/structured-data'
 
-export function generateStaticParams() {
-  return GUIDE_ARTICLES.map((a) => ({ slug: a.slug }))
+export const revalidate = 60
+
+export async function generateStaticParams() {
+  const articles = await getAllArticles()
+  return articles.map((a) => ({ slug: a.slug }))
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const a = getArticleBySlug(slug)
+  const a = await getArticleBySlug(slug)
   if (!a) return { title: 'Article not found' }
   return {
     title: a.title,
@@ -23,13 +27,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function GuideArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const article = getArticleBySlug(slug)
+  const article = await getArticleBySlug(slug)
   if (!article) notFound()
 
-  const related = GUIDE_ARTICLES.filter((a) => a.category === article.category && a.slug !== article.slug).slice(0, 2)
+  const all = await getAllArticles()
+  const related = all.filter((a) => a.category === article.category && a.slug !== article.slug).slice(0, 2)
 
   return (
     <article>
+      <JsonLd data={articleSchema(article)} />
       {/* Hero */}
       <div className="relative overflow-hidden text-white" style={{ background: article.gradient }}>
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/20" />

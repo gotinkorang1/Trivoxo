@@ -4,21 +4,22 @@ import { SlidersHorizontal, X } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { Button } from '@/components/ui/button'
 import { ExperienceCard } from '@/components/experiences/experience-card'
-import { EXPERIENCES, type Experience } from '@/lib/data/experiences'
+import type { Experience } from '@/lib/data/experiences'
+import { getAllExperiences } from '@/lib/payload/experiences'
 import { EXPERIENCE_CATEGORIES } from '@/lib/constants'
+
+export const revalidate = 60
 
 export const metadata: Metadata = {
   title: 'Find an Experience',
   description: 'Browse curated tours, hikes, cruises and cultural journeys across Ghana.',
 }
 
-const DURATIONS = Array.from(new Set(EXPERIENCES.map((e) => e.duration))).sort()
-const DESTINATIONS = Array.from(new Set(EXPERIENCES.map((e) => e.destination))).sort()
 const DIFFICULTIES = ['Easy', 'Moderate', 'Challenging']
 
 type SP = Record<string, string | undefined>
 
-function applyFilters(sp: SP): Experience[] {
+function applyFilters(experiences: Experience[], sp: SP): Experience[] {
   const q = (sp.q ?? sp.destination ?? '').trim().toLowerCase()
   const category = sp.category
   const destination = sp.destination
@@ -26,7 +27,7 @@ function applyFilters(sp: SP): Experience[] {
   const duration = sp.duration
   const maxPrice = sp.maxPrice ? Number(sp.maxPrice) : undefined
 
-  let results = EXPERIENCES.filter((e) => {
+  let results = experiences.filter((e) => {
     if (category && e.categorySlug !== category) return false
     if (difficulty && e.difficulty !== difficulty) return false
     if (duration && e.duration !== duration) return false
@@ -59,12 +60,14 @@ function applyFilters(sp: SP): Experience[] {
 }
 
 export default async function ExperiencesPage({ searchParams }: { searchParams: Promise<SP> }) {
-  const sp = await searchParams
-  const results = applyFilters(sp)
+  const [sp, experiences] = await Promise.all([searchParams, getAllExperiences()])
+  const results = applyFilters(experiences, sp)
   const activeCategory = EXPERIENCE_CATEGORIES.find((c) => c.slug === sp.category)
   const hasFilters = Boolean(
     sp.q || sp.category || sp.destination || sp.difficulty || sp.duration || sp.maxPrice || sp.sort,
   )
+  const durations = Array.from(new Set(experiences.map((e) => e.duration))).filter(Boolean).sort()
+  const destinations = Array.from(new Set(experiences.map((e) => e.destination))).sort()
 
   return (
     <Container className="py-10 sm:py-14">
@@ -80,7 +83,7 @@ export default async function ExperiencesPage({ searchParams }: { searchParams: 
       </header>
 
       <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
-        <FilterSidebar sp={sp} hasFilters={hasFilters} />
+        <FilterSidebar sp={sp} hasFilters={hasFilters} durations={durations} destinations={destinations} />
 
         <div>
           {results.length === 0 ? (
@@ -105,7 +108,17 @@ export default async function ExperiencesPage({ searchParams }: { searchParams: 
 }
 
 /* Server-rendered GET filter form — works without client JS. */
-function FilterSidebar({ sp, hasFilters }: { sp: SP; hasFilters: boolean }) {
+function FilterSidebar({
+  sp,
+  hasFilters,
+  durations,
+  destinations,
+}: {
+  sp: SP
+  hasFilters: boolean
+  durations: string[]
+  destinations: string[]
+}) {
   return (
     <aside className="lg:sticky lg:top-24 lg:self-start">
       <form action="/experiences" method="get" className="space-y-5 rounded-card border border-border bg-surface p-5">
@@ -133,13 +146,13 @@ function FilterSidebar({ sp, hasFilters }: { sp: SP; hasFilters: boolean }) {
           options={EXPERIENCE_CATEGORIES.map((c) => ({ value: c.slug, label: c.title }))} />
 
         <FilterSelect name="destination" label="Destination" value={sp.destination}
-          options={DESTINATIONS.map((d) => ({ value: d, label: d }))} />
+          options={destinations.map((d) => ({ value: d, label: d }))} />
 
         <FilterSelect name="difficulty" label="Difficulty" value={sp.difficulty}
           options={DIFFICULTIES.map((d) => ({ value: d, label: d }))} />
 
         <FilterSelect name="duration" label="Duration" value={sp.duration}
-          options={DURATIONS.map((d) => ({ value: d, label: d }))} />
+          options={durations.map((d) => ({ value: d, label: d }))} />
 
         <FilterField label="Max price (GHS)">
           <input

@@ -3,6 +3,7 @@ import { Inter, Fraunces } from 'next/font/google'
 import React from 'react'
 import { Header } from '@/components/site/header'
 import { Footer } from '@/components/site/footer'
+import { JsonLd, organizationSchema } from '@/components/seo/structured-data'
 import { BRAND } from '@/lib/constants'
 import './globals.css'
 
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
       <body className="min-h-dvh bg-background text-text-primary antialiased">
+        <JsonLd data={organizationSchema()} />
         <Header />
         <main>{children}</main>
         <Footer />

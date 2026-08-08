@@ -2,14 +2,17 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MapPin } from 'lucide-react'
 import { Container } from '@/components/ui/container'
-import { DESTINATIONS, getDestinationExperiences } from '@/lib/data/destinations'
+import { getAllDestinations } from '@/lib/payload/destinations'
+
+export const revalidate = 60
 
 export const metadata: Metadata = {
   title: 'Destinations',
   description: 'Explore Ghana by destination — Accra, Cape Coast, Volta, Akosombo and more.',
 }
 
-export default function DestinationsPage() {
+export default async function DestinationsPage() {
+  const destinations = await getAllDestinations()
   return (
     <Container className="py-10 sm:py-14">
       <header className="mb-8">
@@ -22,8 +25,8 @@ export default function DestinationsPage() {
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {DESTINATIONS.map((dest) => {
-          const count = getDestinationExperiences(dest.slug).length
+        {destinations.map((dest) => {
+          const count = dest.experienceSlugs.length
           return (
             <Link
               key={dest.slug}

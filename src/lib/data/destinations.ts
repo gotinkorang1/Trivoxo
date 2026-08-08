@@ -1,10 +1,9 @@
 /**
- * Curated destination hubs (§15, §74). Unlike the auto-derived destinations the
- * seed first produced, these are clean, browsable places. Each maps to the
- * catalogue experiences that belong to it (by slug), so the destination pages
- * and the seed share one source of truth.
+ * Curated destination hubs (§15, §74). The public site now reads live from
+ * Payload (src/lib/payload/destinations.ts); this module remains the seed's
+ * source of truth and defines the `Destination` shape the live layer maps into.
  */
-import { EXPERIENCES, getExperienceBySlug, type Experience } from './experiences'
+import { EXPERIENCES } from './experiences'
 
 export type Destination = {
   slug: string
@@ -72,23 +71,6 @@ export const DESTINATIONS: Destination[] = [
     experienceSlugs: ['wild-plains-river-cruise'],
   },
 ]
-
-export function getDestinationBySlug(slug: string): Destination | undefined {
-  return DESTINATIONS.find((d) => d.slug === slug)
-}
-
-export function getFeaturedDestinations(limit = 6): Destination[] {
-  return DESTINATIONS.filter((d) => d.featured).slice(0, limit)
-}
-
-/** Resolve a destination's experiences from the catalogue. */
-export function getDestinationExperiences(slug: string): Experience[] {
-  const dest = getDestinationBySlug(slug)
-  if (!dest) return []
-  return dest.experienceSlugs
-    .map((s) => getExperienceBySlug(s))
-    .filter((e): e is Experience => Boolean(e))
-}
 
 /** Slug → curated destination slug, for the seed to link experiences. */
 export const EXPERIENCE_TO_DESTINATION: Record<string, string> = Object.fromEntries(

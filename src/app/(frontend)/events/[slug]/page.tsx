@@ -4,30 +4,35 @@ import { notFound } from 'next/navigation'
 import { ChevronRight, MapPin, CalendarDays, MessageCircle, Check } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { ButtonLink } from '@/components/ui/button'
-import { EVENTS, getEventBySlug } from '@/lib/data/events'
+import { getAllEvents, getEventBySlug } from '@/lib/payload/events'
 import { formatDateTime, formatPrice } from '@/lib/format'
 import { whatsappLink } from '@/lib/constants'
+import { JsonLd, eventSchema } from '@/components/seo/structured-data'
 
-export function generateStaticParams() {
-  return EVENTS.map((e) => ({ slug: e.slug }))
+export const revalidate = 60
+
+export async function generateStaticParams() {
+  const events = await getAllEvents()
+  return events.map((e) => ({ slug: e.slug }))
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const ev = getEventBySlug(slug)
+  const ev = await getEventBySlug(slug)
   if (!ev) return { title: 'Event not found' }
   return { title: ev.title, description: ev.blurb, openGraph: { title: ev.title, description: ev.blurb } }
 }
 
 export default async function EventDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const ev = getEventBySlug(slug)
+  const ev = await getEventBySlug(slug)
   if (!ev) notFound()
 
   const waMessage = `Hi Trivoxo, I'd like tickets for ${ev.title} on ${formatDateTime(ev.startsAt)}.`
 
   return (
     <article>
+      <JsonLd data={eventSchema(ev)} />
       {/* Hero */}
       <div className="relative overflow-hidden text-white" style={{ background: ev.gradient }}>
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/20" />

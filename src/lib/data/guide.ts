@@ -1,7 +1,8 @@
 /**
- * Ghana Guide articles (§21, §75). Source of truth shared by the guide pages
- * and the seed. Category values match the Posts collection enum
- * (GUIDE_CATEGORIES). Includes real Trivoxo articles/case studies.
+ * Ghana Guide articles (§21, §75). The public site now reads live from
+ * Payload (src/lib/payload/guide.ts); this module remains the seed's source
+ * of truth and defines the `GuideArticle` shape the live layer maps into.
+ * Category values match the Posts collection enum (GUIDE_CATEGORIES).
  */
 
 export type GuideBlock = { heading?: string; text: string }
@@ -94,19 +95,3 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   },
 ]
 
-export function getArticleBySlug(slug: string): GuideArticle | undefined {
-  return GUIDE_ARTICLES.find((a) => a.slug === slug)
-}
-
-export function getRecentArticles(limit = 3): GuideArticle[] {
-  return [...GUIDE_ARTICLES]
-    .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
-    .slice(0, limit)
-}
-
-/** Distinct categories present, for the listing filter. */
-export function guideCategories(): { value: string; label: string }[] {
-  const seen = new Map<string, string>()
-  for (const a of GUIDE_ARTICLES) if (!seen.has(a.category)) seen.set(a.category, a.categoryLabel)
-  return [...seen].map(([value, label]) => ({ value, label }))
-}

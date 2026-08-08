@@ -69,6 +69,7 @@ async function run() {
       region: dest.region as never,
       shortDescription: dest.blurb,
       featured: Boolean(dest.featured),
+      _status: 'published' as const,
     }
     const doc = found.docs[0]
       ? await payload.update({ collection: 'destinations', id: found.docs[0].id, data })
@@ -118,6 +119,10 @@ async function run() {
       startsAt: ev.startsAt,
       endsAt: ev.endsAt,
       venue: ev.venue,
+      location: ev.location,
+      about: ev.about,
+      highlights: strings(ev.whatToExpect),
+      included: strings(ev.included),
       featured: Boolean(ev.featured),
       ticketTypes: ev.ticketTypes.map((t) => ({ name: t.name, price: t.price, soldOut: Boolean(t.soldOut) })),
       _status: 'published' as const,
@@ -149,6 +154,7 @@ async function run() {
       category: a.category as never,
       publishedAt: a.publishedAt,
       featured: Boolean(a.featured),
+      body: a.body.map((b) => ({ heading: b.heading, text: b.text })),
       _status: 'published' as const,
     }
     if (found.docs[0]) {

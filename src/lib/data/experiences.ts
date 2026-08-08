@@ -1,9 +1,10 @@
 /**
  * Trivoxo experience catalogue — the 13 packages from the brochure (§24).
  *
- * This module is the single source of truth used both by the marketing
- * frontend (until it reads from Payload) and by the seed script
- * (src/seed/index.ts) that loads Payload once a database is connected.
+ * The public site now reads live from Payload (src/lib/payload/experiences.ts).
+ * This module is the seed's source of truth (src/seed/index.ts loads it into
+ * Postgres) and still defines the `Experience` shape the live layer maps into,
+ * so presentational components stay unchanged either way.
  *
  * IMPORTANT — data provenance:
  *  - `name` and `priceFrom` are taken directly from the brochure and are
@@ -289,11 +290,3 @@ export const EXPERIENCES: Experience[] = [
   },
 ]
 
-export function getFeaturedExperiences(limit = 6): Experience[] {
-  const featured = EXPERIENCES.filter((e) => e.featured)
-  return (featured.length >= limit ? featured : EXPERIENCES).slice(0, limit)
-}
-
-export function getExperienceBySlug(slug: string): Experience | undefined {
-  return EXPERIENCES.find((e) => e.slug === slug)
-}

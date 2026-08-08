@@ -42,8 +42,22 @@ export const Events: CollectionConfig = {
               ],
             },
             { name: 'venue', type: 'text' },
+            { name: 'location', type: 'text', admin: { description: 'City/area shown to customers, e.g. "Aburi".' } },
             { name: 'destination', type: 'relationship', relationTo: 'destinations' },
-            { name: 'whatToExpect', type: 'richText' },
+            { name: 'about', type: 'textarea' },
+            {
+              name: 'highlights',
+              label: 'What to expect',
+              type: 'array',
+              fields: [{ name: 'text', type: 'text', required: true }],
+            },
+            {
+              name: 'included',
+              label: "What's included",
+              type: 'array',
+              fields: [{ name: 'text', type: 'text', required: true }],
+            },
+            { name: 'whatToExpect', type: 'richText', admin: { description: 'Optional long-form alternative to the bullet list above.' } },
           ],
         },
         {

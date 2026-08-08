@@ -314,6 +314,20 @@ export const Experiences: CollectionConfig = {
       defaultValue: false,
       admin: { position: 'sidebar', description: 'Surface in "Popular Experiences" on the homepage.' },
     },
+    {
+      type: 'row',
+      admin: { position: 'sidebar' },
+      fields: [
+        {
+          name: 'rating',
+          type: 'number',
+          min: 0,
+          max: 5,
+          admin: { width: '50%', step: 0.1, description: 'Leave blank until real review data exists.' },
+        },
+        { name: 'reviewCount', type: 'number', min: 0, admin: { width: '50%' } },
+      ],
+    },
     { name: 'heroImage', type: 'upload', relationTo: 'media', admin: { position: 'sidebar' } },
     {
       name: 'gallery',

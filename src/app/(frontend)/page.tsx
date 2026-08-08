@@ -23,13 +23,17 @@ import { Container } from '@/components/ui/container'
 import { Button, ButtonLink } from '@/components/ui/button'
 import { SectionHeading } from '@/components/ui/section-heading'
 import { ExperienceCard } from '@/components/experiences/experience-card'
+import type { Experience } from '@/lib/data/experiences'
+import type { Destination } from '@/lib/data/destinations'
+import type { EventItem } from '@/lib/data/events'
+import type { GuideArticle } from '@/lib/data/guide'
 import { BRAND, EXPERIENCE_CATEGORIES } from '@/lib/constants'
-import { getFeaturedExperiences } from '@/lib/data/experiences'
+import { getFeaturedExperiences } from '@/lib/payload/experiences'
 import { formatFromPrice, dateParts } from '@/lib/format'
 import { HOME_REVIEWS, WHY_TRIVOXO } from '@/lib/data/home-samples'
-import { getFeaturedDestinations } from '@/lib/data/destinations'
-import { getUpcomingEvents, eventFromPrice } from '@/lib/data/events'
-import { getRecentArticles } from '@/lib/data/guide'
+import { getFeaturedDestinations } from '@/lib/payload/destinations'
+import { getUpcomingEvents, eventFromPrice } from '@/lib/payload/events'
+import { getRecentArticles } from '@/lib/payload/guide'
 
 const ICONS: Record<string, LucideIcon> = {
   Mountain,
@@ -45,21 +49,28 @@ const ICONS: Record<string, LucideIcon> = {
   Coins,
 }
 
-export default function HomePage() {
-  const featured = getFeaturedExperiences(6)
+export const revalidate = 60
+
+export default async function HomePage() {
+  const [featured, destinations, events, articles] = await Promise.all([
+    getFeaturedExperiences(6),
+    getFeaturedDestinations(6),
+    getUpcomingEvents(3),
+    getRecentArticles(3),
+  ])
 
   return (
     <>
       <Hero />
       <Categories />
       <PopularExperiences experiences={featured} />
-      <ExploreGhana />
+      <ExploreGhana destinations={destinations} />
       <WhyTrivoxo />
       <CorporateBand />
-      <UpcomingEvents />
+      <UpcomingEvents events={events} />
       <CustomTrips />
       <Reviews />
-      <GhanaGuide />
+      <GhanaGuide articles={articles} />
       <Newsletter />
     </>
   )
@@ -171,7 +182,7 @@ function Categories() {
 }
 
 /* ── Popular experiences (§14) ──────────────────────────────── */
-function PopularExperiences({ experiences }: { experiences: ReturnType<typeof getFeaturedExperiences> }) {
+function PopularExperiences({ experiences }: { experiences: Experience[] }) {
   return (
     <section className="bg-surface py-16 sm:py-20">
       <Container>
@@ -192,7 +203,7 @@ function PopularExperiences({ experiences }: { experiences: ReturnType<typeof ge
 }
 
 /* ── Explore Ghana (§15) ────────────────────────────────────── */
-function ExploreGhana() {
+function ExploreGhana({ destinations }: { destinations: Destination[] }) {
   return (
     <Container className="py-16 sm:py-20">
       <SectionHeading
@@ -201,7 +212,7 @@ function ExploreGhana() {
         link={{ href: '/destinations', label: 'All destinations' }}
       />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        {getFeaturedDestinations(6).map((dest) => (
+        {destinations.map((dest) => (
           <Link
             key={dest.slug}
             href={`/destinations/${dest.slug}`}
@@ -275,7 +286,7 @@ function CorporateBand() {
 }
 
 /* ── Upcoming events (§18) ──────────────────────────────────── */
-function UpcomingEvents() {
+function UpcomingEvents({ events }: { events: EventItem[] }) {
   return (
     <Container className="py-16 sm:py-20">
       <SectionHeading
@@ -284,7 +295,7 @@ function UpcomingEvents() {
         link={{ href: '/events', label: 'All events' }}
       />
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {getUpcomingEvents(3).map((ev) => {
+        {events.map((ev) => {
           const { day, month } = dateParts(ev.startsAt)
           return (
             <div
@@ -365,7 +376,7 @@ function Reviews() {
 }
 
 /* ── Ghana Guide (§21) ──────────────────────────────────────── */
-function GhanaGuide() {
+function GhanaGuide({ articles }: { articles: GuideArticle[] }) {
   return (
     <section className="bg-surface py-16 sm:py-20">
       <Container>
@@ -375,7 +386,7 @@ function GhanaGuide() {
           link={{ href: '/guide', label: 'Read the guide' }}
         />
         <div className="grid gap-5 sm:grid-cols-3">
-          {getRecentArticles(3).map((post) => (
+          {articles.map((post) => (
             <Link
               key={post.slug}
               href={`/guide/${post.slug}`}

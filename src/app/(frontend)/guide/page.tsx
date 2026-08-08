@@ -2,9 +2,11 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Clock } from 'lucide-react'
 import { Container } from '@/components/ui/container'
-import { GUIDE_ARTICLES, getRecentArticles, guideCategories } from '@/lib/data/guide'
+import { getAllArticles, guideCategories } from '@/lib/payload/guide'
 import { formatDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
+
+export const revalidate = 60
 
 export const metadata: Metadata = {
   title: 'Ghana Guide',
@@ -13,8 +15,10 @@ export const metadata: Metadata = {
 
 export default async function GuidePage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
   const { category } = await searchParams
-  const categories = guideCategories()
-  const articles = (category ? GUIDE_ARTICLES.filter((a) => a.category === category) : getRecentArticles(GUIDE_ARTICLES.length))
+  const [categories, all] = await Promise.all([guideCategories(), getAllArticles()])
+  const articles = category
+    ? all.filter((a) => a.category === category)
+    : [...all].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
 
   return (
     <Container className="py-10 sm:py-14">

@@ -17,18 +17,22 @@ import { Container } from '@/components/ui/container'
 import { ButtonLink } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ExperienceCard } from '@/components/experiences/experience-card'
-import { EXPERIENCES, getExperienceBySlug } from '@/lib/data/experiences'
+import { getAllExperiences, getExperienceBySlug } from '@/lib/payload/experiences'
 import { gradientFor } from '@/lib/visuals'
 import { formatPrice } from '@/lib/format'
 import { whatsappLink } from '@/lib/constants'
+import { JsonLd, experienceSchema } from '@/components/seo/structured-data'
 
-export function generateStaticParams() {
-  return EXPERIENCES.map((e) => ({ slug: e.slug }))
+export const revalidate = 60
+
+export async function generateStaticParams() {
+  const experiences = await getAllExperiences()
+  return experiences.map((e) => ({ slug: e.slug }))
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const exp = getExperienceBySlug(slug)
+  const exp = await getExperienceBySlug(slug)
   if (!exp) return { title: 'Experience not found' }
   return {
     title: exp.name,
@@ -39,14 +43,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ExperienceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const exp = getExperienceBySlug(slug)
+  const exp = await getExperienceBySlug(slug)
   if (!exp) notFound()
 
-  const related = EXPERIENCES.filter((e) => e.categorySlug === exp.categorySlug && e.slug !== exp.slug).slice(0, 3)
+  const all = await getAllExperiences()
+  const related = all.filter((e) => e.categorySlug === exp.categorySlug && e.slug !== exp.slug).slice(0, 3)
   const waMessage = `Hi Trivoxo, I'm interested in the ${exp.name}. Could you share availability and next steps?`
 
   return (
     <article>
+      <JsonLd data={experienceSchema(exp)} />
       {/* Hero */}
       <div className="relative overflow-hidden text-white" style={{ background: gradientFor(exp.categorySlug) }}>
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/20" />

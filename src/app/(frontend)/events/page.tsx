@@ -2,16 +2,19 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MapPin, ArrowRight } from 'lucide-react'
 import { Container } from '@/components/ui/container'
-import { EVENTS, getUpcomingEvents, eventFromPrice } from '@/lib/data/events'
+import { getAllEvents, eventFromPrice } from '@/lib/payload/events'
 import { dateParts, formatFromPrice } from '@/lib/format'
+
+export const revalidate = 60
 
 export const metadata: Metadata = {
   title: 'Events',
   description: 'Trivoxo events across Ghana — sunset sessions, December nights and lake cruises. Get your tickets.',
 }
 
-export default function EventsPage() {
-  const events = getUpcomingEvents(EVENTS.length)
+export default async function EventsPage() {
+  const all = await getAllEvents()
+  const events = [...all].sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt))
 
   return (
     <Container className="py-10 sm:py-14">
