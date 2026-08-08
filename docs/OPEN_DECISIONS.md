@@ -24,22 +24,23 @@ missing architecture. Grouped by urgency. (§ refers to the redesign plan.)
 | # | Decision | Status |
 |---|----------|--------|
 | 11 | **Capital Pulse "Osu" question** — is Osu part of the tour, or should the reference be removed from the description? (§26) | Needs clarification |
-| 12 | Canonical slogan — brochure "Explore. Adventure. Connect." vs site "Experience. Explore. Express." (§6). Scaffold uses the brochure version. | Needs sign-off |
+| 12 | ~~Canonical slogan~~ — **RESOLVED: "Experience. Explore. Express."** (official site copy). Applied. | ✅ Confirmed |
 | 13 | Final brand HEX values from the approved vector logo (§7). Scaffold uses provisional tokens in `globals.css`. | Needs assets |
 | 14 | December / seasonal & public-holiday pricing | Needs decision |
 | 15 | Guide languages | Needs decision |
 
 ## Contact details (§98)
 
-One canonical primary phone / WhatsApp number must be chosen:
+**RESOLVED** from the official site copy:
 
-- Site currently lists **0593962111**
-- Brochure lists **+233 531 014 111** and **+233 244 833 280**
-- Email is consistent: **info@trivoxoghana.com**
-- Address provided: **Plantsville Residence, Poultry Farm Ave, Accra, Ghana**
+- Primary phone / WhatsApp: **0593962111** (`+233 59 396 2111`) — applied in
+  `src/lib/constants.ts` and the `site-settings` global defaults.
+- Email: **info@trivoxoghana.com**
+- Address: **Plantsville Residence, Poultry Farm Ave, Accra**
+- Instagram: **@trivoxo_gh**
+- Booking/enquiry emails also in use: kingdom@ / gideon@niiplantsghana.com.
 
-Scaffold placeholder uses `+233 531 014 111` as primary (in `src/lib/constants.ts`
-and the `site-settings` global). **Confirm before launch.**
+Company note: **Trivoxo Limited Company is a subsidiary of Nii Plants Group.**
 
 ## Confirmed (already reflected in the build)
 

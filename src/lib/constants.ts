@@ -8,28 +8,25 @@
 
 export const BRAND = {
   name: 'Trivoxo',
-  // §7 recommended positioning (brochure) — supersedes the site's older
-  // "Experience. Explore. Express." Pending final sign-off.
-  tagline: 'Explore. Adventure. Connect.',
-  headline: 'Experience Ghana Beyond the Ordinary',
+  // Confirmed from the official site copy.
+  tagline: 'Experience. Explore. Express.',
+  headline: 'Experience Ghana the Trivoxo Way',
   description:
-    'Curated tours, outdoor adventures, cultural journeys, premium escapes and memorable events across Ghana.',
+    'A Ghanaian-owned travel, tour and events company — curating immersive, safe and memorable experiences across Ghana for expatriates, corporates and leisure travellers.',
   domain: 'trivoxogh.com',
 } as const
 
 export const CONTACT = {
-  // TODO(confirm): canonical primary phone / WhatsApp. The site lists
-  // 0593962111; the brochure lists +233 531 014 111 and +233 244 833 280.
-  primaryPhone: '+233531014111',
-  altPhone: '+233244833280',
-  whatsapp: '233531014111', // digits only, for wa.me links
+  // Confirmed canonical number from the official site.
+  primaryPhone: '0593962111',
+  whatsapp: '233593962111', // digits only, for wa.me links (+233 59 396 2111)
   email: 'info@trivoxoghana.com',
   address: 'Plantsville Residence, Poultry Farm Ave, Accra, Ghana',
 } as const
 
 export const SOCIALS = {
-  instagram: 'https://instagram.com/trivoxo',
-  tiktok: 'https://tiktok.com/@trivoxo',
+  instagram: 'https://instagram.com/trivoxo_gh',
+  tiktok: 'https://tiktok.com/@trivoxo_gh',
   linkedin: 'https://linkedin.com/company/trivoxo',
 } as const
 

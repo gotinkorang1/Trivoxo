@@ -1,8 +1,7 @@
 /**
  * Ghana Guide articles (§21, §75). Source of truth shared by the guide pages
  * and the seed. Category values match the Posts collection enum
- * (GUIDE_CATEGORIES). Real articles are authored in the admin; these give the
- * section content to render.
+ * (GUIDE_CATEGORIES). Includes real Trivoxo articles/case studies.
  */
 
 export type GuideBlock = { heading?: string; text: string }
@@ -23,13 +22,33 @@ export type GuideArticle = {
 
 export const GUIDE_ARTICLES: GuideArticle[] = [
   {
+    slug: 'how-to-plan-a-corporate-event-in-accra',
+    title: 'How to Plan a Corporate Event or Conference in Accra',
+    category: 'corporate-travel',
+    categoryLabel: 'Corporate Travel',
+    excerpt: 'Retreat, training, conference or stakeholder meeting — how to plan a smooth corporate event in Accra.',
+    readMins: 5,
+    publishedAt: '2026-02-10T09:00:00.000Z',
+    gradient: 'linear-gradient(135deg,#0e1c2b,#13273a)',
+    featured: true,
+    body: [
+      { text: 'Planning a corporate event in Accra can be very smooth — if you handle the key details early. Whether it’s a retreat, training, conference or stakeholder meeting, the goal is simple: a great guest experience and zero stress.' },
+      { heading: '1) Start with your purpose', text: 'Be clear on the goal of the event (training, celebration, strategy, launch), the expected number of attendees, and your budget range and style (formal vs relaxed).' },
+      { heading: '2) Choose the right date and time', text: 'Accra traffic is real — timing affects attendance and mood. Consider morning start times for conferences, avoiding peak traffic windows, and weekday vs weekend depending on your audience.' },
+      { heading: '3) Lock down a suitable venue', text: 'A good venue matches your program: seating style (theatre, classroom, round table), sound system and microphones, power backup, and parking and accessibility.' },
+      { heading: '4) Plan the guest experience', text: 'Great events feel easy — think registration flow, clear signage, seating plan, refreshments timing and a strong guest/MC schedule.' },
+      { heading: '5) Coordinate logistics like a pro', text: 'This is where most events win or fail: vendor coordination, program timing and transitions, a run-of-show document, and a point person for troubleshooting. A well-managed program isn’t loud — it’s smooth, calm and on time.' },
+      { heading: 'Need a hand?', text: 'If you want a professional team to coordinate your corporate event or conference in Accra, Trivoxo can support planning and execution from start to finish.' },
+    ],
+  },
+  {
     slug: 'first-timers-guide-accra',
     title: 'A First-Timer’s Guide to Accra',
     category: 'travel-planning',
     categoryLabel: 'Travel Planning',
     excerpt: 'Where to start in Ghana’s capital — the neighbourhoods, the pace and the must-sees.',
     readMins: 6,
-    publishedAt: '2026-07-02T09:00:00.000Z',
+    publishedAt: '2026-01-20T09:00:00.000Z',
     gradient: 'linear-gradient(135deg,#7a2e12,#e85d2a)',
     featured: true,
     body: [
@@ -46,9 +65,9 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     categoryLabel: 'Travel Planning',
     excerpt: 'From canopy walks to city nights — a simple, no-overpacking checklist.',
     readMins: 4,
-    publishedAt: '2026-07-15T09:00:00.000Z',
+    publishedAt: '2026-01-10T09:00:00.000Z',
     gradient: 'linear-gradient(135deg,#0f3d2e,#1e9e7a)',
-    featured: true,
+    featured: false,
     body: [
       { text: 'Ghana is warm year-round, so pack light — but a few smart choices make outdoor days far more comfortable.' },
       { heading: 'The essentials', text: 'Breathable clothing, a light rain layer, sunscreen, insect repellent and a refillable water bottle. Comfortable, grippy shoes are non-negotiable for hikes and the Kakum canopy walk.' },
@@ -57,37 +76,20 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     ],
   },
   {
-    slug: 'best-times-cape-coast',
-    title: 'The Best Times to Visit Cape Coast',
-    category: 'cape-coast',
-    categoryLabel: 'Cape Coast',
-    excerpt: 'Weather, crowds and the quiet moments — how to time a heritage trip.',
-    readMins: 5,
-    publishedAt: '2026-07-28T09:00:00.000Z',
-    gradient: 'linear-gradient(135deg,#0e2a4d,#2f7fb8)',
-    featured: true,
-    body: [
-      { text: 'Cape Coast is moving and unmissable — the castles, the canopy walk at Kakum, and the coastline in between. When you go shapes the experience.' },
-      { heading: 'Dry season (Nov–Mar)', text: 'The most comfortable window: clear skies, easier roads and the best conditions for the canopy walk. It is also the busiest, so start early.' },
-      { heading: 'Green season (Apr–Oct)', text: 'Fewer visitors and a lush rainforest, with the occasional heavy shower. Mornings are usually clear — a good time for a quieter, reflective castle visit.' },
-      { heading: 'Give it time', text: 'Cape Coast deserves more than a rushed day. The heritage sites carry real weight; leave room to take them in.' },
-    ],
-  },
-  {
-    slug: 'accra-after-dark',
-    title: 'Accra After Dark: A Night Out Guide',
-    category: 'nightlife',
-    categoryLabel: 'Nightlife',
-    excerpt: 'Live bands, rooftops and street food — how the capital glows at night.',
-    readMins: 4,
-    publishedAt: '2026-08-05T09:00:00.000Z',
-    gradient: 'linear-gradient(135deg,#1a1440,#6d4bd8)',
+    slug: 'vegetable-hub-of-excellence-commissioning',
+    title: 'Commissioning the Vegetable Hub of Excellence at the University of Ghana',
+    category: 'events',
+    categoryLabel: 'Events',
+    excerpt: 'How Trivoxo planned and executed the commissioning ceremony for the MTN Foundation.',
+    readMins: 3,
+    publishedAt: '2025-12-03T09:00:00.000Z',
+    gradient: 'linear-gradient(135deg,#4d3a12,#f5b133)',
     featured: false,
     body: [
-      { text: 'When the heat lifts, Accra comes alive. The capital’s nightlife is warm, musical and endlessly social.' },
-      { heading: 'Start with live music', text: 'Highlife and Afrobeats spill out of bars across Osu and East Legon. A live band on the right night is the best introduction to the city’s sound.' },
-      { heading: 'Eat late', text: 'Street-food stalls fire up after dark — grilled meats, kelewele and more. It is half the fun.' },
-      { heading: 'Do it with a guide', text: 'The Accra By Night experience takes the guesswork out — the right spots, safe transport, and a local’s read on where the energy is.' },
+      { text: 'On 3rd December 2025, Trivoxo Limited Company successfully planned and executed the commissioning ceremony for the Vegetable Hub of Excellence at the University of Ghana, on behalf of the MTN Foundation.' },
+      { heading: 'A milestone event', text: 'The ceremony brought together key stakeholders from academia, industry and the development community to celebrate an initiative aimed at strengthening practical learning, agricultural innovation and capacity-building within the university environment.' },
+      { heading: 'End-to-end delivery', text: 'Trivoxo provided end-to-end event management — a smooth, professional experience from arrival to closing, with seamless coordination, clear stakeholder flow and a well-structured program that reflected the significance of the project and the values of the MTN Foundation.' },
+      { heading: 'Event details', text: 'Event: Commissioning of the Vegetable Hub of Excellence. Client: MTN Foundation. Venue: University of Ghana. Date: 3rd December 2025.' },
     ],
   },
 ]

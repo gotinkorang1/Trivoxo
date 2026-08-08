@@ -20,8 +20,8 @@ export const SiteSettings: GlobalConfig = {
         {
           label: 'Brand',
           fields: [
-            { name: 'tagline', type: 'text', defaultValue: 'Explore. Adventure. Connect.' },
-            { name: 'headline', type: 'text', defaultValue: 'Experience Ghana Beyond the Ordinary' },
+            { name: 'tagline', type: 'text', defaultValue: 'Experience. Explore. Express.' },
+            { name: 'headline', type: 'text', defaultValue: 'Experience Ghana the Trivoxo Way' },
             { name: 'description', type: 'textarea' },
           ],
         },

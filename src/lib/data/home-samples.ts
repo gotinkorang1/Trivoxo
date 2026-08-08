@@ -26,8 +26,8 @@ export const HOME_REVIEWS: { name: string; type: string; rating: number; body: s
 ]
 
 export const WHY_TRIVOXO: { title: string; body: string; icon: string }[] = [
-  { title: 'Local Expertise', body: 'Experiences designed around Ghana by people who know it best.', icon: 'Compass' },
-  { title: 'Carefully Curated', body: 'Handpicked routes and partners — never generic itineraries.', icon: 'Sparkles' },
-  { title: 'Adventure With Confidence', body: 'Safety-conscious planning and coordination on every trip.', icon: 'ShieldCheck' },
-  { title: 'Built Around You', body: 'Private, group and fully tailor-made options to suit your plans.', icon: 'Users' },
+  { title: 'Excellence in the Details', body: 'We plan carefully and pay attention to the details that make an experience smooth and premium.', icon: 'Sparkles' },
+  { title: 'Client-Centered Service', body: 'We listen, personalize every experience and deliver with warm hospitality.', icon: 'Users' },
+  { title: 'Safety First', body: 'Professional drivers, reliable vehicles and support — always prepared, always responsible.', icon: 'ShieldCheck' },
+  { title: 'Value for Money', body: 'The best return on every cedi — quality experiences that feel premium and truly worth it.', icon: 'Coins' },
 ]

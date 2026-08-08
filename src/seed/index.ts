@@ -116,6 +116,7 @@ async function run() {
       slug: ev.slug,
       shortDescription: ev.blurb,
       startsAt: ev.startsAt,
+      endsAt: ev.endsAt,
       venue: ev.venue,
       featured: Boolean(ev.featured),
       ticketTypes: ev.ticketTypes.map((t) => ({ name: t.name, price: t.price, soldOut: Boolean(t.soldOut) })),
@@ -129,6 +130,13 @@ async function run() {
     eventCount++
   }
   payload.logger.info(`Seeded ${eventCount} events`)
+  const staleEvents = await payload.find({
+    collection: 'events',
+    where: { slug: { not_in: EVENTS.map((e) => e.slug) } },
+    limit: 100,
+  })
+  for (const d of staleEvents.docs) await payload.delete({ collection: 'events', id: d.id })
+  if (staleEvents.totalDocs > 0) payload.logger.info(`Removed ${staleEvents.totalDocs} stale events`)
 
   // ── Ghana Guide posts ──────────────────────────────────────
   let postCount = 0
@@ -151,6 +159,13 @@ async function run() {
     postCount++
   }
   payload.logger.info(`Seeded ${postCount} guide posts`)
+  const stalePosts = await payload.find({
+    collection: 'posts',
+    where: { slug: { not_in: GUIDE_ARTICLES.map((a) => a.slug) } },
+    limit: 100,
+  })
+  for (const d of stalePosts.docs) await payload.delete({ collection: 'posts', id: d.id })
+  if (stalePosts.totalDocs > 0) payload.logger.info(`Removed ${stalePosts.totalDocs} stale posts`)
 
   // ── Content pages (About, Contact, Safety, FAQ, legal) ─────
   let pageCount = 0

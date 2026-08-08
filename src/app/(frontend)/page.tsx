@@ -15,6 +15,7 @@ import {
   MoonStar,
   Compass,
   ShieldCheck,
+  Coins,
   Building2,
   type LucideIcon,
 } from 'lucide-react'
@@ -41,6 +42,7 @@ const ICONS: Record<string, LucideIcon> = {
   Compass,
   ShieldCheck,
   Users,
+  Coins,
 }
 
 export default function HomePage() {

@@ -72,6 +72,18 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                 ))}
               </ul>
             </section>
+            {ev.included && ev.included.length > 0 && (
+              <section>
+                <h2 className="mb-4 text-xl font-semibold">What’s included</h2>
+                <ul className="grid gap-2 sm:grid-cols-2">
+                  {ev.included.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-text-secondary">
+                      <Check className="mt-0.5 size-4 shrink-0 text-brand-accent" /> {item}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </div>
 
           {/* Tickets */}
