@@ -15,6 +15,7 @@ import { EXPERIENCE_CATEGORIES } from '../lib/constants'
 import { EXPERIENCES, type Experience } from '../lib/data/experiences'
 import { DESTINATIONS, EXPERIENCE_TO_DESTINATION } from '../lib/data/destinations'
 import { EVENTS } from '../lib/data/events'
+import { GUIDE_ARTICLES } from '../lib/data/guide'
 
 const strings = (values?: string[]) => (values ?? []).map((text) => ({ text }))
 
@@ -127,6 +128,28 @@ async function run() {
     eventCount++
   }
   payload.logger.info(`Seeded ${eventCount} events`)
+
+  // ── Ghana Guide posts ──────────────────────────────────────
+  let postCount = 0
+  for (const a of GUIDE_ARTICLES) {
+    const found = await payload.find({ collection: 'posts', where: { slug: { equals: a.slug } }, limit: 1 })
+    const data = {
+      title: a.title,
+      slug: a.slug,
+      excerpt: a.excerpt,
+      category: a.category as never,
+      publishedAt: a.publishedAt,
+      featured: Boolean(a.featured),
+      _status: 'published' as const,
+    }
+    if (found.docs[0]) {
+      await payload.update({ collection: 'posts', id: found.docs[0].id, data })
+    } else {
+      await payload.create({ collection: 'posts', data })
+    }
+    postCount++
+  }
+  payload.logger.info(`Seeded ${postCount} guide posts`)
 
   payload.logger.info('✅ Seed complete')
   process.exit(0)

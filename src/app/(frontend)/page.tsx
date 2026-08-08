@@ -25,9 +25,10 @@ import { ExperienceCard } from '@/components/experiences/experience-card'
 import { BRAND, EXPERIENCE_CATEGORIES } from '@/lib/constants'
 import { getFeaturedExperiences } from '@/lib/data/experiences'
 import { formatFromPrice, dateParts } from '@/lib/format'
-import { HOME_REVIEWS, HOME_GUIDE, WHY_TRIVOXO } from '@/lib/data/home-samples'
+import { HOME_REVIEWS, WHY_TRIVOXO } from '@/lib/data/home-samples'
 import { getFeaturedDestinations } from '@/lib/data/destinations'
 import { getUpcomingEvents, eventFromPrice } from '@/lib/data/events'
+import { getRecentArticles } from '@/lib/data/guide'
 
 const ICONS: Record<string, LucideIcon> = {
   Mountain,
@@ -372,15 +373,15 @@ function GhanaGuide() {
           link={{ href: '/guide', label: 'Read the guide' }}
         />
         <div className="grid gap-5 sm:grid-cols-3">
-          {HOME_GUIDE.map((post) => (
+          {getRecentArticles(3).map((post) => (
             <Link
               key={post.slug}
               href={`/guide/${post.slug}`}
               className="group flex flex-col overflow-hidden rounded-card border border-border bg-surface-elevated"
             >
-              <div className="aspect-[16/9]" style={{ background: 'linear-gradient(135deg,#13273a,#1e3350)' }} />
+              <div className="aspect-[16/9]" style={{ background: post.gradient }} />
               <div className="flex flex-1 flex-col p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-brand-primary">{post.category}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-brand-primary">{post.categoryLabel}</p>
                 <p className="mt-2 font-display text-lg leading-snug text-text-primary group-hover:text-brand-primary">
                   {post.title}
                 </p>
