@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   Search,
   CalendarDays,
@@ -34,6 +35,7 @@ import { HOME_REVIEWS, WHY_TRIVOXO } from '@/lib/data/home-samples'
 import { getFeaturedDestinations } from '@/lib/payload/destinations'
 import { getUpcomingEvents, eventFromPrice } from '@/lib/payload/events'
 import { getRecentArticles } from '@/lib/payload/guide'
+import { SITE_MEDIA } from '@/lib/site-media'
 
 const ICONS: Record<string, LucideIcon> = {
   Mountain,
@@ -80,15 +82,16 @@ export default async function HomePage() {
 function Hero() {
   return (
     <section className="relative overflow-hidden bg-brand-navy text-white">
-      {/* Layered gradient stand-in for cinematic Ghana photography/video */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(120% 120% at 15% 10%, rgba(232,93,42,0.55) 0%, transparent 45%), radial-gradient(120% 120% at 90% 20%, rgba(245,177,51,0.4) 0%, transparent 40%), linear-gradient(160deg, #0e1c2b 20%, #10202e 100%)',
-        }}
+      <Image
+        src={SITE_MEDIA.hero.src}
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover object-center"
       />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(11,22,33,0.4)_100%)]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-brand-navy via-brand-navy/80 to-brand-navy/25" />
+      <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/75 via-transparent to-brand-navy/25" />
       <Container className="relative py-20 sm:py-28">
         <p className="text-sm font-semibold uppercase tracking-[0.25em] text-brand-secondary">{BRAND.tagline}</p>
         <h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-[1.05] sm:text-6xl">{BRAND.headline}</h1>
@@ -260,10 +263,16 @@ function WhyTrivoxo() {
 function CorporateBand() {
   return (
     <Container className="py-16 sm:py-20">
-      <div
-        className="relative overflow-hidden rounded-3xl px-8 py-14 text-white sm:px-14"
-        style={{ background: 'linear-gradient(120deg, #0e1c2b 0%, #13273a 60%, #1e3350 100%)' }}
-      >
+      <div className="relative overflow-hidden rounded-3xl px-8 py-14 text-white sm:px-14">
+        <Image
+          src={SITE_MEDIA.groupTravel.src}
+          alt=""
+          fill
+          sizes="(min-width: 1280px) 1200px, 100vw"
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-navy via-brand-navy/85 to-brand-navy/30" />
+        <div className="relative">
         <span className="inline-flex size-11 items-center justify-center rounded-full bg-white/10">
           <Building2 className="size-5" />
         </span>
@@ -279,6 +288,7 @@ function CorporateBand() {
           <ButtonLink href="/contact" variant="white">
             Speak to Trivoxo
           </ButtonLink>
+        </div>
         </div>
       </div>
     </Container>

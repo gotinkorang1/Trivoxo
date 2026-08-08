@@ -45,17 +45,17 @@ const COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
 
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-border bg-surface">
+    <footer className="mt-24 border-t border-white/10 bg-brand-navy text-white">
       <Container className="py-14">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-6">
           <div className="lg:col-span-2">
-            <Wordmark className="text-2xl" />
-            <p className="mt-3 max-w-xs text-sm text-text-secondary">{BRAND.tagline}</p>
-            <div className="mt-5 space-y-2 text-sm text-text-secondary">
-              <a href={`tel:${CONTACT.primaryPhone}`} className="flex items-center gap-2 hover:text-brand-primary">
+            <Wordmark variant="white" className="h-12 w-auto" />
+            <p className="mt-3 max-w-xs text-sm text-white/70">{BRAND.tagline}</p>
+            <div className="mt-5 space-y-2 text-sm text-white/70">
+              <a href={`tel:${CONTACT.primaryPhone}`} className="flex items-center gap-2 hover:text-brand-secondary">
                 <Phone className="size-4" /> {CONTACT.primaryPhone}
               </a>
-              <a href={`mailto:${CONTACT.email}`} className="flex items-center gap-2 hover:text-brand-primary">
+              <a href={`mailto:${CONTACT.email}`} className="flex items-center gap-2 hover:text-brand-secondary">
                 <Mail className="size-4" /> {CONTACT.email}
               </a>
               <p className="flex items-start gap-2">
@@ -68,7 +68,7 @@ export function Footer() {
                 aria-label="Instagram"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex size-9 items-center justify-center rounded-full border border-border text-text-secondary hover:border-brand-primary hover:text-brand-primary"
+                className="inline-flex size-9 items-center justify-center rounded-full border border-white/20 text-white/70 hover:border-brand-secondary hover:text-brand-secondary"
               >
                 <Instagram className="size-4" />
               </a>
@@ -77,7 +77,7 @@ export function Footer() {
                 aria-label="LinkedIn"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex size-9 items-center justify-center rounded-full border border-border text-text-secondary hover:border-brand-primary hover:text-brand-primary"
+                className="inline-flex size-9 items-center justify-center rounded-full border border-white/20 text-white/70 hover:border-brand-secondary hover:text-brand-secondary"
               >
                 <Linkedin className="size-4" />
               </a>
@@ -86,11 +86,11 @@ export function Footer() {
 
           {COLUMNS.map((col) => (
             <div key={col.title}>
-              <p className="text-sm font-semibold text-text-primary">{col.title}</p>
+              <p className="text-sm font-semibold text-white">{col.title}</p>
               <ul className="mt-4 space-y-2.5">
                 {col.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-text-secondary hover:text-brand-primary">
+                    <Link href={link.href} className="text-sm text-white/65 hover:text-brand-secondary">
                       {link.label}
                     </Link>
                   </li>
@@ -100,7 +100,7 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-sm text-text-muted sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-sm text-white/50 sm:flex-row">
           <p>
             © {new Date().getFullYear()} {BRAND.name}. All rights reserved.
           </p>

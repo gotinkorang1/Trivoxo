@@ -16,7 +16,7 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-md">
       <Container className="flex h-16 items-center justify-between gap-4">
         <Link href="/" aria-label="Trivoxo home">
-          <Wordmark className="text-2xl" />
+          <Wordmark className="h-10 w-auto" priority />
         </Link>
 
         {/* Desktop nav */}

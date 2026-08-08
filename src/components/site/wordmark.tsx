@@ -1,16 +1,61 @@
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
+export type LogoVariant = 'adaptive' | 'colored' | 'black' | 'white'
+
+const LOGOS: Record<Exclude<LogoVariant, 'adaptive'>, string> = {
+  colored: '/logo/colored.webp',
+  black: '/logo/black.webp',
+  white: '/logo/white.webp',
+}
+
 /**
- * Text wordmark echoing the Trivoxo logo colour split — "Tri" and "oxo" in
- * orange, the "v" in golden yellow. A CSS stand-in for the logo graphic; swap
- * for an <Image> of the vector logo once the asset file is in `public/`.
+ * Official Trivoxo wordmark.
+ *
+ * - `colored`: default on white and light neutral surfaces.
+ * - `black`: monochrome use on very light or visually busy surfaces.
+ * - `white`: reversed use on navy, photography and other dark surfaces.
  */
-export function Wordmark({ className }: { className?: string }) {
+export function Wordmark({
+  variant = 'adaptive',
+  className,
+  priority = false,
+}: {
+  variant?: LogoVariant
+  className?: string
+  priority?: boolean
+}) {
+  if (variant === 'adaptive') {
+    return (
+      <span className="inline-flex items-center">
+        <Image
+          src={LOGOS.colored}
+          alt="Trivoxo"
+          width={301}
+          height={96}
+          priority={priority}
+          className={cn('h-auto w-auto object-contain dark:hidden', className)}
+        />
+        <Image
+          src={LOGOS.white}
+          alt=""
+          width={301}
+          height={96}
+          priority={priority}
+          className={cn('hidden h-auto w-auto object-contain dark:block', className)}
+        />
+      </span>
+    )
+  }
+
   return (
-    <span className={cn('font-display font-semibold tracking-tight', className)} aria-label="Trivoxo">
-      <span className="text-brand-primary" aria-hidden>Tri</span>
-      <span className="text-brand-secondary" aria-hidden>v</span>
-      <span className="text-brand-primary" aria-hidden>oxo</span>
-    </span>
+    <Image
+      src={LOGOS[variant]}
+      alt="Trivoxo"
+      width={301}
+      height={96}
+      priority={priority}
+      className={cn('h-auto w-auto object-contain', className)}
+    />
   )
 }

@@ -1,10 +1,12 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { MapPin, Clock, Star, TrendingUp } from 'lucide-react'
 import type { Experience } from '@/lib/data/experiences'
 import { gradientFor } from '@/lib/visuals'
 import { formatFromPrice } from '@/lib/format'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { experienceImage } from '@/lib/site-media'
 
 const DIFFICULTY_LABEL: Record<string, string> = {
   Easy: 'Easy',
@@ -17,6 +19,8 @@ export function ExperienceCard({ experience }: { experience: Experience }) {
   const { slug, name, badge, categoryLabel, destination, duration, difficulty, priceFrom, rating, reviews } =
     experience
 
+  const image = experienceImage(experience.categorySlug)
+
   return (
     <Link
       href={`/experiences/${slug}`}
@@ -24,6 +28,15 @@ export function ExperienceCard({ experience }: { experience: Experience }) {
     >
       {/* Media */}
       <div className="relative aspect-[4/3] overflow-hidden" style={{ background: gradientFor(experience.categorySlug) }}>
+        {image && (
+          <Image
+            src={image.src}
+            alt={image.alt}
+            fill
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
         <div className="absolute left-3 top-3 flex gap-2">
           {badge && <Badge tone={badge.toLowerCase()}>{badge}</Badge>}
