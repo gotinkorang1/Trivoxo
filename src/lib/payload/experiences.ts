@@ -12,8 +12,10 @@
 import { cache } from 'react'
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import type { Experience, ItineraryStop, Difficulty, ExperienceImage } from '@/lib/data/experiences'
-import type { Experience as ExperienceDoc, Media } from '@/payload-types'
+import type { Experience, ItineraryStop, Difficulty } from '@/lib/data/experiences'
+import type { Experience as ExperienceDoc } from '@/payload-types'
+import { mediaToPublicImage } from '@/lib/media'
+import { getVerifiedReviewStats, type ReviewStats } from '@/lib/payload/reviews'
 
 const BADGE_LABEL: Record<string, NonNullable<Experience['badge']>> = {
   bestseller: 'Bestseller',
@@ -28,17 +30,7 @@ const DIFFICULTY_LABEL: Record<string, Difficulty> = {
   challenging: 'Challenging',
 }
 
-function toImage(media: number | Media | null | undefined): ExperienceImage | undefined {
-  if (!media || typeof media === 'number' || !media.url) return undefined
-  return {
-    src: media.url,
-    alt: media.alt,
-    width: media.width ?? undefined,
-    height: media.height ?? undefined,
-  }
-}
-
-function toExperience(doc: ExperienceDoc): Experience | null {
+function toExperience(doc: ExperienceDoc, reviewStats?: ReviewStats): Experience | null {
   if (!doc.slug) return null
   const category = typeof doc.category === 'object' && doc.category ? doc.category : null
   const destination =
@@ -54,8 +46,9 @@ function toExperience(doc: ExperienceDoc): Experience | null {
     categoryLabel: category?.title ?? 'Experience',
     duration: doc.duration ?? '',
     difficulty: doc.difficulty ? DIFFICULTY_LABEL[doc.difficulty] : undefined,
-    rating: doc.rating ?? undefined,
-    reviews: doc.reviewCount ?? undefined,
+    // Public ratings come only from approved, booking-verified reviews.
+    rating: reviewStats?.rating,
+    reviews: reviewStats?.count,
     badge: doc.badge ? BADGE_LABEL[doc.badge] : undefined,
     blurb: doc.shortDescription ?? '',
     highlights: doc.highlights?.map((h) => h.text),
@@ -90,36 +83,44 @@ function toExperience(doc: ExperienceDoc): Experience | null {
         }
       : undefined,
     faqs: doc.faqs?.map((faq) => ({ question: faq.question, answer: faq.answer })),
-    heroImage: toImage(doc.heroImage),
+    heroImage: mediaToPublicImage(doc.heroImage),
     gallery: doc.gallery
-      ?.map((item) => toImage(item.image))
-      .filter((image): image is ExperienceImage => Boolean(image)),
+      ?.map((item) => mediaToPublicImage(item.image))
+      .filter((image): image is NonNullable<Experience['heroImage']> => Boolean(image)),
     featured: Boolean(doc.featured),
   }
 }
 
 export const getAllExperiences = cache(async (): Promise<Experience[]> => {
   const payload = await getPayload({ config })
-  const { docs } = await payload.find({
-    collection: 'experiences',
-    where: { _status: { equals: 'published' } },
-    depth: 1,
-    limit: 500,
-    sort: 'title',
-  })
-  return docs.map(toExperience).filter((e): e is Experience => e !== null)
+  const [{ docs }, reviewStats] = await Promise.all([
+    payload.find({
+      collection: 'experiences',
+      where: { _status: { equals: 'published' } },
+      depth: 1,
+      limit: 500,
+      sort: 'title',
+    }),
+    getVerifiedReviewStats(),
+  ])
+  return docs
+    .map((doc) => toExperience(doc, reviewStats.get(doc.id)))
+    .filter((e): e is Experience => e !== null)
 })
 
 export const getExperienceBySlug = cache(async (slug: string): Promise<Experience | undefined> => {
   const payload = await getPayload({ config })
-  const { docs } = await payload.find({
-    collection: 'experiences',
-    where: { slug: { equals: slug }, _status: { equals: 'published' } },
-    depth: 1,
-    limit: 1,
-  })
+  const [{ docs }, reviewStats] = await Promise.all([
+    payload.find({
+      collection: 'experiences',
+      where: { slug: { equals: slug }, _status: { equals: 'published' } },
+      depth: 1,
+      limit: 1,
+    }),
+    getVerifiedReviewStats(),
+  ])
   const doc = docs[0]
-  return doc ? (toExperience(doc) ?? undefined) : undefined
+  return doc ? (toExperience(doc, reviewStats.get(doc.id)) ?? undefined) : undefined
 })
 
 export async function getFeaturedExperiences(limit = 6): Promise<Experience[]> {
@@ -139,6 +140,9 @@ export const getExperiencesForDestinationId = cache(
       limit: 200,
       sort: 'title',
     })
-    return docs.map(toExperience).filter((e): e is Experience => e !== null)
+    const reviewStats = await getVerifiedReviewStats()
+    return docs
+      .map((doc) => toExperience(doc, reviewStats.get(doc.id)))
+      .filter((e): e is Experience => e !== null)
   },
 )

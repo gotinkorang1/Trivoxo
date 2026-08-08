@@ -4,6 +4,7 @@
  * source of truth and defines the `Destination` shape the live layer maps into.
  */
 import { EXPERIENCES } from './experiences'
+import type { PublicImage } from '@/lib/media'
 
 export type Destination = {
   slug: string
@@ -11,6 +12,7 @@ export type Destination = {
   region: string
   blurb: string
   gradient: string
+  image?: PublicImage
   featured?: boolean
   experienceSlugs: string[]
 }
@@ -59,7 +61,12 @@ export const DESTINATIONS: Destination[] = [
     blurb: 'Caves, falls, gardens and craft heritage across the hills.',
     gradient: 'linear-gradient(135deg,#3d4a12,#8bae2a)',
     featured: true,
-    experienceSlugs: ['caves-cascades', 'eco-luxury-wilderness', 'legacy-clay-trail', 'garden-gold-trail'],
+    experienceSlugs: [
+      'caves-cascades',
+      'eco-luxury-wilderness',
+      'legacy-clay-trail',
+      'garden-gold-trail',
+    ],
   },
   {
     slug: 'shai-hills',
@@ -78,4 +85,6 @@ export const EXPERIENCE_TO_DESTINATION: Record<string, string> = Object.fromEntr
 )
 
 // Compile-time sanity: every catalogue experience maps to a destination.
-export const UNMAPPED_EXPERIENCES = EXPERIENCES.filter((e) => !(e.slug in EXPERIENCE_TO_DESTINATION))
+export const UNMAPPED_EXPERIENCES = EXPERIENCES.filter(
+  (e) => !(e.slug in EXPERIENCE_TO_DESTINATION),
+)

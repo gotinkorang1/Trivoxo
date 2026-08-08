@@ -1,11 +1,16 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ChevronRight, MapPin } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { ButtonLink } from '@/components/ui/button'
 import { ExperienceCard } from '@/components/experiences/experience-card'
-import { getAllDestinations, getDestinationBySlug, getDestinationExperiences } from '@/lib/payload/destinations'
+import {
+  getAllDestinations,
+  getDestinationBySlug,
+  getDestinationExperiences,
+} from '@/lib/payload/destinations'
 
 export const revalidate = 60
 
@@ -14,14 +19,26 @@ export async function generateStaticParams() {
   return destinations.map((d) => ({ slug: d.slug }))
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
   const { slug } = await params
   const dest = await getDestinationBySlug(slug)
   if (!dest) return { title: 'Destination not found' }
-  return { title: dest.title, description: dest.blurb, openGraph: { title: dest.title, description: dest.blurb } }
+  return {
+    title: dest.title,
+    description: dest.blurb,
+    openGraph: { title: dest.title, description: dest.blurb },
+  }
 }
 
-export default async function DestinationDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function DestinationDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
   const { slug } = await params
   const dest = await getDestinationBySlug(slug)
   if (!dest) notFound()
@@ -32,12 +49,26 @@ export default async function DestinationDetailPage({ params }: { params: Promis
     <article>
       {/* Hero */}
       <div className="relative overflow-hidden text-white" style={{ background: dest.gradient }}>
+        {dest.image && (
+          <Image
+            src={dest.image.src}
+            alt={dest.image.alt}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/25 to-black/20" />
         <Container className="relative flex min-h-[280px] flex-col justify-end py-8 sm:min-h-[340px]">
           <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm text-white/75">
-            <Link href="/" className="hover:text-white">Home</Link>
+            <Link href="/" className="hover:text-white">
+              Home
+            </Link>
             <ChevronRight className="size-3.5" />
-            <Link href="/destinations" className="hover:text-white">Destinations</Link>
+            <Link href="/destinations" className="hover:text-white">
+              Destinations
+            </Link>
             <ChevronRight className="size-3.5" />
             <span className="text-white">{dest.title}</span>
           </nav>
@@ -45,7 +76,7 @@ export default async function DestinationDetailPage({ params }: { params: Promis
             <p className="flex items-center gap-1.5 text-sm text-white/85">
               <MapPin className="size-4" /> {dest.region}
             </p>
-            <h1 className="mt-2 text-4xl font-semibold sm:text-5xl">{dest.title}</h1>
+            <h1 className="mt-2 text-4xl font-semibold text-white sm:text-5xl">{dest.title}</h1>
             <p className="mt-3 max-w-xl text-white/85">{dest.blurb}</p>
           </div>
         </Container>
@@ -59,7 +90,10 @@ export default async function DestinationDetailPage({ params }: { params: Promis
               ({experiences.length})
             </span>
           </h2>
-          <Link href="/experiences" className="text-sm font-semibold text-brand-link hover:underline">
+          <Link
+            href="/experiences"
+            className="text-sm font-semibold text-brand-link hover:underline"
+          >
             All experiences
           </Link>
         </div>

@@ -26,6 +26,6 @@ export async function login({
 
   await page.waitForURL(`${serverURL}/admin`)
 
-  const dashboardArtifact = page.locator('.step-nav__first')
+  const dashboardArtifact = page.getByRole('heading', { name: /Good (morning|afternoon|evening)/ })
   await expect(dashboardArtifact).toBeVisible()
 }

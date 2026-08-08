@@ -76,4 +76,55 @@ test.describe('Trivoxo frontend', () => {
     await expect(page.getByRole('button', { name: 'Continue', exact: true })).toBeVisible()
     await expect(page.getByText('2 travellers').first()).toBeVisible()
   })
+
+  test('connects homepage destination, date and traveller search to discovery', async ({
+    page,
+  }) => {
+    await page.goto('http://localhost:3000')
+    const date = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+
+    await page.getByLabel('Where do you want to go?').fill('Accra')
+    await page.getByLabel('When?').fill(date)
+    await page.getByLabel('Travellers').selectOption('2')
+    await page.getByRole('button', { name: 'Find experiences' }).click()
+
+    await expect(page).toHaveURL(new RegExp(`destination=Accra.*date=${date}.*travellers=2`))
+    await expect(page.getByText('Date pattern checked for')).toBeVisible()
+    await expect(page.getByText('Suitable for')).toBeVisible()
+    await expect(page.getByRole('link', { name: /The Capital Pulse Tour/ })).toBeVisible()
+  })
+
+  test('archives ended events and does not present them as upcoming tickets', async ({ page }) => {
+    await page.goto('http://localhost:3000/events')
+
+    await expect(page.getByText('New event dates are being planned.')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Past Trivoxo moments' })).toBeVisible()
+    await page.getByRole('link', { name: /Hike and Chill/ }).click()
+
+    await expect(page.getByText('Past event').first()).toBeVisible()
+    await expect(page.getByText('This event has ended.')).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Ask about this event' })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Add one/ })).toHaveCount(0)
+  })
+
+  test('guides a corporate enquiry from brief to review', async ({ page }) => {
+    await page.goto('http://localhost:3000/corporate')
+
+    await expect(
+      page.getByRole('heading', { name: 'Bring your team somewhere memorable' }),
+    ).toBeVisible()
+    await page.getByLabel('Event or experience type').selectOption('corporate-retreat')
+    await page.getByRole('button', { name: 'Continue' }).click()
+    await expect(page.getByRole('heading', { name: 'Shape the experience' })).toBeVisible()
+    await page.getByRole('button', { name: 'Continue' }).click()
+
+    await page.getByLabel('Your name').fill('Ama Mensah')
+    await page.getByLabel('Email').fill('ama@example.com')
+    await page.getByLabel('Phone or WhatsApp').fill('0593962111')
+    await page.getByRole('button', { name: 'Continue' }).click()
+
+    await expect(page.getByRole('heading', { name: 'Review your brief' })).toBeVisible()
+    await expect(page.locator('dd').getByText('Corporate Retreat', { exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Send proposal request' })).toBeVisible()
+  })
 })

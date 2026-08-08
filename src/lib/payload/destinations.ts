@@ -12,6 +12,7 @@ import type { Experience } from '@/lib/data/experiences'
 import type { Destination as DestinationDoc } from '@/payload-types'
 import { gradientForDestination } from '@/lib/visuals'
 import { getExperiencesForDestinationId } from './experiences'
+import { mediaToPublicImage } from '@/lib/media'
 
 function toDestination(doc: DestinationDoc, experienceSlugs: string[] = []): Destination {
   return {
@@ -20,6 +21,7 @@ function toDestination(doc: DestinationDoc, experienceSlugs: string[] = []): Des
     region: doc.region,
     blurb: doc.shortDescription ?? '',
     gradient: gradientForDestination(doc.slug ?? ''),
+    image: mediaToPublicImage(doc.heroImage),
     featured: Boolean(doc.featured),
     experienceSlugs,
   }
@@ -30,28 +32,40 @@ export const getAllDestinations = cache(async (): Promise<Destination[]> => {
   const { docs } = await payload.find({
     collection: 'destinations',
     where: { _status: { equals: 'published' } },
+    depth: 1,
     limit: 100,
     sort: 'title',
   })
   return Promise.all(
     docs
       .filter((d) => d.slug)
-      .map(async (d) => toDestination(d, (await getExperiencesForDestinationId(d.id)).map((e) => e.slug))),
+      .map(async (d) =>
+        toDestination(
+          d,
+          (await getExperiencesForDestinationId(d.id)).map((e) => e.slug),
+        ),
+      ),
   )
 })
 
-export const getDestinationBySlug = cache(async (slug: string): Promise<Destination | undefined> => {
-  const payload = await getPayload({ config })
-  const { docs } = await payload.find({
-    collection: 'destinations',
-    where: { slug: { equals: slug }, _status: { equals: 'published' } },
-    limit: 1,
-  })
-  const doc = docs[0]
-  if (!doc) return undefined
-  const experiences = await getExperiencesForDestinationId(doc.id)
-  return toDestination(doc, experiences.map((e) => e.slug))
-})
+export const getDestinationBySlug = cache(
+  async (slug: string): Promise<Destination | undefined> => {
+    const payload = await getPayload({ config })
+    const { docs } = await payload.find({
+      collection: 'destinations',
+      where: { slug: { equals: slug }, _status: { equals: 'published' } },
+      depth: 1,
+      limit: 1,
+    })
+    const doc = docs[0]
+    if (!doc) return undefined
+    const experiences = await getExperiencesForDestinationId(doc.id)
+    return toDestination(
+      doc,
+      experiences.map((e) => e.slug),
+    )
+  },
+)
 
 export async function getFeaturedDestinations(limit = 6): Promise<Destination[]> {
   const all = await getAllDestinations()

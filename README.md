@@ -151,7 +151,7 @@ per-activity metadata — all editable without code.
 
 - Combined Next.js + Payload app on Postgres — typechecks, builds, lints
 - Full admin data model + RBAC + drafts/versioning; seed for categories, 6
-  destinations, the 13 brochure tours (Capital Pulse corrected), 3 events,
+  destinations, the 13 brochure tours (Capital Pulse corrected), 2 events,
   4 guide posts and content-page stubs
 - **Public site (content-complete):** home; experiences (browse + filters +
   detail + booking request); destinations; events; corporate, custom-trip &

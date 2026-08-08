@@ -10,14 +10,22 @@ export function generateStaticParams() {
   return TRAVEL_SERVICES.map((s) => ({ service: s.slug }))
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ service: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ service: string }>
+}): Promise<Metadata> {
   const { service } = await params
   const s = getServiceBySlug(service)
   if (!s) return { title: 'Not found' }
   return { title: s.title, description: s.blurb }
 }
 
-export default async function TravelServicePage({ params }: { params: Promise<{ service: string }> }) {
+export default async function TravelServicePage({
+  params,
+}: {
+  params: Promise<{ service: string }>
+}) {
   const { service } = await params
   const s = getServiceBySlug(service)
   if (!s) notFound()
@@ -39,7 +47,7 @@ export default async function TravelServicePage({ params }: { params: Promise<{ 
               <Icon className="size-6" />
             </span>
             <div>
-              <h1 className="text-3xl font-semibold sm:text-4xl">{s.title}</h1>
+              <h1 className="text-3xl font-semibold text-white sm:text-4xl">{s.title}</h1>
             </div>
           </div>
           <p className="mt-3 max-w-xl text-white/85">{s.blurb}</p>
@@ -53,7 +61,11 @@ export default async function TravelServicePage({ params }: { params: Promise<{ 
             Share a few details and we’ll get back to you with options. You won’t be charged now.
           </p>
           <div className="mt-6">
-            <ServiceRequestForm serviceType={s.serviceType} fields={s.fields} submitLabel={s.submitLabel} />
+            <ServiceRequestForm
+              serviceType={s.serviceType}
+              fields={s.fields}
+              submitLabel={s.submitLabel}
+            />
           </div>
         </div>
       </Container>

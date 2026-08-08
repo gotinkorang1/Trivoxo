@@ -12,19 +12,30 @@ export const metadata: Metadata = {
 const POINTS = [
   { icon: Compass, title: 'Built around you', body: 'Your interests, your pace, your budget.' },
   { icon: Route, title: 'Multi-day journeys', body: 'From weekend escapes to full itineraries.' },
-  { icon: HeartHandshake, title: 'Diaspora & private groups', body: 'Returns, executive escapes and more.' },
+  {
+    icon: HeartHandshake,
+    title: 'Diaspora & private groups',
+    body: 'Returns, executive escapes and more.',
+  },
 ]
 
 export default function CustomTripsPage() {
   return (
     <>
-      <section className="relative overflow-hidden text-white" style={{ background: 'linear-gradient(120deg,#7a2e12,#e85d2a 70%,#f5b133)' }}>
+      <section
+        className="relative overflow-hidden text-white"
+        style={{ background: 'linear-gradient(120deg,#7a2e12,#e85d2a 70%,#f5b133)' }}
+      >
         <Container className="py-16 sm:py-20">
-          <p className="text-sm font-semibold uppercase tracking-widest text-white/85">Your Ghana. Your way.</p>
-          <h1 className="mt-3 max-w-2xl text-3xl font-semibold sm:text-5xl">Build my Ghana experience</h1>
+          <p className="text-sm font-semibold uppercase tracking-widest text-white/85">
+            Your Ghana. Your way.
+          </p>
+          <h1 className="mt-3 max-w-2xl text-3xl font-semibold text-white sm:text-5xl">
+            Build my Ghana experience
+          </h1>
           <p className="mt-4 max-w-xl text-white/90">
-            Tell us what you enjoy and let Trivoxo design a trip made just for you — history, food, adventure,
-            beaches, wellness, or a bit of everything.
+            Tell us what you enjoy and let Trivoxo design a trip made just for you — history, food,
+            adventure, beaches, wellness, or a bit of everything.
           </p>
         </Container>
       </section>
@@ -47,7 +58,8 @@ export default function CustomTripsPage() {
               ))}
             </div>
             <p className="mt-8 rounded-card border border-border bg-surface p-5 text-sm text-text-secondary">
-              No obligation — share your ideas and we’ll respond with a suggested itinerary and pricing.
+              No obligation — share your ideas and we’ll respond with a suggested itinerary and
+              pricing.
             </p>
           </div>
 

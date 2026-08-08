@@ -7,10 +7,13 @@ import config from '@payload-config'
 import type { EventItem } from '@/lib/data/events'
 import type { Event as EventDoc } from '@/payload-types'
 import { gradientForSlug } from '@/lib/visuals'
+import { mediaToPublicImage } from '@/lib/media'
+import { isCurrentEvent } from '@/lib/event-status'
 
 function toEvent(doc: EventDoc): EventItem | null {
   if (!doc.slug) return null
-  const destination = typeof doc.destination === 'object' && doc.destination ? doc.destination : null
+  const destination =
+    typeof doc.destination === 'object' && doc.destination ? doc.destination : null
 
   return {
     slug: doc.slug,
@@ -22,6 +25,7 @@ function toEvent(doc: EventDoc): EventItem | null {
     location: doc.location ?? destination?.title ?? '',
     region: destination?.region ?? '',
     gradient: gradientForSlug(doc.slug),
+    image: mediaToPublicImage(doc.coverImage),
     featured: Boolean(doc.featured),
     about: doc.about ?? doc.shortDescription ?? '',
     whatToExpect: doc.highlights?.map((h) => h.text) ?? [],
@@ -30,6 +34,10 @@ function toEvent(doc: EventDoc): EventItem | null {
       name: t.name,
       price: t.price,
       soldOut: Boolean(t.soldOut),
+      quantity: t.quantity ?? undefined,
+      perOrderLimit: t.perOrderLimit ?? undefined,
+      saleStart: t.saleStart ?? undefined,
+      saleEnd: t.saleEnd ?? undefined,
     })),
   }
 }
@@ -59,9 +67,13 @@ export const getEventBySlug = cache(async (slug: string): Promise<EventItem | un
 
 export async function getUpcomingEvents(limit = 3): Promise<EventItem[]> {
   const all = await getAllEvents()
-  return [...all].sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt)).slice(0, limit)
+  return all
+    .filter((event) => isCurrentEvent(event))
+    .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt))
+    .slice(0, limit)
 }
 
 export function eventFromPrice(event: EventItem): number {
-  return Math.min(...event.ticketTypes.map((t) => t.price))
+  const prices = event.ticketTypes.map((t) => t.price)
+  return prices.length > 0 ? Math.min(...prices) : 0
 }

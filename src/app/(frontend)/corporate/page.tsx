@@ -10,7 +10,11 @@ export const metadata: Metadata = {
 }
 
 const CAPABILITIES = [
-  { icon: Building2, title: 'Venue & logistics', body: 'Sourcing, setup and on-ground coordination.' },
+  {
+    icon: Building2,
+    title: 'Venue & logistics',
+    body: 'Sourcing, setup and on-ground coordination.',
+  },
   { icon: Users, title: 'Team experiences', body: 'Retreats, outings and team-building days.' },
   { icon: CalendarCheck, title: 'Conferences', body: 'Registration, AV, catering and staffing.' },
   { icon: Truck, title: 'End-to-end delivery', body: 'Transport, accommodation and management.' },
@@ -20,13 +24,20 @@ export default function CorporatePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden text-white" style={{ background: 'linear-gradient(120deg,#0e1c2b,#13273a 60%,#1e3350)' }}>
+      <section
+        className="relative overflow-hidden text-white"
+        style={{ background: 'linear-gradient(120deg,#0e1c2b,#13273a 60%,#1e3350)' }}
+      >
         <Container className="py-16 sm:py-20">
-          <p className="text-sm font-semibold uppercase tracking-widest text-brand-secondary">Corporate & Groups</p>
-          <h1 className="mt-3 max-w-2xl text-3xl font-semibold sm:text-5xl">Bring your team somewhere memorable</h1>
+          <p className="text-sm font-semibold uppercase tracking-widest text-brand-secondary">
+            Corporate & Groups
+          </p>
+          <h1 className="mt-3 max-w-2xl text-3xl font-semibold text-white sm:text-5xl">
+            Bring your team somewhere memorable
+          </h1>
           <p className="mt-4 max-w-xl text-white/85">
-            Corporate retreats, conferences, company outings and complete event coordination — planned and run
-            end to end, so your team just shows up.
+            Corporate retreats, conferences, company outings and complete event coordination —
+            planned and run end to end, so your team just shows up.
           </p>
         </Container>
       </section>

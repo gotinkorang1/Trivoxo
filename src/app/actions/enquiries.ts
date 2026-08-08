@@ -44,12 +44,14 @@ export async function createCorporateEnquiryAction(
   const values = { eventType, name, email, phone, organisation, location, budget, message }
 
   const fieldErrors: Record<string, string> = {}
-  if (!eventType || !EVENT_TYPE_VALUES.includes(eventType as never)) fieldErrors.eventType = 'Choose an option'
+  if (!eventType || !EVENT_TYPE_VALUES.includes(eventType as never))
+    fieldErrors.eventType = 'Choose an option'
   if (!name) fieldErrors.name = 'Required'
   if (!email) fieldErrors.email = 'Required'
   else if (!EMAIL_RE.test(email)) fieldErrors.email = 'Enter a valid email'
   if (!phone) fieldErrors.phone = 'Required'
-  if (Object.keys(fieldErrors).length) return { error: 'Please correct the highlighted fields.', fieldErrors, values }
+  if (Object.keys(fieldErrors).length)
+    return { error: 'Please correct the highlighted fields.', fieldErrors, values }
 
   const services = formData
     .getAll('services')
@@ -64,7 +66,9 @@ export async function createCorporateEnquiryAction(
         eventType: eventType as never,
         organisation: organisation || undefined,
         expectedGuests: num(formData.get('expectedGuests')),
-        preferredDate: get('preferredDate') ? new Date(get('preferredDate')).toISOString() : undefined,
+        preferredDate: get('preferredDate')
+          ? new Date(get('preferredDate')).toISOString()
+          : undefined,
         durationDays: num(formData.get('durationDays')),
         location: location || undefined,
         budget: budget || undefined,
@@ -101,7 +105,8 @@ export async function createCustomTripAction(
   if (!name) fieldErrors.name = 'Required'
   if (!email) fieldErrors.email = 'Required'
   else if (!EMAIL_RE.test(email)) fieldErrors.email = 'Enter a valid email'
-  if (Object.keys(fieldErrors).length) return { error: 'Please correct the highlighted fields.', fieldErrors, values }
+  if (Object.keys(fieldErrors).length)
+    return { error: 'Please correct the highlighted fields.', fieldErrors, values }
 
   const interests = formData
     .getAll('interests')
@@ -143,6 +148,13 @@ const SERVICE_LABELS: Record<string, string> = {
   'car-rental': 'Car Rental',
 }
 
+const SERVICE_REQUIRED_FIELDS: Record<string, string[]> = {
+  'airport-transfer': ['direction', 'airport', 'date', 'time', 'destination', 'passengers'],
+  flights: ['tripType', 'from', 'to', 'departDate', 'adults'],
+  accommodation: ['location', 'checkIn', 'checkOut', 'guests'],
+  'car-rental': ['vehicleType', 'pickupLocation', 'startDate', 'endDate', 'driver'],
+}
+
 /**
  * Travel services enquiry (§70–§73). One generic action for all four services:
  * everything except serviceType + contact is captured into `details` (JSON) so
@@ -164,7 +176,21 @@ export async function createServiceRequestAction(
   if (!name) fieldErrors.name = 'Required'
   if (!email) fieldErrors.email = 'Required'
   else if (!EMAIL_RE.test(email)) fieldErrors.email = 'Enter a valid email'
-  if (Object.keys(fieldErrors).length) return { error: 'Please correct the highlighted fields.', fieldErrors, values }
+  for (const field of SERVICE_REQUIRED_FIELDS[serviceType] ?? []) {
+    if (!get(field)) fieldErrors[field] = 'Required'
+  }
+
+  const invalidDateOrder = (startName: string, endName: string) => {
+    const start = get(startName)
+    const end = get(endName)
+    if (start && end && end < start) fieldErrors[endName] = 'Must be after the start date'
+  }
+  if (serviceType === 'flights' && get('tripType') === 'return')
+    invalidDateOrder('departDate', 'returnDate')
+  if (serviceType === 'accommodation') invalidDateOrder('checkIn', 'checkOut')
+  if (serviceType === 'car-rental') invalidDateOrder('startDate', 'endDate')
+  if (Object.keys(fieldErrors).length)
+    return { error: 'Please correct the highlighted fields.', fieldErrors, values }
 
   const known = new Set(['serviceType', 'name', 'email', 'phone'])
   const details: Record<string, string> = {}

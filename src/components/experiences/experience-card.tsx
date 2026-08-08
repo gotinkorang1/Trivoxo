@@ -16,10 +16,20 @@ const DIFFICULTY_LABEL: Record<string, string> = {
 
 /** Experience card — answers the six "at a glance" questions from §28. */
 export function ExperienceCard({ experience }: { experience: Experience }) {
-  const { slug, name, badge, categoryLabel, destination, duration, difficulty, priceFrom, rating, reviews } =
-    experience
+  const {
+    slug,
+    name,
+    badge,
+    categoryLabel,
+    destination,
+    duration,
+    difficulty,
+    priceFrom,
+    rating,
+    reviews,
+  } = experience
 
-  const image = experienceImage(experience.categorySlug)
+  const image = experience.heroImage ?? experienceImage(experience.categorySlug)
 
   return (
     <Link
@@ -27,7 +37,10 @@ export function ExperienceCard({ experience }: { experience: Experience }) {
       className="card-lift group flex h-full flex-col overflow-hidden rounded-card border border-border bg-surface-elevated shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
     >
       {/* Media */}
-      <div className="relative aspect-[4/3] overflow-hidden" style={{ background: gradientFor(experience.categorySlug) }}>
+      <div
+        className="relative aspect-[4/3] overflow-hidden"
+        style={{ background: gradientFor(experience.categorySlug) }}
+      >
         {image && (
           <Image
             src={image.src}

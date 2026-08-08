@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Clock } from 'lucide-react'
 import { Container } from '@/components/ui/container'
@@ -10,10 +11,15 @@ export const revalidate = 60
 
 export const metadata: Metadata = {
   title: 'Ghana Guide',
-  description: 'Travel planning, destinations, food and culture — plan your Ghana trip like a local.',
+  description:
+    'Travel planning, destinations, food and culture — plan your Ghana trip like a local.',
 }
 
-export default async function GuidePage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
+export default async function GuidePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>
+}) {
   const { category } = await searchParams
   const [categories, all] = await Promise.all([guideCategories(), getAllArticles()])
   const articles = category
@@ -23,7 +29,9 @@ export default async function GuidePage({ searchParams }: { searchParams: Promis
   return (
     <Container className="py-10 sm:py-14">
       <header className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand-link">Ghana Guide</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-brand-link">
+          Ghana Guide
+        </p>
         <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Plan like a local</h1>
         <p className="mt-2 max-w-2xl text-text-secondary">
           Practical tips, destination know-how and the stories behind the experiences.
@@ -34,7 +42,12 @@ export default async function GuidePage({ searchParams }: { searchParams: Promis
       <div className="mb-8 flex flex-wrap gap-2">
         <Chip href="/guide" active={!category} label="All" />
         {categories.map((c) => (
-          <Chip key={c.value} href={`/guide?category=${c.value}`} active={category === c.value} label={c.label} />
+          <Chip
+            key={c.value}
+            href={`/guide?category=${c.value}`}
+            active={category === c.value}
+            label={c.label}
+          />
         ))}
       </div>
 
@@ -45,9 +58,24 @@ export default async function GuidePage({ searchParams }: { searchParams: Promis
             href={`/guide/${a.slug}`}
             className="group flex flex-col overflow-hidden rounded-card border border-border bg-surface-elevated transition-all hover:-translate-y-1 hover:shadow-lg"
           >
-            <div className="aspect-[16/9]" style={{ background: a.gradient }} />
+            <div
+              className="relative aspect-[16/9] overflow-hidden"
+              style={{ background: a.gradient }}
+            >
+              {a.image && (
+                <Image
+                  src={a.image.src}
+                  alt={a.image.alt}
+                  fill
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              )}
+            </div>
             <div className="flex flex-1 flex-col p-5">
-              <p className="text-xs font-semibold uppercase tracking-wide text-brand-link">{a.categoryLabel}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-link">
+                {a.categoryLabel}
+              </p>
               <h2 className="mt-2 font-display text-lg leading-snug text-text-primary group-hover:text-brand-link">
                 {a.title}
               </h2>
@@ -71,7 +99,7 @@ function Chip({ href, active, label }: { href: string; active: boolean; label: s
     <Link
       href={href}
       className={cn(
-        'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
+        'inline-flex min-h-11 items-center rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
         active
           ? 'border-brand-primary bg-brand-primary text-brand-navy'
           : 'border-border bg-background text-text-secondary hover:border-border-strong',

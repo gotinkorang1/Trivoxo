@@ -8,11 +8,17 @@
  * the package rate is displayed and booking routes through WhatsApp.
  */
 
+import type { PublicImage } from '@/lib/media'
+
 export type TicketType = {
   name: string
   price: number
   note?: string
   soldOut?: boolean
+  quantity?: number
+  perOrderLimit?: number
+  saleStart?: string
+  saleEnd?: string
 }
 
 export type EventItem = {
@@ -27,6 +33,7 @@ export type EventItem = {
   location: string
   region: string
   gradient: string
+  image?: PublicImage
   featured?: boolean
   about: string
   whatToExpect: string[]
@@ -38,7 +45,8 @@ export const EVENTS: EventItem[] = [
   {
     slug: '3-days-volta-xcape',
     title: '3 Days Volta Xcape',
-    blurb: 'Independence-weekend adventure across the Volta Region — mountains, waterfalls, culture and chill.',
+    blurb:
+      'Independence-weekend adventure across the Volta Region — mountains, waterfalls, culture and chill.',
     startsAt: '2026-03-06T07:00:00.000Z',
     endsAt: '2026-03-08T18:00:00.000Z',
     venue: 'Volta Region',
@@ -69,7 +77,8 @@ export const EVENTS: EventItem[] = [
   {
     slug: 'hike-and-chill',
     title: 'Hike and Chill',
-    blurb: 'Adventure, fresh air, beautiful views and great vibes — Danfa-Adamorobe Hills to Cactus Creek, Aburi.',
+    blurb:
+      'Adventure, fresh air, beautiful views and great vibes — Danfa-Adamorobe Hills to Cactus Creek, Aburi.',
     startsAt: '2026-03-21T06:00:00.000Z',
     venue: 'Danfa-Adamorobe Hills → Cactus Creek',
     location: 'Aburi',
@@ -88,4 +97,3 @@ export const EVENTS: EventItem[] = [
     ticketTypes: [{ name: 'Full package', price: 650 }],
   },
 ]
-

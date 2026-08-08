@@ -13,7 +13,7 @@ import {
   Search,
   ShieldCheck,
   Sparkles,
-  Star,
+  Compass,
   Users,
 } from 'lucide-react'
 import { Container } from '@/components/ui/container'
@@ -56,7 +56,7 @@ const SLIDES = [
   },
 ] as const
 
-export function HeroCarousel() {
+export function HeroCarousel({ experienceCount }: { experienceCount: number }) {
   const [active, setActive] = useState(0)
   const [paused, setPaused] = useState(false)
   const reduceMotion = useReducedMotion()
@@ -129,14 +129,17 @@ export function HeroCarousel() {
                   <Sparkles className="size-3.5" aria-hidden="true" /> {slide.eyebrow}
                 </span>
                 <span className="hidden items-center gap-2 text-sm font-medium text-white/80 sm:inline-flex">
-                  <ShieldCheck className="size-4 text-brand-accent" aria-hidden="true" /> Ghanaian-owned & locally curated
+                  <ShieldCheck className="size-4 text-brand-accent" aria-hidden="true" />{' '}
+                  Ghanaian-owned & locally curated
                 </span>
               </div>
 
               <h1 className="max-w-3xl text-[clamp(3rem,7vw,6.5rem)] font-semibold leading-[0.94] tracking-[-0.045em] text-white">
                 {slide.title}
               </h1>
-              <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-xl">{slide.description}</p>
+              <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/82 sm:text-xl">
+                {slide.description}
+              </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <ButtonLink href={slide.primary.href} size="lg">
@@ -149,11 +152,11 @@ export function HeroCarousel() {
 
               <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/76">
                 <span className="inline-flex items-center gap-1.5">
-                  <Star className="size-4 fill-brand-secondary text-brand-secondary" aria-hidden="true" />
-                  <strong className="text-white">4.9</strong> guest rating
+                  <Compass className="size-4 text-brand-secondary" aria-hidden="true" />
+                  <strong className="text-white">{experienceCount}</strong> curated experiences
                 </span>
                 <span className="h-1 w-1 rounded-full bg-white/40" aria-hidden="true" />
-                <span>Trusted by travellers, teams & families</span>
+                <span>Tours, events and tailored travel support</span>
               </div>
             </motion.div>
           </AnimatePresence>
@@ -174,7 +177,11 @@ export function HeroCarousel() {
             className="inline-flex size-11 items-center justify-center rounded-full border border-white/25 bg-black/20 text-white backdrop-blur-md transition hover:border-white/60 hover:bg-white/15"
             aria-label={paused ? 'Play carousel' : 'Pause carousel'}
           >
-            {paused ? <Play className="size-4" aria-hidden="true" /> : <Pause className="size-4" aria-hidden="true" />}
+            {paused ? (
+              <Play className="size-4" aria-hidden="true" />
+            ) : (
+              <Pause className="size-4" aria-hidden="true" />
+            )}
           </button>
           <button
             type="button"
@@ -255,7 +262,9 @@ function SearchField({
 }) {
   return (
     <label className="flex min-h-14 flex-col justify-center rounded-2xl px-4 py-2 transition hover:bg-slate-100 focus-within:bg-slate-100 focus-within:ring-2 focus-within:ring-brand-primary lg:min-h-16">
-      <span className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.12em] text-slate-600">{label}</span>
+      <span className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.12em] text-slate-600">
+        {label}
+      </span>
       <span className="flex items-center gap-2.5">
         <Icon className="size-4 shrink-0 text-brand-primary-hover" aria-hidden="true" /> {children}
       </span>

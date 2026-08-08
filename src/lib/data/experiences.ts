@@ -11,12 +11,14 @@
  *    authoritative.
  *  - Capital Pulse's itinerary / inclusions / exclusions reflect the CONFIRMED
  *    correction in the redesign plan (§25): entry fees included, lunch EXCLUDED.
- *  - `region`, `categorySlug`, `duration`, `difficulty`, `rating` and `reviews`
+ *  - `region`, `categorySlug`, `duration` and `difficulty`
  *    marked `provisional: true` are inferred placeholders for the scaffold.
  *    The plan lists durations, capacities, group-discount tiers and resident
  *    pricing as still-missing business inputs — see docs/OPEN_DECISIONS.md.
  *    Do not treat provisional values as final.
  */
+
+import type { PublicImage } from '@/lib/media'
 
 export type Difficulty = 'Easy' | 'Moderate' | 'Challenging'
 
@@ -30,12 +32,7 @@ export type AvailabilityType =
   'everyday' | 'weekdays' | 'specific-dates' | 'on-request' | 'private-only'
 export type Weekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
 
-export type ExperienceImage = {
-  src: string
-  alt: string
-  width?: number
-  height?: number
-}
+export type ExperienceImage = PublicImage
 
 export type ActivityDetails = {
   distanceKm?: number
@@ -82,7 +79,7 @@ export type Experience = {
   faqs?: { question: string; answer: string }[]
   heroImage?: ExperienceImage
   gallery?: ExperienceImage[]
-  /** True where region/category/duration/difficulty/rating are inferred, not confirmed. */
+  /** True where region/category/duration/difficulty are inferred, not confirmed. */
   provisional?: boolean
   featured?: boolean
 }
@@ -98,8 +95,6 @@ export const EXPERIENCES: Experience[] = [
     categoryLabel: 'Culture & History',
     duration: 'Full Day',
     difficulty: 'Easy',
-    rating: 4.8,
-    reviews: 96,
     badge: 'Popular',
     featured: true,
     blurb:
@@ -151,8 +146,6 @@ export const EXPERIENCES: Experience[] = [
     categoryLabel: 'Heritage & Nature',
     duration: 'Full Day',
     difficulty: 'Moderate',
-    rating: 4.9,
-    reviews: 74,
     badge: 'Bestseller',
     featured: true,
     provisional: true,
@@ -168,8 +161,6 @@ export const EXPERIENCES: Experience[] = [
     categoryLabel: 'Heritage',
     duration: 'Full Day',
     difficulty: 'Easy',
-    rating: 4.9,
-    reviews: 61,
     provisional: true,
     blurb: 'A moving journey through the castles and dungeons of the transatlantic story.',
   },
@@ -183,8 +174,6 @@ export const EXPERIENCES: Experience[] = [
     categoryLabel: 'Nature & Cruise',
     duration: 'Full Day',
     difficulty: 'Easy',
-    rating: 4.7,
-    reviews: 43,
     provisional: true,
     blurb: 'Open savannah wildlife by morning, an easy river cruise by afternoon.',
   },
@@ -198,8 +187,6 @@ export const EXPERIENCES: Experience[] = [
     categoryLabel: 'Water & Cruises',
     duration: 'Full Day',
     difficulty: 'Easy',
-    rating: 4.8,
-    reviews: 52,
     badge: 'Limited',
     featured: true,
     provisional: true,
@@ -217,8 +204,6 @@ export const EXPERIENCES: Experience[] = [
     categoryLabel: 'Hiking & Adventure',
     duration: 'Full Day',
     difficulty: 'Challenging',
-    rating: 4.8,
-    reviews: 38,
     provisional: true,
     blurb: 'Misty highland trails and cascading falls for hikers who want the real thing.',
   },
@@ -232,8 +217,6 @@ export const EXPERIENCES: Experience[] = [
     categoryLabel: 'Hiking & Adventure',
     duration: 'Full Day',
     difficulty: 'Challenging',
-    rating: 4.9,
-    reviews: 57,
     badge: 'Bestseller',
     featured: true,
     provisional: true,
@@ -249,8 +232,6 @@ export const EXPERIENCES: Experience[] = [
     categoryLabel: 'Nature & Adventure',
     duration: 'Full Day',
     difficulty: 'Moderate',
-    rating: 4.7,
-    reviews: 34,
     provisional: true,
     blurb: 'Rock caves, umbrella stones and twin falls across the Eastern hills.',
   },
@@ -264,8 +245,6 @@ export const EXPERIENCES: Experience[] = [
     categoryLabel: 'Premium Day-Out',
     duration: 'Full Day',
     difficulty: 'Easy',
-    rating: 4.9,
-    reviews: 48,
     badge: 'Popular',
     provisional: true,
     blurb: 'A slow, indulgent day by the river — resort comfort, water and calm.',
@@ -280,8 +259,6 @@ export const EXPERIENCES: Experience[] = [
     categoryLabel: 'Eco-Luxury',
     duration: 'Full Day',
     difficulty: 'Easy',
-    rating: 4.8,
-    reviews: 29,
     provisional: true,
     blurb: 'Nature-first luxury: wilderness surrounds, gentle pace, genuine escape.',
   },
@@ -295,8 +272,6 @@ export const EXPERIENCES: Experience[] = [
     categoryLabel: 'Culture & Craft',
     duration: 'Full Day',
     difficulty: 'Easy',
-    rating: 4.7,
-    reviews: 22,
     provisional: true,
     blurb: 'Hands-on craft heritage — clay, legacy and the makers who keep it alive.',
   },
@@ -310,8 +285,6 @@ export const EXPERIENCES: Experience[] = [
     categoryLabel: 'Gardens & Heritage',
     duration: 'Full Day',
     difficulty: 'Easy',
-    rating: 4.8,
-    reviews: 31,
     provisional: true,
     blurb: 'Botanical gardens and gold-country heritage on one scenic loop.',
   },
@@ -325,8 +298,6 @@ export const EXPERIENCES: Experience[] = [
     categoryLabel: 'Night Experience',
     duration: 'Evening',
     difficulty: 'Easy',
-    rating: 4.8,
-    reviews: 66,
     badge: 'Popular',
     featured: true,
     provisional: true,

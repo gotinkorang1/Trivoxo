@@ -29,9 +29,10 @@ per-experience data (real costs, durations, timings) only Trivoxo can supply.
 |---|----------|--------|
 | 11 | **Capital Pulse "Osu" question** — is Osu part of the tour, or should the reference be removed from the description? (§26) | Needs clarification |
 | 12 | ~~Canonical slogan~~ — **RESOLVED: "Experience. Explore. Express."** (official site copy). Applied. | ✅ Confirmed |
-| 13 | Brand palette from the logo (§7) | ✅ **Set** — orange `#f15a29`, gold `#f9b233` in `globals.css`; wordmark echoes the logo. *(Still nice to have: the vector logo file in `public/` to replace the CSS wordmark + favicon.)* |
+| 13 | Brand palette and official logo variants (§7) | ✅ **Set** — orange `#f15a29`, gold `#f9b233`; coloured, black and white wordmarks are used adaptively from `public/logo/`. |
 | 14 | December / seasonal & public-holiday pricing | ✅ **Set** — day tours flat; 15% peak premium on premium experiences & events for Dec 15 – Jan 5 + major holidays (decision made; engine enforcement pending) |
 | 15 | Guide languages | ✅ **Set** — English default; Twi/Ga/Ewe on request; other languages with 7 days’ notice |
+| 16 | Ghanaian legal review of Privacy Policy and Terms of Use | Required before production launch — operational drafts are now complete | `src/lib/data/legal.ts` |
 
 ## Contact details (§98)
 

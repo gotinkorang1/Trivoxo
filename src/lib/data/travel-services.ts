@@ -12,6 +12,7 @@ export type ServiceField = {
   options?: { value: string; label: string }[]
   placeholder?: string
   full?: boolean
+  required?: boolean
 }
 
 export type TravelService = {
@@ -25,7 +26,8 @@ export type TravelService = {
   fields: ServiceField[]
 }
 
-const sel = (values: string[]) => values.map((v) => ({ value: v.toLowerCase().replace(/[^a-z0-9]+/g, '-'), label: v }))
+const sel = (values: string[]) =>
+  values.map((v) => ({ value: v.toLowerCase().replace(/[^a-z0-9]+/g, '-'), label: v }))
 
 export const TRAVEL_SERVICES: TravelService[] = [
   {
@@ -37,14 +39,37 @@ export const TRAVEL_SERVICES: TravelService[] = [
     gradient: 'linear-gradient(135deg,#0e2a4d,#2f7fb8)',
     submitLabel: 'Request a transfer',
     fields: [
-      { name: 'direction', label: 'Direction', type: 'select', options: sel(['Pickup from airport', 'Drop-off to airport']) },
-      { name: 'airport', label: 'Airport', type: 'text', placeholder: 'e.g. Kotoka International' },
-      { name: 'date', label: 'Date', type: 'date' },
-      { name: 'time', label: 'Time', type: 'text', placeholder: 'e.g. 14:30' },
+      {
+        name: 'direction',
+        label: 'Direction',
+        type: 'select',
+        options: sel(['Pickup from airport', 'Drop-off to airport']),
+        required: true,
+      },
+      {
+        name: 'airport',
+        label: 'Airport',
+        type: 'text',
+        placeholder: 'e.g. Kotoka International',
+        required: true,
+      },
+      { name: 'date', label: 'Date', type: 'date', required: true },
+      { name: 'time', label: 'Time', type: 'text', placeholder: 'e.g. 14:30', required: true },
       { name: 'flightNumber', label: 'Flight number', type: 'text' },
-      { name: 'destination', label: 'Other location', type: 'text', placeholder: 'City address / hotel' },
-      { name: 'passengers', label: 'Passengers', type: 'number' },
-      { name: 'vehicle', label: 'Vehicle', type: 'select', options: sel(['Sedan', 'SUV', 'Van', 'Bus']) },
+      {
+        name: 'destination',
+        label: 'Other location',
+        type: 'text',
+        placeholder: 'City address / hotel',
+        required: true,
+      },
+      { name: 'passengers', label: 'Passengers', type: 'number', required: true },
+      {
+        name: 'vehicle',
+        label: 'Vehicle',
+        type: 'select',
+        options: sel(['Sedan', 'SUV', 'Van', 'Bus']),
+      },
       { name: 'notes', label: 'Notes', type: 'textarea', full: true },
     ],
   },
@@ -57,15 +82,26 @@ export const TRAVEL_SERVICES: TravelService[] = [
     gradient: 'linear-gradient(135deg,#13273a,#1e3350)',
     submitLabel: 'Request flight options',
     fields: [
-      { name: 'tripType', label: 'Trip type', type: 'select', options: sel(['One way', 'Return', 'Multi-city']) },
-      { name: 'from', label: 'Departure city', type: 'text' },
-      { name: 'to', label: 'Destination', type: 'text' },
-      { name: 'departDate', label: 'Departure date', type: 'date' },
+      {
+        name: 'tripType',
+        label: 'Trip type',
+        type: 'select',
+        options: sel(['One way', 'Return', 'Multi-city']),
+        required: true,
+      },
+      { name: 'from', label: 'Departure city', type: 'text', required: true },
+      { name: 'to', label: 'Destination', type: 'text', required: true },
+      { name: 'departDate', label: 'Departure date', type: 'date', required: true },
       { name: 'returnDate', label: 'Return date', type: 'date' },
-      { name: 'adults', label: 'Adults', type: 'number' },
+      { name: 'adults', label: 'Adults', type: 'number', required: true },
       { name: 'children', label: 'Children', type: 'number' },
       { name: 'infants', label: 'Infants', type: 'number' },
-      { name: 'cabin', label: 'Cabin', type: 'select', options: sel(['Economy', 'Premium Economy', 'Business', 'First']) },
+      {
+        name: 'cabin',
+        label: 'Cabin',
+        type: 'select',
+        options: sel(['Economy', 'Premium Economy', 'Business', 'First']),
+      },
       { name: 'airline', label: 'Preferred airline', type: 'text' },
       { name: 'baggage', label: 'Baggage', type: 'text', placeholder: 'e.g. 2 checked bags' },
       { name: 'notes', label: 'Notes', type: 'textarea', full: true },
@@ -80,11 +116,22 @@ export const TRAVEL_SERVICES: TravelService[] = [
     gradient: 'linear-gradient(135deg,#4d3a12,#f5b133)',
     submitLabel: 'Request accommodation',
     fields: [
-      { name: 'location', label: 'Location', type: 'text', placeholder: 'City / area' },
-      { name: 'checkIn', label: 'Check-in', type: 'date' },
-      { name: 'checkOut', label: 'Check-out', type: 'date' },
-      { name: 'guests', label: 'Guests', type: 'number' },
-      { name: 'roomType', label: 'Room type', type: 'select', options: sel(['Standard', 'Deluxe', 'Suite', 'Serviced apartment']) },
+      {
+        name: 'location',
+        label: 'Location',
+        type: 'text',
+        placeholder: 'City / area',
+        required: true,
+      },
+      { name: 'checkIn', label: 'Check-in', type: 'date', required: true },
+      { name: 'checkOut', label: 'Check-out', type: 'date', required: true },
+      { name: 'guests', label: 'Guests', type: 'number', required: true },
+      {
+        name: 'roomType',
+        label: 'Room type',
+        type: 'select',
+        options: sel(['Standard', 'Deluxe', 'Suite', 'Serviced apartment']),
+      },
       { name: 'budget', label: 'Budget per night', type: 'text' },
       { name: 'notes', label: 'Notes', type: 'textarea', full: true },
     ],
@@ -98,11 +145,23 @@ export const TRAVEL_SERVICES: TravelService[] = [
     gradient: 'linear-gradient(135deg,#133a4d,#2a9fb8)',
     submitLabel: 'Request a vehicle',
     fields: [
-      { name: 'vehicleType', label: 'Vehicle type', type: 'select', options: sel(['Sedan', 'SUV', 'Van', 'Luxury']) },
-      { name: 'pickupLocation', label: 'Pickup location', type: 'text' },
-      { name: 'startDate', label: 'Start date', type: 'date' },
-      { name: 'endDate', label: 'End date', type: 'date' },
-      { name: 'driver', label: 'Driver', type: 'select', options: sel(['With driver', 'Self-drive']) },
+      {
+        name: 'vehicleType',
+        label: 'Vehicle type',
+        type: 'select',
+        options: sel(['Sedan', 'SUV', 'Van', 'Luxury']),
+        required: true,
+      },
+      { name: 'pickupLocation', label: 'Pickup location', type: 'text', required: true },
+      { name: 'startDate', label: 'Start date', type: 'date', required: true },
+      { name: 'endDate', label: 'End date', type: 'date', required: true },
+      {
+        name: 'driver',
+        label: 'Driver',
+        type: 'select',
+        options: sel(['With driver', 'Self-drive']),
+        required: true,
+      },
       { name: 'notes', label: 'Notes', type: 'textarea', full: true },
     ],
   },

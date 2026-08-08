@@ -3,9 +3,9 @@
  * business rules in src/lib/policies.ts, so the published terms and the enforced
  * pricing/cancellation logic can't drift.
  *
- * Privacy Policy and Terms of Use remain "being finalised" placeholders: the
- * privacy wording needs Trivoxo's actual data-handling practices and a local
- * legal review before publishing (see docs/OPEN_DECISIONS.md).
+ * Privacy and website terms are practical operational drafts based on the
+ * platform's current behaviour. They must receive Ghanaian legal review before
+ * production launch (see docs/OPEN_DECISIONS.md).
  */
 import {
   GROUP_DISCOUNT_TIERS,
@@ -27,9 +27,9 @@ export type LegalPage = {
   sections: LegalSection[]
 }
 
-const PENDING: LegalSection = {
-  heading: 'This policy is being finalised',
-  text: 'We’re finalising the full details of this policy. In the meantime, the terms that apply to your trip are confirmed with your booking. If you have any questions, please contact us and we’ll be glad to help.',
+const LEGAL_REVIEW_NOTICE: LegalSection = {
+  heading: 'Document status',
+  text: 'Last updated 8 August 2026. This is Trivoxo’s operational policy for this platform and should receive final Ghanaian legal review before production launch. Contact info@trivoxoghana.com if anything is unclear.',
 }
 
 const childPct = Math.round(CHILD_RATE * 100)
@@ -43,7 +43,9 @@ export const LEGAL_PAGES: LegalPage[] = [
     title: 'Booking Terms',
     subtitle: 'The terms that apply when you book a Trivoxo experience.',
     sections: [
-      { text: 'These terms apply when you book any Trivoxo experience, event or travel service. By making a booking you agree to them.' },
+      {
+        text: 'These terms apply when you book any Trivoxo experience, event or travel service. By making a booking you agree to them.',
+      },
       {
         heading: 'Bookings & confirmation',
         text: `Submit a booking request with your date, number of travellers and contact details. We confirm availability and share payment details; a booking is confirmed once payment (or the required deposit) is received. Most experiences run from a minimum of ${CAPACITY.minGuests} travellers, with private options available for solo travellers on request.`,
@@ -83,7 +85,9 @@ export const LEGAL_PAGES: LegalPage[] = [
     title: 'Cancellation Policy',
     subtitle: 'What happens if you need to cancel or change your trip.',
     sections: [
-      { text: 'Plans change — here’s how cancellations work across our experiences, trips and events. Cancellation times are measured from the experience start time.' },
+      {
+        text: 'Plans change — here’s how cancellations work across our experiences, trips and events. Cancellation times are measured from the experience start time.',
+      },
       {
         heading: 'Day experiences & activities',
         text: `Free cancellation up to ${CANCELLATION.dayTour.freeHours} hours before — full refund. Between ${CANCELLATION.dayTour.partialFromHours} and ${CANCELLATION.dayTour.freeHours} hours before — ${CANCELLATION.dayTour.partialPct}% refund. Less than ${CANCELLATION.dayTour.partialFromHours} hours before, or a no-show — no refund.`,
@@ -119,7 +123,9 @@ export const LEGAL_PAGES: LegalPage[] = [
     title: 'Refund Policy',
     subtitle: 'How and when refunds are issued.',
     sections: [
-      { text: 'This explains how refunds are calculated and paid. It works alongside our Cancellation Policy.' },
+      {
+        text: 'This explains how refunds are calculated and paid. It works alongside our Cancellation Policy.',
+      },
       {
         heading: 'How refunds are calculated',
         text: 'The refund you receive depends on when you cancel, as set out in our Cancellation Policy (full, partial or none).',
@@ -147,8 +153,50 @@ export const LEGAL_PAGES: LegalPage[] = [
     title: 'Privacy Policy',
     subtitle: 'How we handle your personal information.',
     sections: [
-      { text: 'This policy will describe what information we collect when you book or enquire, how we use it to deliver your experience, and the choices you have. We only collect what we need to serve you.' },
-      PENDING,
+      {
+        text: 'This policy explains what Trivoxo Limited Company collects through this website, why we use it, who may receive it and the choices available to you. We aim to collect only what is reasonably needed to serve you.',
+      },
+      {
+        heading: 'Information we collect',
+        text: 'Depending on how you use the platform, we may collect your name, email address, phone or WhatsApp number, country, trip dates, traveller numbers, pickup details, service preferences, dietary or accessibility information you choose to provide, booking references, payment status, enquiry messages and newsletter preferences. Staff may also record bookings received by phone, WhatsApp, social media or in person.',
+      },
+      {
+        heading: 'How we use your information',
+        text: 'We use this information to answer enquiries, check availability, prepare itineraries and proposals, manage bookings, coordinate suppliers, process and reconcile payments, send confirmations and service updates, provide customer support, prevent misuse, maintain business records and improve our services. Marketing messages are sent only where you have asked for them or where otherwise permitted, and you can unsubscribe.',
+      },
+      {
+        heading: 'Payments',
+        text: 'Payments are processed by approved payment providers. Trivoxo stores transaction references, amounts, channels and payment status for reconciliation, but does not store card numbers, Mobile Money PINs or card security codes.',
+      },
+      {
+        heading: 'Who receives information',
+        text: 'We may share only the necessary details with staff and service providers involved in your request, such as guides, drivers, accommodation providers, venues, airlines or ticketing partners, payment providers, email providers, website hosting and security providers, and professional advisers. We may also disclose information where required by law or to protect customers, Trivoxo or the public. We do not sell personal information.',
+      },
+      {
+        heading: 'Sensitive and safety information',
+        text: 'Some experiences may require limited health, dietary, accessibility or emergency-contact information for safety and service delivery. Please provide only relevant information. Access is restricted to people who need it for the trip, and it is not used for unrelated marketing.',
+      },
+      {
+        heading: 'Cookies and analytics',
+        text: 'The website may use essential cookies for security, preferences and account or booking functions. If analytics or marketing tools are enabled, Trivoxo will configure an appropriate consent notice before using non-essential tracking. You can also control cookies through your browser.',
+      },
+      {
+        heading: 'Retention and security',
+        text: 'We keep information only as long as reasonably needed for the service, accounting, legal, safety, dispute and fraud-prevention purposes, then delete or anonymise it where practical. We use access controls, encrypted connections, restricted administrator roles, validation, backups and monitoring, but no internet service can guarantee absolute security.',
+      },
+      {
+        heading: 'Your choices and rights',
+        text: 'Subject to Ghana’s Data Protection Act, 2012 (Act 843), you may ask whether we hold your personal data, request access or correction, object to certain processing, or ask us to stop direct marketing. We may need to verify your identity and may retain information where law or an active transaction requires it.',
+      },
+      {
+        heading: 'International services',
+        text: 'Some technology or travel providers may process information outside Ghana. Where this is necessary, Trivoxo will take reasonable steps to use reputable providers and appropriate safeguards.',
+      },
+      {
+        heading: 'Contact and complaints',
+        text: 'Send privacy questions or requests to info@trivoxoghana.com or contact Trivoxo at Plantsville Residence, Poultry Farm Ave, Accra, Ghana. If a concern is not resolved, you may contact Ghana’s Data Protection Commission.',
+      },
+      LEGAL_REVIEW_NOTICE,
     ],
   },
   {
@@ -156,8 +204,46 @@ export const LEGAL_PAGES: LegalPage[] = [
     title: 'Terms of Use',
     subtitle: 'The terms for using the Trivoxo website.',
     sections: [
-      { text: 'These terms will govern your use of this website, acceptable use, and the limits of our liability.' },
-      PENDING,
+      {
+        text: 'These terms apply when you visit or use the Trivoxo website. Booking Terms, Cancellation Policy and Refund Policy also apply when you request or purchase a tour, event ticket or travel service.',
+      },
+      {
+        heading: 'Using the website',
+        text: 'You may use the website for lawful personal or business travel planning. You agree to provide accurate information, keep booking-management links and references secure, and avoid any activity that could damage, overload, scrape, reverse engineer, disrupt or gain unauthorised access to the website, accounts or data.',
+      },
+      {
+        heading: 'Availability and quotations',
+        text: 'Website availability calendars show normal operating patterns unless expressly marked as live inventory. A request is not confirmed until Trivoxo verifies availability and receives the required payment or deposit. Prices, schedules and inclusions may change before confirmation. Custom trips, corporate services, flights, accommodation and some transfers are quotation requests rather than instant purchases.',
+      },
+      {
+        heading: 'Payments and third-party services',
+        text: 'Payments and some travel services are provided through third parties. Their secure pages and service terms may also apply. Trivoxo is not responsible for a third-party website’s content or availability, but remains responsible for the Trivoxo services confirmed in your booking.',
+      },
+      {
+        heading: 'Website content',
+        text: 'We work to keep descriptions, dates and prices accurate. Photographs may illustrate a destination or activity and do not guarantee identical weather, views, vehicles, rooms or group composition. If a material website error affects your request, Trivoxo will correct it before confirmation or offer a suitable remedy.',
+      },
+      {
+        heading: 'Intellectual property',
+        text: 'The Trivoxo name, logos, website design, original text, photographs and other material are owned by Trivoxo or used with permission. You may share public page links for personal planning, but may not copy, republish or commercially exploit protected material without written permission.',
+      },
+      {
+        heading: 'Reviews and submissions',
+        text: 'If you submit a review, enquiry or other content, it must be truthful, lawful and respectful. You permit Trivoxo to store and use it to respond to you and, for an approved review, to display it with the name or initials you supplied. We may reject or remove fraudulent, abusive, irrelevant or unlawful material.',
+      },
+      {
+        heading: 'Liability',
+        text: 'Nothing in these terms excludes liability that cannot lawfully be excluded. To the extent permitted by law, Trivoxo is not liable for indirect losses caused solely by your device, internet connection, unauthorised use of a link you failed to secure, or an independent third-party website. Tour and service responsibilities are governed by the terms confirmed with your booking.',
+      },
+      {
+        heading: 'Changes, suspension and governing law',
+        text: 'We may update or temporarily suspend parts of the website for security, maintenance or business changes. Material term changes apply from the published update date and do not retrospectively reduce confirmed booking rights. These website terms are governed by the laws of Ghana.',
+      },
+      {
+        heading: 'Contact',
+        text: 'Questions about these terms can be sent to info@trivoxoghana.com or raised by phone or WhatsApp using the contact details on this website.',
+      },
+      LEGAL_REVIEW_NOTICE,
     ],
   },
 ]

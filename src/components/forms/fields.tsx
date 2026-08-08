@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 
 export function inputCls(error?: string) {
   return cn(
-    'w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:border-brand-primary',
+    'min-h-11 w-full rounded-xl border bg-background px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20',
     error ? 'border-danger' : 'border-border',
   )
 }
@@ -26,7 +26,11 @@ export function Field({
       <span className="mb-1.5 flex items-center justify-between text-sm font-medium text-text-primary">
         {label}
         {optional && <span className="text-xs font-normal text-text-muted">Optional</span>}
-        {error && <span className="text-xs font-normal text-danger">{error}</span>}
+        {error && (
+          <span className="text-xs font-normal text-danger" role="alert">
+            {error}
+          </span>
+        )}
       </span>
       {children}
     </label>
@@ -46,7 +50,7 @@ export function CheckboxChips({
       {options.map((o) => (
         <label
           key={o.value}
-          className="cursor-pointer rounded-full border border-border bg-background px-3.5 py-1.5 text-sm text-text-secondary transition-colors has-[:checked]:border-brand-primary has-[:checked]:bg-brand-primary-soft has-[:checked]:text-brand-link hover:border-border-strong"
+          className="inline-flex min-h-11 cursor-pointer items-center rounded-full border border-border bg-background px-3.5 py-1.5 text-sm text-text-secondary transition-colors has-[:checked]:border-brand-primary has-[:checked]:bg-brand-primary-soft has-[:checked]:text-brand-link hover:border-border-strong focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand-primary"
         >
           <input type="checkbox" name={name} value={o.value} className="sr-only" />
           {o.label}
@@ -58,7 +62,7 @@ export function CheckboxChips({
 
 export function CheckboxRow({ name, label }: { name: string; label: string }) {
   return (
-    <label className="flex cursor-pointer items-center gap-2.5 text-sm text-text-secondary">
+    <label className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-xl border border-border bg-background px-3 text-sm text-text-secondary transition hover:border-border-strong focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand-primary">
       <input
         type="checkbox"
         name={name}
