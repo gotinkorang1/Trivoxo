@@ -154,12 +154,17 @@ per-activity metadata — all editable without code.
   destinations, the 13 brochure tours (Capital Pulse corrected), 3 events,
   4 guide posts and content-page stubs
 - **Public site (content-complete):** home; experiences (browse + filters +
-  detail + booking request); destinations; events; corporate & custom-trip
-  enquiry forms; Ghana Guide; about; contact; safety; FAQs; legal pages
+  detail + booking request); destinations; events; corporate, custom-trip &
+  travel-services enquiry forms; Ghana Guide; about; contact; safety; FAQs;
+  legal pages; My Trips guest lookup
 - Booking request flow creates real bookings in Payload (capture only)
-
-Front-end pages render from the shared catalogue modules (`src/lib/data/*`),
-which are also the seed's source — so site and admin stay in sync.
+- **Live data:** the public site reads from Payload (local API, ISR
+  `revalidate = 60`), not the static modules — admin edits appear without a
+  rebuild. The `src/lib/data/*` catalogue modules remain the seed's source.
+- **SEO:** JSON-LD (Organization + Experience/Event/Article), sitemap.xml,
+  robots.txt
+- **Admin:** custom dashboard summary widget (today's departures, bookings,
+  pending enquiries, published experiences)
 
 **Next (not yet built)**
 
@@ -167,9 +172,8 @@ which are also the seed's source — so site and admin stay in sync.
   transactional booking hold (§38, §46) — needs Paystack keys; flagged for
   deliberate human review
 - **Event ticketing:** orders model, purchase, QR tickets + check-in (§65–66)
-- Confirmation emails / vouchers (Resend); My Trips; travel-services pages
-- Swap front-end reads from the static modules to live Payload queries
-- Cloudinary storage adapter, sitemap/robots, redirects from the old site
+- Confirmation emails / vouchers (Resend)
+- Cloudinary storage adapter + real photography; redirects from the old site
 
 See the redesign plan in `docs/` for the full Phase 1–3 breakdown.
 
