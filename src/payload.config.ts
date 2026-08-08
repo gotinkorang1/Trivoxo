@@ -26,6 +26,7 @@ import { NewsletterSubscribers } from './collections/NewsletterSubscribers'
 // Enquiries
 import { CorporateEnquiries } from './collections/CorporateEnquiries'
 import { CustomTripRequests } from './collections/CustomTripRequests'
+import { TravelServiceRequests } from './collections/TravelServiceRequests'
 // Globals
 import { SiteSettings } from './globals/SiteSettings'
 
@@ -62,6 +63,7 @@ export default buildConfig({
     // Enquiries
     CorporateEnquiries,
     CustomTripRequests,
+    TravelServiceRequests,
   ],
   globals: [SiteSettings],
   editor: lexicalEditor(),

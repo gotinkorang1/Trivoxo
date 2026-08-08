@@ -82,6 +82,7 @@ export interface Config {
     'newsletter-subscribers': NewsletterSubscriber;
     'corporate-enquiries': CorporateEnquiry;
     'custom-trip-requests': CustomTripRequest;
+    'travel-service-requests': TravelServiceRequest;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -105,6 +106,7 @@ export interface Config {
     'newsletter-subscribers': NewsletterSubscribersSelect<false> | NewsletterSubscribersSelect<true>;
     'corporate-enquiries': CorporateEnquiriesSelect<false> | CorporateEnquiriesSelect<true>;
     'custom-trip-requests': CustomTripRequestsSelect<false> | CustomTripRequestsSelect<true>;
+    'travel-service-requests': TravelServiceRequestsSelect<false> | TravelServiceRequestsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -969,6 +971,35 @@ export interface CustomTripRequest {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "travel-service-requests".
+ */
+export interface TravelServiceRequest {
+  id: number;
+  status?: ('new' | 'contacted' | 'quoted' | 'confirmed' | 'closed') | null;
+  serviceType: 'airport-transfer' | 'flights' | 'accommodation' | 'car-rental';
+  summary?: string | null;
+  contact: {
+    name: string;
+    email: string;
+    phone?: string | null;
+  };
+  /**
+   * The service-specific request details submitted by the customer.
+   */
+  details?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1142,6 +1173,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'custom-trip-requests';
         value: number | CustomTripRequest;
+      } | null)
+    | ({
+        relationTo: 'travel-service-requests';
+        value: number | TravelServiceRequest;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1660,6 +1695,25 @@ export interface CustomTripRequestsSelect<T extends boolean = true> {
         email?: T;
         phone?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "travel-service-requests_select".
+ */
+export interface TravelServiceRequestsSelect<T extends boolean = true> {
+  status?: T;
+  serviceType?: T;
+  summary?: T;
+  contact?:
+    | T
+    | {
+        name?: T;
+        email?: T;
+        phone?: T;
+      };
+  details?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -134,3 +134,61 @@ export async function createCustomTripAction(
   }
   return { success: true }
 }
+
+const SERVICE_TYPES = ['airport-transfer', 'flights', 'accommodation', 'car-rental'] as const
+const SERVICE_LABELS: Record<string, string> = {
+  'airport-transfer': 'Airport Transfer',
+  flights: 'Flights',
+  accommodation: 'Accommodation',
+  'car-rental': 'Car Rental',
+}
+
+/**
+ * Travel services enquiry (§70–§73). One generic action for all four services:
+ * everything except serviceType + contact is captured into `details` (JSON) so
+ * each page can define its own fields without a bespoke action.
+ */
+export async function createServiceRequestAction(
+  _prev: EnquiryState,
+  formData: FormData,
+): Promise<EnquiryState> {
+  const get = (k: string) => String(formData.get(k) ?? '').trim()
+  const serviceType = get('serviceType')
+  const name = get('name')
+  const email = get('email')
+  const phone = get('phone')
+  const values = { name, email, phone }
+
+  if (!SERVICE_TYPES.includes(serviceType as never)) return { error: 'Unknown service.', values }
+  const fieldErrors: Record<string, string> = {}
+  if (!name) fieldErrors.name = 'Required'
+  if (!email) fieldErrors.email = 'Required'
+  else if (!EMAIL_RE.test(email)) fieldErrors.email = 'Enter a valid email'
+  if (Object.keys(fieldErrors).length) return { error: 'Please correct the highlighted fields.', fieldErrors, values }
+
+  const known = new Set(['serviceType', 'name', 'email', 'phone'])
+  const details: Record<string, string> = {}
+  for (const [k, val] of formData.entries()) {
+    if (known.has(k)) continue
+    const s = String(val).trim()
+    if (s) details[k] = s
+  }
+  const summary = `${SERVICE_LABELS[serviceType]} — ${name}`
+
+  try {
+    const payload = await getPayload({ config })
+    await payload.create({
+      collection: 'travel-service-requests',
+      data: {
+        serviceType: serviceType as never,
+        summary,
+        contact: { name, email, phone: phone || undefined },
+        details,
+      },
+    })
+  } catch (err) {
+    console.error('Travel service request failed', err)
+    return { error: 'Something went wrong. Please try again.', values }
+  }
+  return { success: true }
+}
