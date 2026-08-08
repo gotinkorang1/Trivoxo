@@ -17,7 +17,7 @@ import { Container } from '@/components/ui/container'
 import { ButtonLink } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ExperienceCard } from '@/components/experiences/experience-card'
-import { EXPERIENCES, getExperienceBySlug, type Experience } from '@/lib/data/experiences'
+import { EXPERIENCES, getExperienceBySlug } from '@/lib/data/experiences'
 import { gradientFor } from '@/lib/visuals'
 import { formatPrice } from '@/lib/format'
 import { whatsappLink } from '@/lib/constants'
@@ -171,11 +171,14 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
                 <Row label="Location" value={exp.destination} />
               </dl>
 
-              <ButtonLink href={whatsappLink(waMessage)} external variant="primary" size="lg" className="mt-5 w-full">
-                <MessageCircle className="size-4" /> Check availability
+              <ButtonLink href={`/experiences/${exp.slug}/book`} variant="primary" size="lg" className="mt-5 w-full">
+                Book this experience
+              </ButtonLink>
+              <ButtonLink href={whatsappLink(waMessage)} external variant="outline" className="mt-3 w-full">
+                <MessageCircle className="size-4" /> Ask on WhatsApp
               </ButtonLink>
               <p className="mt-3 text-center text-xs text-text-muted">
-                Online checkout is coming soon — reserve via WhatsApp for now.
+                No payment now — we confirm availability first.
               </p>
             </div>
           </aside>
