@@ -4,20 +4,24 @@ These business rules must be confirmed before the booking/pricing logic is
 finalised. The **system already supports them** — this is missing data, not
 missing architecture. Grouped by urgency. (§ refers to the redesign plan.)
 
-## Blocking the booking engine
+## Booking-engine rules
+
+Operational **defaults are now set** in `src/lib/policies.ts` and reflected in the
+seed, the booking quote and the legal pages. The remaining "Missing" rows are
+per-experience data (real costs, durations, timings) only Trivoxo can supply.
 
 | # | Decision | Status | Where it lands |
 |---|----------|--------|----------------|
-| 1 | Exact group-discount tiers (3–4, 5–8, 9–14, 15+) | **Missing** | `experiences.priceTiers` |
-| 2 | Local / resident prices (per package) | Missing | `experiences.visitorPricing` (disabled until provided) |
+| 1 | Group-discount tiers | ✅ **Set** — 10% (3–4), 15% (5–8), 20% (9–14), 15+ custom quote | `experiences.priceTiers`, `policies.ts` |
+| 2 | Local / resident prices (per package) | Missing (needs entry-fee data) | `experiences.visitorPricing` (disabled until provided) |
 | 3 | International prices confirmed for all packages | Needs confirmation | `experiences.priceFrom` |
-| 4 | Child prices & age bands | Missing | booking guests / pricing |
+| 4 | Child prices & age bands | ✅ **Set** — infant 0–2 free, child 3–11 @ 60%, adult 12+ | `policies.ts` / booking quote |
 | 5 | Tour durations (several packages) | Missing | `experiences.duration` (placeholders now) |
 | 6 | Departure times & pickup zones | Missing | `experiences.itinerary` / `pickupInfo` |
-| 7 | Max capacity per departure | Missing | `experiences.maxGuests` |
-| 8 | Cancellation, refund, no-show & rescheduling policy | Missing | policy fields + legal pages |
-| 9 | Private-tour pricing | Missing | `experiences.privatePrice` |
-| 10 | Event ticket refund rules | Missing | events module |
+| 7 | Max capacity per departure | ✅ **Set** — default 2–15 (tune per vehicle) | `experiences.maxGuests` |
+| 8 | Cancellation, refund, no-show & rescheduling | ✅ **Set** — see legal pages | `policies.ts` + legal pages |
+| 9 | Private-tour pricing (exact rate) | Missing (concept set: private option for solo) | `experiences.privatePrice` |
+| 10 | Event ticket refund rules | ✅ **Set** — non-refundable, transferable ≥72h | `policies.ts` + legal pages |
 
 ## Content / brand
 
@@ -26,8 +30,8 @@ missing architecture. Grouped by urgency. (§ refers to the redesign plan.)
 | 11 | **Capital Pulse "Osu" question** — is Osu part of the tour, or should the reference be removed from the description? (§26) | Needs clarification |
 | 12 | ~~Canonical slogan~~ — **RESOLVED: "Experience. Explore. Express."** (official site copy). Applied. | ✅ Confirmed |
 | 13 | Final brand HEX values from the approved vector logo (§7). Scaffold uses provisional tokens in `globals.css`. | Needs assets |
-| 14 | December / seasonal & public-holiday pricing | Needs decision |
-| 15 | Guide languages | Needs decision |
+| 14 | December / seasonal & public-holiday pricing | ✅ **Set** — day tours flat; 15% peak premium on premium experiences & events for Dec 15 – Jan 5 + major holidays (decision made; engine enforcement pending) |
+| 15 | Guide languages | ✅ **Set** — English default; Twi/Ga/Ewe on request; other languages with 7 days’ notice |
 
 ## Contact details (§98)
 
@@ -49,3 +53,20 @@ Company note: **Trivoxo Limited Company is a subsidiary of Nii Plants Group.**
 - Capital Pulse **lunch is excluded**; attraction entry fees **included** (§25)
 - Standard base pricing assumes **2+ travellers**; 3+ eligible for reduced rates (§32)
 - Dodi Island runs **weekends + public holidays only** (§36)
+
+### Business rules — agreed defaults (in `src/lib/policies.ts`)
+
+- **Group discounts:** 10% (3–4), 15% (5–8), 20% (9–14), 15+ by custom quote.
+- **Children:** infants 0–2 free; children 3–11 pay 60% of the adult rate.
+- **Deposits:** day tours paid in full; multi-day/premium/corporate take a 50%
+  deposit, balance due 7 days before. Paystack fee absorbed (no surcharge).
+- **Booking notice:** 24h day tours (48h where permits apply), 7 days multi-day.
+  Capacity default 2–15.
+- **Cancellation** — day tours: free ≥48h, 50% 24–48h, none <24h/no-show;
+  multi-day: free ≥7d, 50% 3–7d, none <3d/no-show; events non-refundable but
+  transferable ≥72h; refunds to original method within 5–10 business days.
+- **Rescheduling:** one free change if ≥48h (day) / ≥7d (multi-day) before.
+
+These are operational defaults to tune against real cost data; the exact
+resident rates, durations, pickup zones and private-tour price still depend on
+Trivoxo's figures (rows 2, 3, 5, 6, 9 above).

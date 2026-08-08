@@ -3,6 +3,7 @@
 import { getPayload } from 'payload'
 import { redirect } from 'next/navigation'
 import config from '@payload-config'
+import { quoteBooking } from '@/lib/policies'
 
 export type BookingFormState = {
   error?: string
@@ -83,9 +84,8 @@ export async function createBookingAction(
         booker: { firstName, lastName, email, phone, country: country || undefined },
         pickup: pickup || undefined,
         specialRequest: specialRequest || undefined,
-        // Provisional estimate only — real pricing (group tiers, child rates)
-        // is applied when the pricing engine + checkout land.
-        totalAmount: (experience.priceFrom ?? 0) * adults,
+        // Estimate from the group-pricing rules (§32) — confirmed at checkout.
+        totalAmount: quoteBooking(experience.priceFrom ?? 0, adults, children).total,
         paymentState: 'outstanding',
       },
     })

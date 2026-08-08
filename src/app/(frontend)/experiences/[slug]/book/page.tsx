@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { ChevronLeft, MapPin, Clock, ShieldCheck } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { BookingForm } from '@/components/booking/booking-form'
+import { GroupPricingTable } from '@/components/experiences/group-pricing'
 import { getExperienceBySlug } from '@/lib/payload/experiences'
 import { gradientFor } from '@/lib/visuals'
 import { formatPrice } from '@/lib/format'
@@ -64,9 +65,12 @@ export default async function BookExperiencePage({ params }: { params: Promise<{
                   <span className="text-sm font-normal text-text-muted"> / person</span>
                 </span>
               </div>
+              <div className="mt-4 border-t border-border pt-4">
+                <GroupPricingTable baseFrom={exp.priceFrom} />
+              </div>
               <p className="mt-4 flex items-start gap-2 text-xs text-text-muted">
                 <ShieldCheck className="mt-0.5 size-4 shrink-0 text-brand-accent" />
-                Group rates for 3+ travellers are confirmed with your quote.
+                Final price is confirmed with your booking.
               </p>
             </div>
           </div>

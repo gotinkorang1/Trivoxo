@@ -17,6 +17,7 @@ import { DESTINATIONS, EXPERIENCE_TO_DESTINATION } from '../lib/data/destination
 import { EVENTS } from '../lib/data/events'
 import { GUIDE_ARTICLES } from '../lib/data/guide'
 import { CONTENT_PAGE_STUBS } from '../lib/data/legal'
+import { GROUP_DISCOUNT_TIERS, perPersonPrice, CAPACITY } from '../lib/policies'
 
 const strings = (values?: string[]) => (values ?? []).map((text) => ({ text }))
 
@@ -203,7 +204,18 @@ function mapExperience(
     slug: exp.slug,
     shortDescription: exp.blurb,
     priceFrom: exp.priceFrom,
-    pricingStrategy: 'fixed' as const,
+    // Tiered group pricing from the agreed ladder (§32, §33).
+    pricingStrategy: 'tiered' as const,
+    priceTiers: GROUP_DISCOUNT_TIERS.map((t) => ({
+      minGuests: t.minGuests,
+      maxGuests: t.maxGuests ?? undefined,
+      pricePerPerson: t.requestQuote ? undefined : perPersonPrice(exp.priceFrom, t.minGuests),
+      requestQuote: Boolean(t.requestQuote),
+    })),
+    minGuests: CAPACITY.minGuests,
+    maxGuests: CAPACITY.maxGuests,
+    minNoticeHours: CAPACITY.minNoticeHours,
+    maxAdvanceDays: CAPACITY.maxAdvanceDays,
     availabilityType: (isDodi ? 'weekdays' : 'everyday') as 'weekdays' | 'everyday',
     weekdays: isDodi ? (['sat', 'sun'] as ('sat' | 'sun')[]) : undefined,
     includePublicHolidays: isDodi ? true : undefined,

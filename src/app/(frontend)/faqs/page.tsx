@@ -39,7 +39,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: 'What are your cancellation and refund terms?',
-    a: 'Cancellation, refund and rescheduling terms are confirmed with your booking. If your plans change, contact us as early as possible and we’ll do our best to help.',
+    a: 'For day experiences: free cancellation up to 48 hours before (full refund), 50% between 24 and 48 hours, and no refund under 24 hours or for a no-show. Multi-day trips use a 7-day window. Event tickets are non-refundable but transferable. You can also reschedule once for free within the same windows. Full details are on our Cancellation and Refund policy pages.',
   },
   {
     q: 'Are the experiences safe?',
