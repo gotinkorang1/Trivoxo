@@ -16,6 +16,7 @@ import { EXPERIENCES, type Experience } from '../lib/data/experiences'
 import { DESTINATIONS, EXPERIENCE_TO_DESTINATION } from '../lib/data/destinations'
 import { EVENTS } from '../lib/data/events'
 import { GUIDE_ARTICLES } from '../lib/data/guide'
+import { CONTENT_PAGE_STUBS } from '../lib/data/legal'
 
 const strings = (values?: string[]) => (values ?? []).map((text) => ({ text }))
 
@@ -150,6 +151,20 @@ async function run() {
     postCount++
   }
   payload.logger.info(`Seeded ${postCount} guide posts`)
+
+  // ── Content pages (About, Contact, Safety, FAQ, legal) ─────
+  let pageCount = 0
+  for (const p of CONTENT_PAGE_STUBS) {
+    const found = await payload.find({ collection: 'pages', where: { slug: { equals: p.slug } }, limit: 1 })
+    const data = { title: p.title, slug: p.slug, subtitle: p.subtitle, _status: 'published' as const }
+    if (found.docs[0]) {
+      await payload.update({ collection: 'pages', id: found.docs[0].id, data })
+    } else {
+      await payload.create({ collection: 'pages', data })
+    }
+    pageCount++
+  }
+  payload.logger.info(`Seeded ${pageCount} content pages`)
 
   payload.logger.info('✅ Seed complete')
   process.exit(0)
