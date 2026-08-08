@@ -29,7 +29,7 @@ per-experience data (real costs, durations, timings) only Trivoxo can supply.
 |---|----------|--------|
 | 11 | **Capital Pulse "Osu" question** — is Osu part of the tour, or should the reference be removed from the description? (§26) | Needs clarification |
 | 12 | ~~Canonical slogan~~ — **RESOLVED: "Experience. Explore. Express."** (official site copy). Applied. | ✅ Confirmed |
-| 13 | Final brand HEX values from the approved vector logo (§7). Scaffold uses provisional tokens in `globals.css`. | Needs assets |
+| 13 | Brand palette from the logo (§7) | ✅ **Set** — orange `#f15a29`, gold `#f9b233` in `globals.css`; wordmark echoes the logo. *(Still nice to have: the vector logo file in `public/` to replace the CSS wordmark + favicon.)* |
 | 14 | December / seasonal & public-holiday pricing | ✅ **Set** — day tours flat; 15% peak premium on premium experiences & events for Dec 15 – Jan 5 + major holidays (decision made; engine enforcement pending) |
 | 15 | Guide languages | ✅ **Set** — English default; Twi/Ga/Ewe on request; other languages with 7 days’ notice |
 

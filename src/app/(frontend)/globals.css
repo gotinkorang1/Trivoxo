@@ -3,24 +3,21 @@
 /*
   Trivoxo design tokens.
   Style direction: "Modern Ghanaian Adventure × Premium Travel Editorial".
-  Palette anchored to the brochure — orange, golden yellow, deep navy, warm
-  neutrals — with an adventure-green accent for eco / nature contexts.
-
-  NOTE: these HEX values are provisional. Per the redesign plan (§7), the final
-  brand primaries should be extracted from the approved vector logo assets and
-  swapped in here — every component reads from these tokens, so it is a one-file
-  change.
+  Palette matched to the Trivoxo logo — vivid orange wordmark, golden-yellow
+  "v", deep navy and warm neutrals — with an adventure-green accent for eco /
+  nature contexts. Every component reads these tokens, so brand tweaks are a
+  one-file change.
 */
 
 :root {
-  /* Brand ramp — orange */
-  --brand-primary: #e85d2a;
-  --brand-primary-hover: #d24e1f;
+  /* Brand ramp — orange (logo wordmark) */
+  --brand-primary: #f15a29;
+  --brand-primary-hover: #d94e20;
   --brand-primary-soft: #fdeee6;
 
-  /* Brand ramp — golden yellow */
-  --brand-secondary: #f5b133;
-  --brand-secondary-hover: #e39d1c;
+  /* Brand ramp — golden yellow (logo "v") */
+  --brand-secondary: #f9b233;
+  --brand-secondary-hover: #e79c1e;
   --brand-secondary-soft: #fdf3dd;
 
   /* Deep navy — the "premium" anchor */
@@ -48,7 +45,7 @@
 
   /* Status */
   --success: #1e9e7a;
-  --warning: #f5b133;
+  --warning: #f9b233;
   --danger: #d64545;
 
   --ring: var(--brand-primary);

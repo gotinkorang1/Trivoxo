@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react'
 import { Container } from '@/components/ui/container'
+import { Wordmark } from '@/components/site/wordmark'
 import { BRAND, CONTACT, SOCIALS } from '@/lib/constants'
 
 const COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
@@ -48,7 +49,7 @@ export function Footer() {
       <Container className="py-14">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-6">
           <div className="lg:col-span-2">
-            <p className="font-display text-2xl font-semibold text-text-primary">{BRAND.name}</p>
+            <Wordmark className="text-2xl" />
             <p className="mt-3 max-w-xs text-sm text-text-secondary">{BRAND.tagline}</p>
             <div className="mt-5 space-y-2 text-sm text-text-secondary">
               <a href={`tel:${CONTACT.primaryPhone}`} className="flex items-center gap-2 hover:text-brand-primary">

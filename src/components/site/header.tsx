@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Menu, X, User } from 'lucide-react'
-import { PRIMARY_NAV, BRAND } from '@/lib/constants'
+import { PRIMARY_NAV } from '@/lib/constants'
 import { Container } from '@/components/ui/container'
 import { ButtonLink } from '@/components/ui/button'
+import { Wordmark } from '@/components/site/wordmark'
 import { cn } from '@/lib/utils'
 
 export function Header() {
@@ -14,8 +15,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-md">
       <Container className="flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="text-xl font-semibold tracking-tight text-text-primary">
-          <span className="font-display">{BRAND.name}</span>
+        <Link href="/" aria-label="Trivoxo home">
+          <Wordmark className="text-2xl" />
         </Link>
 
         {/* Desktop nav */}
