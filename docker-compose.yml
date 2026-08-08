@@ -1,0 +1,24 @@
+# Local Postgres for development.
+#   docker compose up -d
+# Matches the default DATABASE_URI in .env.example:
+#   postgres://trivoxo:trivoxo@localhost:5432/trivoxo
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: trivoxo
+      POSTGRES_PASSWORD: trivoxo
+      POSTGRES_DB: trivoxo
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U trivoxo']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

@@ -1,0 +1,166 @@
+@import 'tailwindcss';
+
+/*
+  Trivoxo design tokens.
+  Style direction: "Modern Ghanaian Adventure × Premium Travel Editorial".
+  Palette anchored to the brochure — orange, golden yellow, deep navy, warm
+  neutrals — with an adventure-green accent for eco / nature contexts.
+
+  NOTE: these HEX values are provisional. Per the redesign plan (§7), the final
+  brand primaries should be extracted from the approved vector logo assets and
+  swapped in here — every component reads from these tokens, so it is a one-file
+  change.
+*/
+
+:root {
+  /* Brand ramp — orange */
+  --brand-primary: #e85d2a;
+  --brand-primary-hover: #d24e1f;
+  --brand-primary-soft: #fdeee6;
+
+  /* Brand ramp — golden yellow */
+  --brand-secondary: #f5b133;
+  --brand-secondary-hover: #e39d1c;
+  --brand-secondary-soft: #fdf3dd;
+
+  /* Deep navy — the "premium" anchor */
+  --brand-navy: #0e1c2b;
+  --brand-navy-700: #13273a;
+
+  /* Adventure green accent — eco / nature */
+  --brand-accent: #1e9e7a;
+  --brand-accent-soft: #e4f4ee;
+
+  /* Semantic surfaces (light) */
+  --background: #ffffff;
+  --surface: #f7f6f3;
+  --surface-elevated: #ffffff;
+
+  /* Text */
+  --text-primary: #14202c;
+  --text-secondary: #4a5866;
+  --text-muted: #7c8894;
+  --text-on-brand: #ffffff;
+
+  /* Lines */
+  --border: #e6e4df;
+  --border-strong: #d3d0c9;
+
+  /* Status */
+  --success: #1e9e7a;
+  --warning: #f5b133;
+  --danger: #d64545;
+
+  --ring: var(--brand-primary);
+  --radius: 0.75rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b1621;
+    --surface: #10202e;
+    --surface-elevated: #142838;
+    --brand-primary-soft: #2a1a12;
+    --brand-secondary-soft: #2a2412;
+    --brand-accent-soft: #10241d;
+
+    --text-primary: #f2f4f6;
+    --text-secondary: #b7c1cb;
+    --text-muted: #8695a2;
+
+    --border: #1f3242;
+    --border-strong: #2a4257;
+  }
+}
+
+/* Explicit theme override (wins over the media query when set on <html>) */
+:root[data-theme='light'] {
+  --background: #ffffff;
+  --surface: #f7f6f3;
+  --surface-elevated: #ffffff;
+  --text-primary: #14202c;
+  --text-secondary: #4a5866;
+  --text-muted: #7c8894;
+  --border: #e6e4df;
+  --border-strong: #d3d0c9;
+}
+
+:root[data-theme='dark'] {
+  --background: #0b1621;
+  --surface: #10202e;
+  --surface-elevated: #142838;
+  --text-primary: #f2f4f6;
+  --text-secondary: #b7c1cb;
+  --text-muted: #8695a2;
+  --border: #1f3242;
+  --border-strong: #2a4257;
+}
+
+/* Map our tokens onto Tailwind's theme so `bg-brand-primary`, `text-muted`,
+   `rounded-card`, `font-display` etc. all work as utilities. */
+@theme inline {
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-primary-hover: var(--brand-primary-hover);
+  --color-brand-primary-soft: var(--brand-primary-soft);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-secondary-hover: var(--brand-secondary-hover);
+  --color-brand-secondary-soft: var(--brand-secondary-soft);
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-navy-700: var(--brand-navy-700);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-soft: var(--brand-accent-soft);
+
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-on-brand: var(--text-on-brand);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+
+  --radius-card: var(--radius);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+  ::selection {
+    background-color: var(--brand-primary);
+    color: #fff;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
