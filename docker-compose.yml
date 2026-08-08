@@ -1,7 +1,8 @@
 # Local Postgres for development.
 #   docker compose up -d
-# Matches the default DATABASE_URI in .env.example:
-#   postgres://trivoxo:trivoxo@localhost:5432/trivoxo
+# Published on host port 5433 (not 5432) to avoid clashing with a native
+# Postgres install that may already own 5432 on this machine. Matches the
+# DATABASE_URI in .env.example: postgres://trivoxo:trivoxo@127.0.0.1:5433/trivoxo
 services:
   postgres:
     image: postgres:16-alpine
@@ -11,7 +12,7 @@ services:
       POSTGRES_PASSWORD: trivoxo
       POSTGRES_DB: trivoxo
     ports:
-      - '5432:5432'
+      - '5433:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
