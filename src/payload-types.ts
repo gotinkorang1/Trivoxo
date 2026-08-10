@@ -76,6 +76,7 @@ export interface Config {
     departures: Departure;
     bookings: Booking;
     payments: Payment;
+    notifications: Notification;
     customers: Customer;
     coupons: Coupon;
     events: Event;
@@ -102,6 +103,7 @@ export interface Config {
     departures: DeparturesSelect<false> | DeparturesSelect<true>;
     bookings: BookingsSelect<false> | BookingsSelect<true>;
     payments: PaymentsSelect<false> | PaymentsSelect<true>;
+    notifications: NotificationsSelect<false> | NotificationsSelect<true>;
     customers: CustomersSelect<false> | CustomersSelect<true>;
     coupons: CouponsSelect<false> | CouponsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
@@ -723,6 +725,44 @@ export interface Payment {
   createdAt: string;
 }
 /**
+ * Booking emails awaiting delivery, sent messages, and items that need attention.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications".
+ */
+export interface Notification {
+  id: number;
+  notificationKey: string;
+  type: 'booking_confirmed';
+  status: 'queued' | 'processing' | 'sent' | 'failed' | 'dead_letter';
+  /**
+   * Set automatically. Kept nullable so deleting a booking does not corrupt the outbox audit.
+   */
+  booking?: (number | null) | Booking;
+  recipient: string;
+  accessExpiresAt: string;
+  /**
+   * Immutable customer-facing data used to make provider retries byte-stable.
+   */
+  payloadSnapshot:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  attempts: number;
+  nextAttemptAt?: string | null;
+  lockedAt?: string | null;
+  sentAt?: string | null;
+  providerMessageId?: string | null;
+  lastError?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "coupons".
  */
@@ -1274,6 +1314,10 @@ export interface PayloadLockedDocument {
         value: number | Payment;
       } | null)
     | ({
+        relationTo: 'notifications';
+        value: number | Notification;
+      } | null)
+    | ({
         relationTo: 'customers';
         value: number | Customer;
       } | null)
@@ -1689,6 +1733,27 @@ export interface PaymentsSelect<T extends boolean = true> {
   reviewReason?: T;
   failureReason?: T;
   verificationSnapshot?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications_select".
+ */
+export interface NotificationsSelect<T extends boolean = true> {
+  notificationKey?: T;
+  type?: T;
+  status?: T;
+  booking?: T;
+  recipient?: T;
+  accessExpiresAt?: T;
+  payloadSnapshot?: T;
+  attempts?: T;
+  nextAttemptAt?: T;
+  lockedAt?: T;
+  sentAt?: T;
+  providerMessageId?: T;
+  lastError?: T;
   updatedAt?: T;
   createdAt?: T;
 }

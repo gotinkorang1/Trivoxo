@@ -1,7 +1,9 @@
 import { getPayload } from 'payload'
+import { after } from 'next/server'
 import config from '@payload-config'
 import { verifyPaystackWebhookSignature } from '@/lib/paystack'
 import { reconcilePaystackPayment } from '@/lib/payment-service'
+import { processBookingNotifications } from '@/lib/notifications'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -33,7 +35,19 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const payload = await getPayload({ config })
-    await reconcilePaystackPayment(payload, reference)
+    const result = await reconcilePaystackPayment(payload, reference)
+    if (result.booking?.id && result.outcome === 'confirmed') {
+      const bookingID = result.booking.id
+      after(async () => {
+        try {
+          await processBookingNotifications(payload, { bookingID, limit: 1 })
+        } catch {
+          console.error(
+            'Booking confirmation delivery could not start; the retry job will recover it.',
+          )
+        }
+      })
+    }
     return Response.json({ received: true })
   } catch (error) {
     console.error('Paystack webhook reconciliation failed', error)

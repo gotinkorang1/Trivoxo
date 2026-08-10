@@ -94,6 +94,10 @@ server-side Verify Transaction request
 exact status + amount + currency + mode + customer validation
         ↓
 PAID + CONFIRMED INVENTORY
+        |
+confirmation notification committed to the database outbox
+        |
+idempotent email + private PDF voucher + calendar link
 ```
 
 Callback and webhook delivery are idempotent. Repeated delivery cannot consume seats twice.
@@ -110,3 +114,5 @@ an alternative departure or process the appropriate refund.
 4. Rotate any test secret that was shared through chat or screenshots.
 5. Add live keys only to the production environment and set `PAYSTACK_MODE=live`.
 6. Run the deployment checklist and a low-value controlled live payment before launch.
+
+See `docs/BOOKING_FULFILMENT.md` for Resend, voucher, calendar, and retry-job setup.

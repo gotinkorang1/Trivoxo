@@ -28,7 +28,17 @@ export function createBookingAccessToken(
   const now = options.now ?? new Date()
   const ttlSeconds = options.ttlSeconds ?? DEFAULT_TTL_SECONDS
   const expiresAt = Math.floor(now.getTime() / 1000) + ttlSeconds
-  return `${TOKEN_VERSION}.${expiresAt}.${signature(reference, expiresAt)}`
+  return createBookingAccessTokenUntil(reference, expiresAt)
+}
+
+/** Create a reproducible token for durable messages that must retry unchanged. */
+export function createBookingAccessTokenUntil(reference: string, expiresAt: Date | number): string {
+  const expirySeconds =
+    expiresAt instanceof Date ? Math.floor(expiresAt.getTime() / 1000) : Math.floor(expiresAt)
+  if (!Number.isSafeInteger(expirySeconds) || expirySeconds < 1) {
+    throw new Error('A valid booking access expiry is required.')
+  }
+  return `${TOKEN_VERSION}.${expirySeconds}.${signature(reference, expirySeconds)}`
 }
 
 export function verifyBookingAccessToken(

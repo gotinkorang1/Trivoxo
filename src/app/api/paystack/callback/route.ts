@@ -1,7 +1,9 @@
 import { getPayload } from 'payload'
+import { after } from 'next/server'
 import config from '@payload-config'
 import { verifyBookingAccessToken } from '@/lib/booking-access'
 import { reconcilePaystackPayment } from '@/lib/payment-service'
+import { processBookingNotifications } from '@/lib/notifications'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -17,6 +19,18 @@ export async function GET(request: Request): Promise<Response> {
   const payload = await getPayload({ config })
   const result = await reconcilePaystackPayment(payload, reference)
   const bookingReference = result.booking?.reference
+  if (result.booking?.id && result.outcome === 'confirmed') {
+    const bookingID = result.booking.id
+    after(async () => {
+      try {
+        await processBookingNotifications(payload, { bookingID, limit: 1 })
+      } catch {
+        console.error(
+          'Booking confirmation delivery could not start; the retry job will recover it.',
+        )
+      }
+    })
+  }
   if (!bookingReference || !verifyBookingAccessToken(bookingReference, access)) {
     return Response.redirect(new URL('/my-trips?payment=verification-complete', requestURL), 303)
   }

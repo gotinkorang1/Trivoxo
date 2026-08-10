@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { fieldHasRole, hasRole } from '../access/roles'
 import { enforceBookingInventory } from '../lib/booking-inventory'
+import { queueBookingConfirmationAfterChange } from '../lib/notification-hooks'
 import { bookingReference } from '../lib/reference'
 
 /** Booking lifecycle states (§41). */
@@ -65,6 +66,7 @@ export const Bookings: CollectionConfig = {
       },
       enforceBookingInventory,
     ],
+    afterChange: [queueBookingConfirmationAfterChange],
   },
   fields: [
     {

@@ -25,6 +25,8 @@
     "@payloadcms/next": "3.87.1",
     "@payloadcms/richtext-lexical": "3.87.1",
     "@payloadcms/ui": "3.87.1",
+    "@react-email/render": "^2.1.0",
+    "@react-pdf/renderer": "^4.6.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cross-env": "10.1.0",
@@ -36,6 +38,7 @@
     "payload": "3.87.1",
     "react": "19.2.6",
     "react-dom": "19.2.6",
+    "resend": "^6.18.1",
     "sharp": "0.34.2",
     "tailwind-merge": "^3.0.0"
   },

@@ -3,8 +3,10 @@ import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import {
   AlertTriangle,
+  CalendarPlus,
   CalendarClock,
   CheckCircle2,
+  FileDown,
   MessageCircle,
   ShieldCheck,
   Users,
@@ -61,6 +63,10 @@ export default async function BookingConfirmationPage({
     ? `Hi Trivoxo, my payment for booking ${booking.reference} needs review. Please help me.`
     : `Hi Trivoxo, I'm following up on booking ${booking.reference} for ${experienceName}.`
   const paymentFeedback = paymentMessage(paymentResult)
+  const resourceQuery = new URLSearchParams({ access: access || '' }).toString()
+  const encodedReference = encodeURIComponent(booking.reference || reference)
+  const voucherHref = `/api/bookings/${encodedReference}/voucher?${resourceQuery}`
+  const calendarHref = `/api/bookings/${encodedReference}/calendar?${resourceQuery}`
 
   return (
     <Container className="max-w-2xl py-14 sm:py-20">
@@ -182,6 +188,24 @@ export default async function BookingConfirmationPage({
             The payment reached Trivoxo, but automatic inventory confirmation was not safe. The team
             will confirm an alternative departure or arrange the appropriate refund.
           </p>
+        </div>
+      )}
+
+      {confirmed && (
+        <div className="mt-6 rounded-card border border-border bg-surface-elevated p-6 shadow-soft">
+          <p className="font-semibold text-text-primary">Your trip documents are ready</p>
+          <p className="mt-1 text-sm leading-6 text-text-secondary">
+            Keep the voucher on your phone and add the departure to your calendar. Both links are
+            private to this booking.
+          </p>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+            <ButtonLink href={voucherHref} variant="secondary" className="flex-1">
+              <FileDown className="size-4" /> Download voucher
+            </ButtonLink>
+            <ButtonLink href={calendarHref} variant="outline" className="flex-1">
+              <CalendarPlus className="size-4" /> Add to calendar
+            </ButtonLink>
+          </div>
         </div>
       )}
 
