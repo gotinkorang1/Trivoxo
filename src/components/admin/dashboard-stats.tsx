@@ -27,18 +27,33 @@ export async function DashboardStats() {
     publishedExperiences,
   ] = await Promise.all([
     payload.count({
-      collection: 'bookings',
-      where: { departureDate: { greater_than_equal: startOfDay.toISOString(), less_than: endOfDay.toISOString() } },
+      collection: 'departures',
+      where: {
+        and: [
+          { startsAt: { greater_than_equal: startOfDay.toISOString() } },
+          { startsAt: { less_than: endOfDay.toISOString() } },
+          { status: { equals: 'scheduled' } },
+        ],
+      },
     }),
     payload.count({
       collection: 'bookings',
       where: { createdAt: { greater_than_equal: startOfDay.toISOString() } },
     }),
     payload.count({
-      collection: 'bookings',
-      where: { departureDate: { greater_than_equal: startOfDay.toISOString(), less_than: in7Days.toISOString() } },
+      collection: 'departures',
+      where: {
+        and: [
+          { startsAt: { greater_than_equal: startOfDay.toISOString() } },
+          { startsAt: { less_than: in7Days.toISOString() } },
+          { status: { equals: 'scheduled' } },
+        ],
+      },
     }),
-    payload.count({ collection: 'corporate-enquiries', where: { pipelineStatus: { equals: 'new' } } }),
+    payload.count({
+      collection: 'corporate-enquiries',
+      where: { pipelineStatus: { equals: 'new' } },
+    }),
     payload.count({ collection: 'custom-trip-requests', where: { status: { equals: 'new' } } }),
     payload.count({ collection: 'travel-service-requests', where: { status: { equals: 'new' } } }),
     payload.count({ collection: 'experiences', where: { _status: { equals: 'published' } } }),
@@ -56,7 +71,11 @@ export async function DashboardStats() {
 
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
-  const today = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())
+  const today = new Intl.DateTimeFormat('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(new Date())
 
   return (
     <div style={{ marginBottom: '2rem' }}>
@@ -80,7 +99,9 @@ export async function DashboardStats() {
             }}
           >
             <div style={{ fontSize: '1.75rem', fontWeight: 600, lineHeight: 1 }}>{s.value}</div>
-            <div style={{ marginTop: '0.35rem', fontSize: '0.8125rem', opacity: 0.75 }}>{s.label}</div>
+            <div style={{ marginTop: '0.35rem', fontSize: '0.8125rem', opacity: 0.75 }}>
+              {s.label}
+            </div>
           </div>
         ))}
       </div>

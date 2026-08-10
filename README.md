@@ -7,25 +7,25 @@ travel, custom trips and travel services — backed by a **zero-code operational
 CMS** so Trivoxo staff can run the business (create tours, change prices, publish
 events, manage bookings) without a developer.
 
-This repository is the **scaffold / Phase-1 foundation**: the app runs, the admin
-is fully modelled, the marketing homepage is built, and the catalogue is
-seed-ready. See [Roadmap](#roadmap) for what is intentionally still ahead.
+This repository is the **Phase-1 foundation**: the app runs, the admin is fully
+modelled, the public experience platform is built, and departure inventory is
+protected transactionally. See [Roadmap](#roadmap) for what is still ahead.
 
 ---
 
 ## Tech stack
 
-| Area            | Choice                                             |
-| --------------- | -------------------------------------------------- |
-| Framework       | Next.js 16 (App Router, Turbopack)                 |
-| Language        | TypeScript                                         |
-| Admin / CMS     | Payload CMS 3 (same Next.js app, `/admin`)         |
-| Database        | PostgreSQL (Supabase in prod, Docker locally)      |
-| Styling         | Tailwind CSS 4 (design tokens in `globals.css`)    |
-| UI foundation   | shadcn-style primitives + Radix + lucide-react     |
-| Animation       | Motion                                             |
-| Rich text       | Lexical (`@payloadcms/richtext-lexical`)           |
-| Images          | sharp locally · Cloudinary intended for production |
+| Area          | Choice                                             |
+| ------------- | -------------------------------------------------- |
+| Framework     | Next.js 16 (App Router, Turbopack)                 |
+| Language      | TypeScript                                         |
+| Admin / CMS   | Payload CMS 3 (same Next.js app, `/admin`)         |
+| Database      | PostgreSQL (Supabase in prod, Docker locally)      |
+| Styling       | Tailwind CSS 4 (design tokens in `globals.css`)    |
+| UI foundation | shadcn-style primitives + Radix + lucide-react     |
+| Animation     | Motion                                             |
+| Rich text     | Lexical (`@payloadcms/richtext-lexical`)           |
+| Images        | sharp locally · Cloudinary intended for production |
 
 Planned integrations (env placeholders already in `.env.example`): Paystack
 (payments), Resend (email), Cloudflare Turnstile (bot protection), PostHog / GA4
@@ -54,7 +54,7 @@ cp .env.example .env
 # 3. Start Postgres (Docker). Matches the default DATABASE_URI in .env.example.
 docker compose up -d
 
-# 4. Seed the catalogue (creates the first admin + the 13 brochure tours)
+# 4. Seed the catalogue (admin, 13 tours, and initial dated departures)
 npm run seed
 
 # 5. Run the app
@@ -84,6 +84,7 @@ Then:
 | `npm run seed`               | Load categories, destinations & the 13 tours       |
 | `npm run generate:types`     | Regenerate `src/payload-types.ts` from the config  |
 | `npm run generate:importmap` | Regenerate the admin import map (after UI changes) |
+| `npm run payload -- migrate` | Apply committed PostgreSQL migrations              |
 | `npm run typecheck`          | `tsc --noEmit`                                     |
 | `npm run lint`               | ESLint                                             |
 | `npm run test:int`           | Vitest integration tests                           |
@@ -101,14 +102,15 @@ src/
       page.tsx           #   homepage (12 sections)
       globals.css        #   Tailwind v4 + Trivoxo design tokens
     (payload)/           # Payload admin + REST/GraphQL API (generated)
-    api/newsletter/      # Newsletter subscribe route
+    api/                 # Availability, hold cleanup, newsletter routes
   access/roles.ts        # RBAC helpers (§80)
   collections/           # Payload collections (the data model)
   globals/SiteSettings.ts# No-code contact / brand settings
   components/            # UI primitives, header/footer, experience card
   fields/                # Reusable field builders (slug, seo)
   lib/                   # constants, formatting, catalogue data, helpers
-  seed/                  # Seed script
+  migrations/            # Production PostgreSQL migrations
+  seed/                  # Catalogue + initial departure seed
 docs/                    # Brochure, redesign plan (PDFs), OPEN_DECISIONS.md
 ```
 
@@ -134,7 +136,7 @@ Content, Enquiries, System) to keep it approachable for non-technical staff.
 ## Data model
 
 Collections: `users`, `media`, `destinations`, `experience-categories`,
-`experiences`, `reviews`, `bookings`, `customers`, `coupons`, `events`, `posts`
+`experiences`, `reviews`, `departures`, `bookings`, `customers`, `coupons`, `events`, `posts`
 (Ghana Guide), `pages`, `newsletter-subscribers`, `corporate-enquiries`,
 `custom-trip-requests`. Global: `site-settings`.
 
@@ -142,6 +144,10 @@ Collections: `users`, `media`, `destinations`, `experience-categories`,
 resident pricing scaffolding, availability rules (incl. weekend-only like Dodi
 Island), capacity limits, drag-to-reorder itineraries, inclusions/exclusions, and
 per-activity metadata — all editable without code.
+
+`departures` stores the real date/time, open/closed state and capacity. Active
+booking holds and confirmed bookings consume that capacity under a PostgreSQL
+row lock; remaining seats are derived rather than stored as a drift-prone counter.
 
 ---
 
@@ -157,7 +163,9 @@ per-activity metadata — all editable without code.
   detail + booking request); destinations; events; corporate, custom-trip &
   travel-services enquiry forms; Ghana Guide; about; contact; safety; FAQs;
   legal pages; My Trips guest lookup
-- Booking request flow creates real bookings in Payload (capture only)
+- **Booking inventory:** real departures, live capacity checks, transactional
+  seat holds, 20-minute timestamp expiry, stale-hold reconciliation and
+  double-booking protection across website and staff-created bookings
 - **Live data:** the public site reads from Payload (local API, ISR
   `revalidate = 60`), not the static modules — admin edits appear without a
   rebuild. The `src/lib/data/*` catalogue modules remain the seed's source.
@@ -168,9 +176,8 @@ per-activity metadata — all editable without code.
 
 **Next (not yet built)**
 
-- **Payments:** Paystack checkout + verified idempotent webhook, and the
-  transactional booking hold (§38, §46) — needs Paystack keys; flagged for
-  deliberate human review
+- **Payments:** Paystack checkout + verified idempotent webhook, converting the
+  existing hold to confirmed inventory (§46) — needs Paystack test keys
 - **Event ticketing:** orders model, purchase, QR tickets + check-in (§65–66)
 - Confirmation emails / vouchers (Resend)
 - Cloudinary storage adapter + real photography; redirects from the old site
@@ -193,4 +200,7 @@ tracked in **[docs/OPEN_DECISIONS.md](docs/OPEN_DECISIONS.md)**.
 Cloudflare (DNS/WAF) → Vercel (Next.js + Payload admin) → Supabase Postgres, with
 Cloudinary (media), Paystack (payments) and Resend (email). Use separate
 Development / Staging / Production environments; never run payment or schema
-changes against production.
+changes against production. Production uses committed Payload migrations. Set
+`CRON_SECRET` so Vercel can authenticate stale-hold reconciliation; expired
+holds stop consuming capacity immediately from their timestamp, independent of
+that housekeeping schedule.

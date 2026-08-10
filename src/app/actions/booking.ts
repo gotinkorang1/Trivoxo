@@ -4,6 +4,7 @@ import { getPayload } from 'payload'
 import { redirect } from 'next/navigation'
 import config from '@payload-config'
 import { evaluateDateAvailability, getBookingWindow, isIsoDate } from '@/lib/availability'
+import { createBookingHold, InventoryError } from '@/lib/booking-inventory'
 import { CAPACITY, quoteBooking } from '@/lib/policies'
 
 export type BookingFormState = {
@@ -15,13 +16,10 @@ export type BookingFormState = {
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 
 /**
- * Create a booking REQUEST from the public site (§39, §40).
- *
- * Scope note: this captures the booking as `pending_payment` and hands the
- * customer a reference. It deliberately does NOT implement the transactional
- * inventory hold or Paystack payment/verification (§38, §46) — those are the
- * concurrency-sensitive pieces flagged for deliberate human review and require
- * Paystack credentials. Payment wiring slots in after this step.
+ * Create a booking and atomically hold its departure seats (§38–§40).
+ * The PostgreSQL departure lock is authoritative; the browser's availability
+ * message is only guidance. Paystack payment/verification follows in the next
+ * checkout sprint and will convert this hold to confirmed inventory.
  *
  * Runs server-side via Payload's local API, so it can create a booking even
  * though public `create` is restricted on the collection. TODO: add Cloudflare
@@ -127,25 +125,30 @@ export async function createBookingAction(
       }
     }
 
-    const booking = await payload.create({
-      collection: 'bookings',
-      data: {
-        status: 'pending_payment',
-        source: 'website',
-        experience: experience.id,
-        departureDate: new Date(`${date}T12:00:00.000Z`).toISOString(),
-        adults,
-        children,
-        booker: { firstName, lastName, email, phone, country: country || undefined },
-        pickup: pickup || undefined,
-        specialRequest: specialRequest || undefined,
-        // Estimate from the group-pricing rules (§32) — confirmed at checkout.
-        totalAmount: quoteBooking(experience.priceFrom ?? 0, adults, children).total,
-        paymentState: 'outstanding',
-      },
+    const { booking } = await createBookingHold(payload, {
+      experience,
+      date,
+      adults,
+      children,
+      booker: { firstName, lastName, email, phone, country: country || undefined },
+      pickup: pickup || undefined,
+      specialRequest: specialRequest || undefined,
+      // Estimate from the group-pricing rules (§32) — confirmed at checkout.
+      totalAmount: quoteBooking(experience.priceFrom ?? 0, adults, children).total,
     })
     reference = booking.reference ?? undefined
   } catch (err) {
+    if (err instanceof InventoryError) {
+      const field = err.code === 'CAPACITY_UNAVAILABLE' ? 'party' : 'date'
+      return {
+        error:
+          err.code === 'CAPACITY_UNAVAILABLE'
+            ? 'Those seats were just taken or are no longer available.'
+            : 'That departure is not available.',
+        fieldErrors: { [field]: err.message },
+        values,
+      }
+    }
     console.error('Booking creation failed', err)
     return { error: 'Something went wrong creating your booking. Please try again.', values }
   }

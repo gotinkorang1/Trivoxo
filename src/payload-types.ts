@@ -73,6 +73,7 @@ export interface Config {
     'experience-categories': ExperienceCategory;
     experiences: Experience;
     reviews: Review;
+    departures: Departure;
     bookings: Booking;
     customers: Customer;
     coupons: Coupon;
@@ -97,6 +98,7 @@ export interface Config {
     'experience-categories': ExperienceCategoriesSelect<false> | ExperienceCategoriesSelect<true>;
     experiences: ExperiencesSelect<false> | ExperiencesSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
+    departures: DeparturesSelect<false> | DeparturesSelect<true>;
     bookings: BookingsSelect<false> | BookingsSelect<true>;
     customers: CustomersSelect<false> | CustomersSelect<true>;
     coupons: CouponsSelect<false> | CouponsSelect<true>;
@@ -558,6 +560,36 @@ export interface Review {
   createdAt: string;
 }
 /**
+ * Scheduled experience dates and seat capacity. Active holds and confirmed bookings consume this capacity automatically.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "departures".
+ */
+export interface Departure {
+  id: number;
+  experience: number | Experience;
+  startsAt: string;
+  /**
+   * Turn off when only the travel date has been agreed.
+   */
+  timeConfirmed?: boolean | null;
+  capacity: number;
+  status: 'scheduled' | 'closed' | 'sold-out' | 'cancelled';
+  /**
+   * Created from an eligible website date request.
+   */
+  autoCreated?: boolean | null;
+  dateKey?: string | null;
+  inventoryKey: string;
+  /**
+   * Leave blank to use the experience meeting point.
+   */
+  meetingPointOverride?: string | null;
+  operationsNotes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "bookings".
  */
@@ -594,10 +626,20 @@ export interface Booking {
     | 'partner'
     | 'other';
   experience: number | Experience;
+  /**
+   * Required when seats are held or confirmed.
+   */
+  departure?: (number | null) | Departure;
   customer?: (number | null) | Customer;
   departureDate: string;
   adults?: number | null;
   children?: number | null;
+  /**
+   * Managed automatically from the booking status.
+   */
+  inventoryState?: ('none' | 'held' | 'confirmed' | 'released') | null;
+  capacitySeats?: number | null;
+  holdExpiresAt?: string | null;
   booker: {
     firstName: string;
     lastName: string;
@@ -1177,6 +1219,10 @@ export interface PayloadLockedDocument {
         value: number | Review;
       } | null)
     | ({
+        relationTo: 'departures';
+        value: number | Departure;
+      } | null)
+    | ({
         relationTo: 'bookings';
         value: number | Booking;
       } | null)
@@ -1517,6 +1563,24 @@ export interface ReviewsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "departures_select".
+ */
+export interface DeparturesSelect<T extends boolean = true> {
+  experience?: T;
+  startsAt?: T;
+  timeConfirmed?: T;
+  capacity?: T;
+  status?: T;
+  autoCreated?: T;
+  dateKey?: T;
+  inventoryKey?: T;
+  meetingPointOverride?: T;
+  operationsNotes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "bookings_select".
  */
 export interface BookingsSelect<T extends boolean = true> {
@@ -1524,10 +1588,14 @@ export interface BookingsSelect<T extends boolean = true> {
   status?: T;
   source?: T;
   experience?: T;
+  departure?: T;
   customer?: T;
   departureDate?: T;
   adults?: T;
   children?: T;
+  inventoryState?: T;
+  capacitySeats?: T;
+  holdExpiresAt?: T;
   booker?:
     | T
     | {

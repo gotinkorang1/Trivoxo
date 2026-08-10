@@ -15,6 +15,7 @@ import { Experiences } from './collections/Experiences'
 import { Reviews } from './collections/Reviews'
 // Operations
 import { Bookings } from './collections/Bookings'
+import { Departures } from './collections/Departures'
 import { Customers } from './collections/Customers'
 import { Coupons } from './collections/Coupons'
 // Events
@@ -54,6 +55,7 @@ export default buildConfig({
     Experiences,
     Reviews,
     // Operations
+    Departures,
     Bookings,
     Customers,
     Coupons,

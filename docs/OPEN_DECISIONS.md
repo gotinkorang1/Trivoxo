@@ -10,29 +10,30 @@ Operational **defaults are now set** in `src/lib/policies.ts` and reflected in t
 seed, the booking quote and the legal pages. The remaining "Missing" rows are
 per-experience data (real costs, durations, timings) only Trivoxo can supply.
 
-| # | Decision | Status | Where it lands |
-|---|----------|--------|----------------|
-| 1 | Group-discount tiers | ✅ **Set** — 10% (3–4), 15% (5–8), 20% (9–14), 15+ custom quote | `experiences.priceTiers`, `policies.ts` |
-| 2 | Local / resident prices (per package) | Missing (needs entry-fee data) | `experiences.visitorPricing` (disabled until provided) |
-| 3 | International prices confirmed for all packages | Needs confirmation | `experiences.priceFrom` |
-| 4 | Child prices & age bands | ✅ **Set** — infant 0–2 free, child 3–11 @ 60%, adult 12+ | `policies.ts` / booking quote |
-| 5 | Tour durations (several packages) | Missing | `experiences.duration` (placeholders now) |
-| 6 | Departure times & pickup zones | Missing | `experiences.itinerary` / `pickupInfo` |
-| 7 | Max capacity per departure | ✅ **Set** — default 2–15 (tune per vehicle) | `experiences.maxGuests` |
-| 8 | Cancellation, refund, no-show & rescheduling | ✅ **Set** — see legal pages | `policies.ts` + legal pages |
-| 9 | Private-tour pricing (exact rate) | Missing (concept set: private option for solo) | `experiences.privatePrice` |
-| 10 | Event ticket refund rules | ✅ **Set** — non-refundable, transferable ≥72h | `policies.ts` + legal pages |
+| #   | Decision                                        | Status                                                          | Where it lands                                         |
+| --- | ----------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
+| 1   | Group-discount tiers                            | ✅ **Set** — 10% (3–4), 15% (5–8), 20% (9–14), 15+ custom quote | `experiences.priceTiers`, `policies.ts`                |
+| 2   | Local / resident prices (per package)           | Missing (needs entry-fee data)                                  | `experiences.visitorPricing` (disabled until provided) |
+| 3   | International prices confirmed for all packages | Needs confirmation                                              | `experiences.priceFrom`                                |
+| 4   | Child prices & age bands                        | ✅ **Set** — infant 0–2 free, child 3–11 @ 60%, adult 12+       | `policies.ts` / booking quote                          |
+| 5   | Tour durations (several packages)               | Missing                                                         | `experiences.duration` (placeholders now)              |
+| 6   | Departure times & pickup zones                  | Missing                                                         | `experiences.itinerary` / `pickupInfo`                 |
+| 7   | Max capacity per departure                      | ✅ **Set** — default 2–15 (tune per vehicle)                    | `experiences.maxGuests`                                |
+| 8   | Cancellation, refund, no-show & rescheduling    | ✅ **Set** — see legal pages                                    | `policies.ts` + legal pages                            |
+| 9   | Private-tour pricing (exact rate)               | Missing (concept set: private option for solo)                  | `experiences.privatePrice`                             |
+| 10  | Event ticket refund rules                       | ✅ **Set** — non-refundable, transferable ≥72h                  | `policies.ts` + legal pages                            |
+| 11  | Checkout seat-hold duration                     | ✅ **Set** — 20 minutes; expiry is timestamp-based              | `BOOKING_HOLD` / booking inventory                     |
 
 ## Content / brand
 
-| # | Decision | Status |
-|---|----------|--------|
-| 11 | **Capital Pulse "Osu" question** — is Osu part of the tour, or should the reference be removed from the description? (§26) | Needs clarification |
-| 12 | ~~Canonical slogan~~ — **RESOLVED: "Experience. Explore. Express."** (official site copy). Applied. | ✅ Confirmed |
-| 13 | Brand palette and official logo variants (§7) | ✅ **Set** — orange `#f15a29`, gold `#f9b233`; coloured, black and white wordmarks are used adaptively from `public/logo/`. |
-| 14 | December / seasonal & public-holiday pricing | ✅ **Set** — day tours flat; 15% peak premium on premium experiences & events for Dec 15 – Jan 5 + major holidays (decision made; engine enforcement pending) |
-| 15 | Guide languages | ✅ **Set** — English default; Twi/Ga/Ewe on request; other languages with 7 days’ notice |
-| 16 | Ghanaian legal review of Privacy Policy and Terms of Use | Required before production launch — operational drafts are now complete | `src/lib/data/legal.ts` |
+| #   | Decision                                                                                                                   | Status                                                                                                                                                        |
+| --- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 12  | **Capital Pulse "Osu" question** — is Osu part of the tour, or should the reference be removed from the description? (§26) | Needs clarification                                                                                                                                           |
+| 13  | ~~Canonical slogan~~ — **RESOLVED: "Experience. Explore. Express."** (official site copy). Applied.                        | ✅ Confirmed                                                                                                                                                  |
+| 14  | Brand palette and official logo variants (§7)                                                                              | ✅ **Set** — orange `#f15a29`, gold `#f9b233`; coloured, black and white wordmarks are used adaptively from `public/logo/`.                                   |
+| 15  | December / seasonal & public-holiday pricing                                                                               | ✅ **Set** — day tours flat; 15% peak premium on premium experiences & events for Dec 15 – Jan 5 + major holidays (decision made; engine enforcement pending) |
+| 16  | Guide languages                                                                                                            | ✅ **Set** — English default; Twi/Ga/Ewe on request; other languages with 7 days’ notice                                                                      |
+| 17  | Ghanaian legal review of Privacy Policy and Terms of Use                                                                   | Required before production launch — operational drafts are now complete                                                                                       | `src/lib/data/legal.ts` |
 
 ## Contact details (§98)
 
@@ -62,7 +63,7 @@ Company note: **Trivoxo Limited Company is a subsidiary of Nii Plants Group.**
 - **Deposits:** day tours paid in full; multi-day/premium/corporate take a 50%
   deposit, balance due 7 days before. Paystack fee absorbed (no surcharge).
 - **Booking notice:** 24h day tours (48h where permits apply), 7 days multi-day.
-  Capacity default 2–15.
+  Capacity default 2–15. Checkout seats are held for 20 minutes.
 - **Cancellation** — day tours: free ≥48h, 50% 24–48h, none <24h/no-show;
   multi-day: free ≥7d, 50% 3–7d, none <3d/no-show; events non-refundable but
   transferable ≥72h; refunds to original method within 5–10 business days.

@@ -37,6 +37,12 @@ export const CAPACITY = {
   maxAdvanceDays: 180,
 } as const
 
+/** A checkout owns its seats for this long before they return to inventory. */
+export const BOOKING_HOLD = {
+  minutes: 20,
+  cleanupBatchSize: 100,
+} as const
+
 export const BOOKING_NOTICE = { dayTourHours: 24, permitTourHours: 48, multiDayDays: 7 } as const
 
 /* ── Deposits & payment (§45) ────────────────────────────────────────────── */
@@ -54,10 +60,17 @@ export const RESCHEDULE = { dayTourHours: 48, multiDayDays: 7, freeCount: 1 } as
 export const REFUND_WINDOW = '5–10 business days' as const
 
 /* ── Seasonal (§35) ──────────────────────────────────────────────────────── */
-export const SEASONAL = { peakSurchargePct: 15, note: 'Dec 15 – Jan 5 and major public holidays, on premium experiences and events only.' } as const
+export const SEASONAL = {
+  peakSurchargePct: 15,
+  note: 'Dec 15 – Jan 5 and major public holidays, on premium experiences and events only.',
+} as const
 
 /* ── Guides (§102) ───────────────────────────────────────────────────────── */
-export const GUIDE_LANGUAGES = { default: 'English', onRequest: ['Twi', 'Ga', 'Ewe'], advanceNoticeDays: 7 } as const
+export const GUIDE_LANGUAGES = {
+  default: 'English',
+  onRequest: ['Twi', 'Ga', 'Ewe'],
+  advanceNoticeDays: 7,
+} as const
 
 /* ── Pricing engine ──────────────────────────────────────────────────────── */
 

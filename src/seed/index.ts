@@ -81,6 +81,7 @@ async function run() {
 
   // ── Experiences ────────────────────────────────────────────
   let count = 0
+  const experienceIds = new Map<string, number>()
   for (const exp of EXPERIENCES) {
     const data = mapExperience(exp, categoryIds, destinationIds)
     const found = await payload.find({
@@ -88,14 +89,48 @@ async function run() {
       where: { slug: { equals: exp.slug } },
       limit: 1,
     })
-    if (found.docs[0]) {
-      await payload.update({ collection: 'experiences', id: found.docs[0].id, data })
-    } else {
-      await payload.create({ collection: 'experiences', data })
-    }
+    const doc = found.docs[0]
+      ? await payload.update({ collection: 'experiences', id: found.docs[0].id, data })
+      : await payload.create({ collection: 'experiences', data })
+    experienceIds.set(exp.slug, doc.id)
     count++
   }
   payload.logger.info(`Seeded ${count} experiences`)
+
+  // Date-only placeholders: official departure times are still awaiting input
+  // from Trivoxo, so staff can confirm or edit each time from the admin.
+  let departureCount = 0
+  for (const exp of EXPERIENCES) {
+    const experience = experienceIds.get(exp.slug)
+    if (!experience) continue
+    for (const date of nextEligibleSaturdays(4)) {
+      const startsAt = `${date}T12:00:00.000Z`
+      const inventoryKey = `${experience}:${startsAt}`
+      const existing = await payload.find({
+        collection: 'departures',
+        depth: 0,
+        limit: 1,
+        where: { inventoryKey: { equals: inventoryKey } },
+      })
+      if (!existing.docs[0]) {
+        await payload.create({
+          collection: 'departures',
+          data: {
+            experience,
+            startsAt,
+            timeConfirmed: false,
+            capacity: CAPACITY.maxGuests,
+            status: 'scheduled',
+            autoCreated: true,
+            dateKey: date,
+            inventoryKey,
+          },
+        })
+      }
+      departureCount++
+    }
+  }
+  payload.logger.info(`Ensured ${departureCount} upcoming departure dates`)
 
   // ── Remove stale (previously auto-derived) destinations ────
   const curatedSlugs = DESTINATIONS.map((d) => d.slug)
@@ -112,7 +147,11 @@ async function run() {
   // ── Events ─────────────────────────────────────────────────
   let eventCount = 0
   for (const ev of EVENTS) {
-    const found = await payload.find({ collection: 'events', where: { slug: { equals: ev.slug } }, limit: 1 })
+    const found = await payload.find({
+      collection: 'events',
+      where: { slug: { equals: ev.slug } },
+      limit: 1,
+    })
     const data = {
       title: ev.title,
       slug: ev.slug,
@@ -125,7 +164,11 @@ async function run() {
       highlights: strings(ev.whatToExpect),
       included: strings(ev.included),
       featured: Boolean(ev.featured),
-      ticketTypes: ev.ticketTypes.map((t) => ({ name: t.name, price: t.price, soldOut: Boolean(t.soldOut) })),
+      ticketTypes: ev.ticketTypes.map((t) => ({
+        name: t.name,
+        price: t.price,
+        soldOut: Boolean(t.soldOut),
+      })),
       _status: 'published' as const,
     }
     if (found.docs[0]) {
@@ -142,12 +185,17 @@ async function run() {
     limit: 100,
   })
   for (const d of staleEvents.docs) await payload.delete({ collection: 'events', id: d.id })
-  if (staleEvents.totalDocs > 0) payload.logger.info(`Removed ${staleEvents.totalDocs} stale events`)
+  if (staleEvents.totalDocs > 0)
+    payload.logger.info(`Removed ${staleEvents.totalDocs} stale events`)
 
   // ── Ghana Guide posts ──────────────────────────────────────
   let postCount = 0
   for (const a of GUIDE_ARTICLES) {
-    const found = await payload.find({ collection: 'posts', where: { slug: { equals: a.slug } }, limit: 1 })
+    const found = await payload.find({
+      collection: 'posts',
+      where: { slug: { equals: a.slug } },
+      limit: 1,
+    })
     const data = {
       title: a.title,
       slug: a.slug,
@@ -177,8 +225,17 @@ async function run() {
   // ── Content pages (About, Contact, Safety, FAQ, legal) ─────
   let pageCount = 0
   for (const p of CONTENT_PAGE_STUBS) {
-    const found = await payload.find({ collection: 'pages', where: { slug: { equals: p.slug } }, limit: 1 })
-    const data = { title: p.title, slug: p.slug, subtitle: p.subtitle, _status: 'published' as const }
+    const found = await payload.find({
+      collection: 'pages',
+      where: { slug: { equals: p.slug } },
+      limit: 1,
+    })
+    const data = {
+      title: p.title,
+      slug: p.slug,
+      subtitle: p.subtitle,
+      _status: 'published' as const,
+    }
     if (found.docs[0]) {
       await payload.update({ collection: 'pages', id: found.docs[0].id, data })
     } else {
@@ -220,17 +277,36 @@ function mapExperience(
     weekdays: isDodi ? (['sat', 'sun'] as ('sat' | 'sun')[]) : undefined,
     includePublicHolidays: isDodi ? true : undefined,
     duration: exp.duration,
-    difficulty: (exp.difficulty?.toLowerCase() as 'easy' | 'moderate' | 'challenging' | undefined) ?? undefined,
-    badge: (exp.badge?.toLowerCase() as 'bestseller' | 'new' | 'popular' | 'limited' | undefined) ?? undefined,
+    difficulty:
+      (exp.difficulty?.toLowerCase() as 'easy' | 'moderate' | 'challenging' | undefined) ??
+      undefined,
+    badge:
+      (exp.badge?.toLowerCase() as 'bestseller' | 'new' | 'popular' | 'limited' | undefined) ??
+      undefined,
     featured: Boolean(exp.featured),
     highlights: strings(exp.highlights),
     included: strings(exp.included),
     excluded: strings(exp.excluded),
-    itinerary: (exp.itinerary ?? []).map((s) => ({ time: s.time, title: s.title, description: s.description })),
+    itinerary: (exp.itinerary ?? []).map((s) => ({
+      time: s.time,
+      title: s.title,
+      description: s.description,
+    })),
     category: categoryIds.get(exp.categorySlug),
     destination: destinationIds.get(EXPERIENCE_TO_DESTINATION[exp.slug]),
     _status: 'published' as const,
   }
+}
+
+function nextEligibleSaturdays(count: number): string[] {
+  const cursor = new Date()
+  cursor.setUTCHours(12, 0, 0, 0)
+  cursor.setUTCDate(cursor.getUTCDate() + ((6 - cursor.getUTCDay() + 7) % 7 || 7))
+  return Array.from({ length: count }, (_, index) => {
+    const date = new Date(cursor)
+    date.setUTCDate(date.getUTCDate() + index * 7)
+    return date.toISOString().slice(0, 10)
+  })
 }
 
 run().catch((err) => {

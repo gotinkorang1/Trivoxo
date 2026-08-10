@@ -52,22 +52,19 @@ export default async function BookExperiencePage({
 
         <div className="mt-6 max-w-3xl text-white">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-secondary">
-            Booking request
+            Secure booking
           </p>
-          <h1 className="mt-3 text-4xl font-semibold text-white sm:text-5xl">
-            Plan your Trivoxo experience
-          </h1>
+          <h1 className="mt-3 text-4xl font-semibold text-white sm:text-5xl">Hold your place</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-white/75">
             Choose your date and travellers, add your contact details, then review everything before
-            sending the request. You will not be charged at this stage.
+            placing a temporary seat hold. You will not be charged at this stage.
           </p>
           <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/75">
             <span className="inline-flex items-center gap-2">
-              <ShieldCheck className="size-4 text-brand-secondary" /> Availability checked by
-              Trivoxo
+              <ShieldCheck className="size-4 text-brand-secondary" /> Live departure capacity
             </span>
             <span className="inline-flex items-center gap-2">
-              <LockKeyhole className="size-4 text-brand-secondary" /> Secure details
+              <LockKeyhole className="size-4 text-brand-secondary" /> Double-booking protection
             </span>
             <span className="inline-flex items-center gap-2">
               <Sparkles className="size-4 text-brand-secondary" /> Group savings calculated live

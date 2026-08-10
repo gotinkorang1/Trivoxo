@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { fieldHasRole, hasRole } from '../access/roles'
+import { enforceBookingInventory } from '../lib/booking-inventory'
 import { bookingReference } from '../lib/reference'
 
 /** Booking lifecycle states (§41). */
@@ -37,9 +38,8 @@ export const BOOKING_SOURCES = [
 /**
  * Bookings (§38–§42, §60). Staff can create manual bookings for WhatsApp /
  * phone / walk-in business so online and offline sales live in one system.
- * The authoritative inventory hold/commit is a Phase-1 server concern (§38) —
- * this collection defines the record; the transactional hold logic lands with
- * the checkout + Paystack webhook work.
+ * Active website checkouts and staff-created bookings are validated against a
+ * locked departure row, so every source shares one authoritative inventory.
  */
 export const Bookings: CollectionConfig = {
   slug: 'bookings',
@@ -62,6 +62,7 @@ export const Bookings: CollectionConfig = {
         }
         return data
       },
+      enforceBookingInventory,
     ],
   },
   fields: [
@@ -70,7 +71,11 @@ export const Bookings: CollectionConfig = {
       type: 'text',
       unique: true,
       index: true,
-      admin: { readOnly: true, position: 'sidebar', description: 'Auto-generated, e.g. TVX-26-A8F41.' },
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description: 'Auto-generated, e.g. TVX-26-A8F41.',
+      },
     },
     {
       name: 'status',
@@ -89,7 +94,22 @@ export const Bookings: CollectionConfig = {
       admin: { position: 'sidebar' },
     },
     { name: 'experience', type: 'relationship', relationTo: 'experiences', required: true },
-    { name: 'customer', type: 'relationship', relationTo: 'customers', admin: { position: 'sidebar' } },
+    {
+      name: 'departure',
+      type: 'relationship',
+      relationTo: 'departures',
+      index: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Required when seats are held or confirmed.',
+      },
+    },
+    {
+      name: 'customer',
+      type: 'relationship',
+      relationTo: 'customers',
+      admin: { position: 'sidebar' },
+    },
     {
       type: 'row',
       fields: [
@@ -97,6 +117,41 @@ export const Bookings: CollectionConfig = {
         { name: 'adults', type: 'number', defaultValue: 2, min: 1, admin: { width: '33%' } },
         { name: 'children', type: 'number', defaultValue: 0, min: 0, admin: { width: '33%' } },
       ],
+    },
+    {
+      name: 'inventoryState',
+      type: 'select',
+      defaultValue: 'none',
+      index: true,
+      options: [
+        { label: 'No inventory', value: 'none' },
+        { label: 'Seats held', value: 'held' },
+        { label: 'Seats confirmed', value: 'confirmed' },
+        { label: 'Seats released', value: 'released' },
+      ],
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        description: 'Managed automatically from the booking status.',
+      },
+    },
+    {
+      name: 'capacitySeats',
+      label: 'Seats consumed',
+      type: 'number',
+      min: 1,
+      admin: { position: 'sidebar', readOnly: true },
+    },
+    {
+      name: 'holdExpiresAt',
+      label: 'Seat hold expires',
+      type: 'date',
+      index: true,
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        date: { pickerAppearance: 'dayAndTime', displayFormat: 'd MMM yyyy, HH:mm:ss' },
+      },
     },
     {
       name: 'booker',
@@ -145,7 +200,13 @@ export const Bookings: CollectionConfig = {
     {
       type: 'row',
       fields: [
-        { name: 'totalAmount', label: 'Total (GHS)', type: 'number', min: 0, admin: { width: '50%' } },
+        {
+          name: 'totalAmount',
+          label: 'Total (GHS)',
+          type: 'number',
+          min: 0,
+          admin: { width: '50%' },
+        },
         {
           name: 'paymentState',
           type: 'select',
@@ -158,6 +219,10 @@ export const Bookings: CollectionConfig = {
         },
       ],
     },
-    { name: 'internalNotes', type: 'textarea', access: { read: fieldHasRole('operations', 'finance') } },
+    {
+      name: 'internalNotes',
+      type: 'textarea',
+      access: { read: fieldHasRole('operations', 'finance') },
+    },
   ],
 }

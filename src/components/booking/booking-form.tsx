@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button'
 import { evaluateDateAvailability, type DateWindow } from '@/lib/availability'
 import type { AvailabilityType, Weekday } from '@/lib/data/experiences'
 import { formatPrice } from '@/lib/format'
-import { quoteBooking } from '@/lib/policies'
+import { BOOKING_HOLD, quoteBooking } from '@/lib/policies'
 import { cn } from '@/lib/utils'
 
 const initialState: BookingFormState = {}
@@ -48,6 +48,17 @@ type FormValues = {
   country: string
   pickup: string
   specialRequest: string
+}
+
+type LiveAvailability = {
+  available: boolean | null
+  maxRemainingSeats?: number
+  message: string
+}
+
+type AvailabilityResponse = {
+  key: string
+  result: LiveAvailability
 }
 
 type BookingFormProps = {
@@ -88,6 +99,9 @@ export function BookingForm({
   const [state, formAction, pending] = useActionState(createBookingAction, initialState)
   const [step, setStep] = useState(0)
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({})
+  const [availabilityResponse, setAvailabilityResponse] = useState<AvailabilityResponse | null>(
+    null,
+  )
   const [values, setValues] = useState<FormValues>({
     date: initialDate,
     adults: '2',
@@ -117,11 +131,72 @@ export function BookingForm({
         dateWindow,
       )
     : undefined
+  const availabilityKey =
+    values.date && dateStatus?.requestable && partySize > 0 && partySize <= maxGuests
+      ? `${values.date}:${partySize}`
+      : ''
+  const liveAvailability =
+    availabilityResponse?.key === availabilityKey ? availabilityResponse.result : null
+  const checkingAvailability = Boolean(
+    availabilityKey && availabilityResponse?.key !== availabilityKey,
+  )
   const combinedErrors = { ...clientErrors, ...(state.fieldErrors ?? {}) }
+  const inventoryBlocked = Boolean(
+    soldOut || checkingAvailability || liveAvailability?.available === false,
+  )
 
   useEffect(() => {
     stepHeadingRef.current?.focus()
   }, [step])
+
+  useEffect(() => {
+    if (!availabilityKey) return
+
+    const controller = new AbortController()
+    const timer = window.setTimeout(async () => {
+      try {
+        const query = new URLSearchParams({
+          experience: slug,
+          date: values.date,
+          travellers: String(partySize),
+        })
+        const response = await fetch(`/api/availability?${query}`, {
+          cache: 'no-store',
+          signal: controller.signal,
+        })
+        if (!response.ok) throw new Error('Availability request failed')
+        const result = (await response.json()) as {
+          available?: boolean
+          maxRemainingSeats?: number
+          message?: string
+        }
+        setAvailabilityResponse({
+          key: availabilityKey,
+          result: {
+            available: Boolean(result.available),
+            maxRemainingSeats: result.maxRemainingSeats,
+            message: result.message ?? 'Availability checked.',
+          },
+        })
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          setAvailabilityResponse({
+            key: availabilityKey,
+            result: {
+              available: null,
+              message:
+                'Live capacity could not be checked. It will be verified securely when you continue.',
+            },
+          })
+        }
+      }
+    }, 250)
+
+    return () => {
+      controller.abort()
+      window.clearTimeout(timer)
+    }
+  }, [availabilityKey, partySize, slug, values.date])
 
   function update<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValues((current) => ({ ...current, [key]: value }))
@@ -139,6 +214,7 @@ export function BookingForm({
     const errors: Record<string, string> = {}
     if (!values.date) errors.date = 'Choose your preferred date.'
     else if (!dateStatus?.requestable) errors.date = dateStatus?.reason ?? 'Choose another date.'
+    else if (liveAvailability?.available === false) errors.date = liveAvailability.message
     if (partySize < minGuests)
       errors.party = `This experience requires at least ${minGuests} travellers.`
     if (partySize > maxGuests)
@@ -272,13 +348,35 @@ export function BookingForm({
                           className="mt-2 text-xs leading-5 text-text-muted"
                         >
                           Requests need at least {minNoticeHours ?? 24} hours’ notice. Trivoxo
-                          confirms capacity before payment.
+                          checks live capacity before creating a temporary seat hold.
                         </p>
-                        {dateStatus?.requestable && (
-                          <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-brand-accent">
-                            <Check className="size-3.5" /> {dateStatus.label}
-                          </p>
-                        )}
+                        <div className="mt-2 min-h-5" aria-live="polite" aria-atomic="true">
+                          {checkingAvailability ? (
+                            <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-muted">
+                              <Loader2 className="size-3.5 animate-spin" /> Checking live capacity…
+                            </p>
+                          ) : liveAvailability ? (
+                            <p
+                              className={cn(
+                                'inline-flex items-center gap-1.5 text-xs font-semibold',
+                                liveAvailability.available === false
+                                  ? 'text-danger'
+                                  : liveAvailability.available === true
+                                    ? 'text-brand-accent'
+                                    : 'text-text-muted',
+                              )}
+                            >
+                              {liveAvailability.available === true && (
+                                <Check className="size-3.5" />
+                              )}
+                              {liveAvailability.message}
+                            </p>
+                          ) : dateStatus?.requestable ? (
+                            <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-accent">
+                              <Check className="size-3.5" /> {dateStatus.label}
+                            </p>
+                          ) : null}
+                        </div>
                       </Field>
 
                       <Field id="booking-adults" label="Adults" error={combinedErrors.adults}>
@@ -342,7 +440,12 @@ export function BookingForm({
                     </div>
 
                     <div className="mt-8 hidden justify-end lg:flex">
-                      <Button type="button" size="lg" onClick={continueFromTrip} disabled={soldOut}>
+                      <Button
+                        type="button"
+                        size="lg"
+                        onClick={continueFromTrip}
+                        disabled={inventoryBlocked}
+                      >
                         Continue to your details <ArrowRight className="size-4" />
                       </Button>
                     </div>
@@ -452,7 +555,7 @@ export function BookingForm({
                       id="review-step-title"
                       eyebrow="Step 3 of 3"
                       title="Review your request"
-                      description="Check the details below. Sending this request does not charge you or confirm inventory."
+                      description={`Check the details below. Submitting starts a ${BOOKING_HOLD.minutes}-minute seat hold; no payment is collected yet.`}
                     />
 
                     <div className="mt-8 space-y-4">
@@ -521,14 +624,14 @@ export function BookingForm({
                       >
                         <ChevronLeft className="size-4" /> Back
                       </Button>
-                      <Button type="submit" size="lg" disabled={pending || soldOut}>
+                      <Button type="submit" size="lg" disabled={pending || inventoryBlocked}>
                         {pending ? (
                           <>
-                            <Loader2 className="size-4 animate-spin" /> Sending request…
+                            <Loader2 className="size-4 animate-spin" /> Holding seats…
                           </>
                         ) : (
                           <>
-                            Send booking request <ArrowRight className="size-4" />
+                            Hold seats &amp; continue <ArrowRight className="size-4" />
                           </>
                         )}
                       </Button>
@@ -564,19 +667,19 @@ export function BookingForm({
             <Button
               type={step === 2 ? 'submit' : 'button'}
               onClick={step === 2 ? undefined : continueFlow}
-              disabled={pending || soldOut}
+              disabled={pending || inventoryBlocked}
               className="shrink-0"
             >
               {pending ? (
                 <>
-                  <Loader2 className="size-4 animate-spin" /> Sending…
+                  <Loader2 className="size-4 animate-spin" /> Holding…
                 </>
               ) : step === 0 ? (
                 'Continue'
               ) : step === 1 ? (
                 'Review'
               ) : (
-                'Send request'
+                'Hold seats'
               )}
             </Button>
           </div>
@@ -632,11 +735,11 @@ export function BookingForm({
           <div className="space-y-3 text-xs leading-5 text-text-muted">
             <p className="flex items-start gap-2">
               <WalletCards className="mt-0.5 size-4 shrink-0 text-brand-link" /> No payment is
-              collected with this request.
+              collected when the temporary hold is created.
             </p>
             <p className="flex items-start gap-2">
-              <CircleCheck className="mt-0.5 size-4 shrink-0 text-brand-accent" /> Final
-              availability and price are confirmed by Trivoxo.
+              <CircleCheck className="mt-0.5 size-4 shrink-0 text-brand-accent" /> Final capacity is
+              locked transactionally for {BOOKING_HOLD.minutes} minutes.
             </p>
           </div>
         </div>
