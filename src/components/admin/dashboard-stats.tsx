@@ -2,6 +2,7 @@ import { Gutter } from '@payloadcms/ui'
 import {
   AlertTriangle,
   ArrowRight,
+  BarChart3,
   BookOpen,
   CalendarDays,
   CalendarPlus,
@@ -11,9 +12,11 @@ import {
   Compass,
   ExternalLink,
   FileText,
+  Gauge,
   MailWarning,
   MessageSquareMore,
   Plus,
+  ReceiptText,
   Sparkles,
   TicketCheck,
   UsersRound,
@@ -27,6 +30,7 @@ import type { User } from '@/payload-types'
 
 type StaffRole = User['roles'][number]
 type Tone = 'brand' | 'gold' | 'green' | 'navy' | 'purple'
+type ReportingPeriod = 7 | 30 | 90
 
 type DashboardMetric = {
   helper: string
@@ -53,15 +57,50 @@ type DepartureSummary = {
   title: string
 }
 
+type PerformancePoint = {
+  bookings: number
+  label: string
+  revenue: number
+  shortLabel: string
+}
+
+type SourceSummary = {
+  count: number
+  label: string
+  percentage: number
+  source: string
+}
+
+type RecentBooking = {
+  createdAt: string
+  experience: string
+  guest: string
+  id: number | string
+  reference: string
+  source: string
+  status: string
+  totalAmount: number
+}
+
 type OperationsData = {
+  averageBookingValue: number
   bookingsToday: number
+  capacityBooked: number
+  capacityTotal: number
+  capacityUtilisation: number
   departuresToday: number
   emailFailures: number
   inventoryReviews: number
+  periodBookings: number
+  periodRevenue: number
+  performance: PerformancePoint[]
   paymentReviews: number
+  recentBookings: RecentBooking[]
   revenueToday: number
+  sourceBreakdown: SourceSummary[]
   travellersToday: number
   upcomingDepartures: DepartureSummary[]
+  upcomingDepartureCount: number
 }
 
 type EnquiryData = {
@@ -89,6 +128,21 @@ const numberFormatter = new Intl.NumberFormat('en-GH')
 const currencyFormatter = new Intl.NumberFormat('en-GH', {
   maximumFractionDigits: 0,
 })
+const DAY_MS = 24 * 60 * 60 * 1000
+const REPORTING_PERIODS: ReportingPeriod[] = [7, 30, 90]
+const SOURCE_LABELS: Record<string, string> = {
+  website: 'Website',
+  whatsapp: 'WhatsApp',
+  instagram: 'Instagram',
+  tiktok: 'TikTok',
+  facebook: 'Facebook',
+  phone: 'Phone',
+  'walk-in': 'Walk-in',
+  corporate: 'Corporate',
+  referral: 'Referral',
+  partner: 'Partner',
+  other: 'Other',
+}
 
 function hasAnyRole(roles: StaffRole[], ...allowed: StaffRole[]) {
   return roles.includes('super-admin') || allowed.some((role) => roles.includes(role))
@@ -111,6 +165,87 @@ function getRelationshipTitle(value: unknown): string {
   return 'Experience departure'
 }
 
+function getBookerName(value: unknown): string {
+  if (!value || typeof value !== 'object') return 'Guest booking'
+  const booker = value as { firstName?: unknown; lastName?: unknown }
+  const name = [booker.firstName, booker.lastName]
+    .filter((part): part is string => typeof part === 'string' && Boolean(part.trim()))
+    .join(' ')
+  return name || 'Guest booking'
+}
+
+function humanize(value: string) {
+  return value
+    .replaceAll('_', ' ')
+    .replaceAll('-', ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
+
+function getReportingPeriod(value: unknown): ReportingPeriod {
+  const raw = Array.isArray(value) ? value[0] : value
+  const parsed = Number(raw)
+  return REPORTING_PERIODS.includes(parsed as ReportingPeriod) ? (parsed as ReportingPeriod) : 30
+}
+
+function periodStartFor(startOfToday: Date, days: ReportingPeriod) {
+  const periodStart = new Date(startOfToday)
+  periodStart.setUTCDate(periodStart.getUTCDate() - (days - 1))
+  return periodStart
+}
+
+function buildPerformanceSeries(
+  periodStart: Date,
+  days: ReportingPeriod,
+  payments: Array<{ amountMinor: number; paidAt?: null | string }>,
+  bookings: Array<{ createdAt: string }>,
+): PerformancePoint[] {
+  const bucketDays = days === 7 ? 1 : days === 30 ? 3 : 8
+  const bucketCount = Math.ceil(days / bucketDays)
+  const points = Array.from({ length: bucketCount }, (_, index) => {
+    const pointStart = new Date(periodStart.getTime() + index * bucketDays * DAY_MS)
+    const pointEnd = new Date(
+      periodStart.getTime() + Math.min(days - 1, (index + 1) * bucketDays - 1) * DAY_MS,
+    )
+    const shortStart = new Intl.DateTimeFormat('en-GH', {
+      day: 'numeric',
+      month: 'short',
+      timeZone: 'Africa/Accra',
+    }).format(pointStart)
+    const shortEnd = new Intl.DateTimeFormat('en-GH', {
+      day: 'numeric',
+      month: 'short',
+      timeZone: 'Africa/Accra',
+    }).format(pointEnd)
+    return {
+      bookings: 0,
+      label: shortStart === shortEnd ? shortStart : `${shortStart} – ${shortEnd}`,
+      revenue: 0,
+      shortLabel: shortStart,
+    }
+  })
+
+  for (const payment of payments) {
+    if (!payment.paidAt) continue
+    const dayIndex = Math.floor(
+      (new Date(payment.paidAt).getTime() - periodStart.getTime()) / DAY_MS,
+    )
+    const bucketIndex = Math.floor(dayIndex / bucketDays)
+    if (bucketIndex >= 0 && bucketIndex < points.length) {
+      points[bucketIndex].revenue += payment.amountMinor / 100
+    }
+  }
+
+  for (const booking of bookings) {
+    const dayIndex = Math.floor(
+      (new Date(booking.createdAt).getTime() - periodStart.getTime()) / DAY_MS,
+    )
+    const bucketIndex = Math.floor(dayIndex / bucketDays)
+    if (bucketIndex >= 0 && bucketIndex < points.length) points[bucketIndex].bookings += 1
+  }
+
+  return points
+}
+
 function ghanaDayBounds() {
   // Ghana remains on UTC throughout the year, so UTC day boundaries are the
   // business-day boundaries used for dashboard reporting.
@@ -120,7 +255,9 @@ function ghanaDayBounds() {
   end.setUTCDate(end.getUTCDate() + 1)
   const inSevenDays = new Date(start)
   inSevenDays.setUTCDate(inSevenDays.getUTCDate() + 7)
-  return { end, inSevenDays, start }
+  const inThirtyDays = new Date(start)
+  inThirtyDays.setUTCDate(inThirtyDays.getUTCDate() + 30)
+  return { end, inSevenDays, inThirtyDays, start }
 }
 
 async function loadOperationsData(
@@ -128,24 +265,29 @@ async function loadOperationsData(
   start: Date,
   end: Date,
   inSevenDays: Date,
+  inThirtyDays: Date,
+  periodStart: Date,
+  periodDays: ReportingPeriod,
 ): Promise<OperationsData> {
   const [
-    departuresToday,
+    futureDepartures,
     bookingsToday,
-    upcomingDepartures,
-    successfulPayments,
+    periodBookings,
+    periodPayments,
+    recentBookings,
     paymentReviews,
     inventoryReviews,
     emailFailures,
   ] = await Promise.all([
     payload.find({
       collection: 'departures',
-      depth: 0,
+      depth: 1,
       limit: 500,
+      sort: 'startsAt',
       where: {
         and: [
           { startsAt: { greater_than_equal: start.toISOString() } },
-          { startsAt: { less_than: end.toISOString() } },
+          { startsAt: { less_than: inThirtyDays.toISOString() } },
           { status: { equals: 'scheduled' } },
         ],
       },
@@ -155,45 +297,40 @@ async function loadOperationsData(
       where: { createdAt: { greater_than_equal: start.toISOString() } },
     }),
     payload.find({
-      collection: 'departures',
-      depth: 1,
-      limit: 6,
-      sort: 'startsAt',
+      collection: 'bookings',
+      depth: 0,
+      limit: 5000,
+      sort: '-createdAt',
       where: {
         and: [
-          { startsAt: { greater_than_equal: start.toISOString() } },
-          { startsAt: { less_than: inSevenDays.toISOString() } },
-          { status: { equals: 'scheduled' } },
+          { createdAt: { greater_than_equal: periodStart.toISOString() } },
+          { createdAt: { less_than: end.toISOString() } },
         ],
       },
     }),
     payload.find({
       collection: 'payments',
-      limit: 500,
+      limit: 5000,
       where: {
         and: [
           { status: { equals: 'succeeded' } },
-          { paidAt: { greater_than_equal: start.toISOString() } },
+          { paidAt: { greater_than_equal: periodStart.toISOString() } },
           { paidAt: { less_than: end.toISOString() } },
         ],
       },
     }),
+    payload.find({ collection: 'bookings', depth: 1, limit: 6, sort: '-createdAt' }),
     payload.count({ collection: 'payments', where: { status: { equals: 'review' } } }),
     payload.count({ collection: 'bookings', where: { status: { equals: 'payment_review' } } }),
     payload.count({ collection: 'notifications', where: { status: { equals: 'dead_letter' } } }),
   ])
 
-  const departureIDs = Array.from(
-    new Set([
-      ...departuresToday.docs.map((departure) => departure.id),
-      ...upcomingDepartures.docs.map((departure) => departure.id),
-    ]),
-  )
+  const departureIDs = futureDepartures.docs.map((departure) => departure.id)
   const confirmedBookings = departureIDs.length
     ? await payload.find({
         collection: 'bookings',
         depth: 0,
-        limit: 1000,
+        limit: 5000,
         where: {
           and: [{ departure: { in: departureIDs } }, { inventoryState: { equals: 'confirmed' } }],
         },
@@ -209,31 +346,91 @@ async function loadOperationsData(
     seatsByDeparture.set(key, (seatsByDeparture.get(key) ?? 0) + seats)
   }
 
-  const departureSummaries = upcomingDepartures.docs.map((departure) => ({
+  const upcomingDepartures = futureDepartures.docs
+    .filter((departure) => new Date(departure.startsAt) < inSevenDays)
+    .slice(0, 6)
+  const departuresToday = futureDepartures.docs.filter(
+    (departure) => new Date(departure.startsAt) < end,
+  )
+  const departureSummaries = upcomingDepartures.map((departure) => ({
     booked: seatsByDeparture.get(String(departure.id)) ?? 0,
     capacity: departure.capacity,
     id: departure.id,
     startsAt: departure.startsAt,
     title: getRelationshipTitle(departure.experience),
   }))
-  const travellersToday = departuresToday.docs.reduce(
+  const travellersToday = departuresToday.reduce(
     (total, departure) => total + (seatsByDeparture.get(String(departure.id)) ?? 0),
     0,
   )
-  const revenueToday = successfulPayments.docs.reduce(
+  const revenueToday = periodPayments.docs.reduce(
+    (total, payment) =>
+      payment.paidAt && new Date(payment.paidAt) >= start
+        ? total + payment.amountMinor / 100
+        : total,
+    0,
+  )
+  const periodRevenue = periodPayments.docs.reduce(
     (total, payment) => total + payment.amountMinor / 100,
     0,
   )
+  const sourceCounts = new Map<string, number>()
+  for (const booking of periodBookings.docs) {
+    const source = booking.source || 'other'
+    sourceCounts.set(source, (sourceCounts.get(source) ?? 0) + 1)
+  }
+  const sourceBreakdown = Array.from(sourceCounts, ([source, count]) => ({
+    count,
+    label: SOURCE_LABELS[source] ?? humanize(source),
+    percentage: Math.round((count / Math.max(periodBookings.docs.length, 1)) * 100),
+    source,
+  }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6)
+  const capacityTotal = futureDepartures.docs.reduce(
+    (total, departure) => total + departure.capacity,
+    0,
+  )
+  const capacityBooked = futureDepartures.docs.reduce(
+    (total, departure) => total + (seatsByDeparture.get(String(departure.id)) ?? 0),
+    0,
+  )
+  const recentBookingSummaries = recentBookings.docs.map((booking) => ({
+    createdAt: booking.createdAt,
+    experience: getRelationshipTitle(booking.experience),
+    guest: getBookerName(booking.booker),
+    id: booking.id,
+    reference: booking.reference ?? `Booking ${booking.id}`,
+    source: SOURCE_LABELS[booking.source] ?? humanize(booking.source),
+    status: booking.status,
+    totalAmount: booking.totalAmount ?? 0,
+  }))
 
   return {
+    averageBookingValue:
+      periodPayments.docs.length > 0 ? periodRevenue / periodPayments.docs.length : 0,
     bookingsToday: bookingsToday.totalDocs,
-    departuresToday: departuresToday.totalDocs,
+    capacityBooked,
+    capacityTotal,
+    capacityUtilisation: capacityTotal > 0 ? Math.round((capacityBooked / capacityTotal) * 100) : 0,
+    departuresToday: departuresToday.length,
     emailFailures: emailFailures.totalDocs,
     inventoryReviews: inventoryReviews.totalDocs,
+    periodBookings: periodBookings.totalDocs,
+    periodRevenue,
+    performance: buildPerformanceSeries(
+      periodStart,
+      periodDays,
+      periodPayments.docs,
+      periodBookings.docs,
+    ),
     paymentReviews: paymentReviews.totalDocs,
+    recentBookings: recentBookingSummaries,
     revenueToday,
+    sourceBreakdown,
     travellersToday,
     upcomingDepartures: departureSummaries,
+    upcomingDepartureCount: futureDepartures.totalDocs,
   }
 }
 
@@ -308,6 +505,16 @@ function formatDepartureTime(value: string) {
   }).format(new Date(value))
 }
 
+function formatBookingDate(value: string) {
+  return new Intl.DateTimeFormat('en-GH', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Africa/Accra',
+  }).format(new Date(value))
+}
+
 function StatCard({ helper, icon: Icon, label, tone, value }: DashboardMetric) {
   return (
     <article className={`tvx-stat-card tvx-stat-card--${tone}`}>
@@ -331,6 +538,258 @@ function EmptyState({ children }: { children: React.ReactNode }) {
       </span>
       <p>{children}</p>
     </div>
+  )
+}
+
+function PeriodSwitch({ period }: { period: ReportingPeriod }) {
+  return (
+    <nav className="tvx-period-switch" aria-label="Reporting period">
+      {REPORTING_PERIODS.map((days) => (
+        <Link
+          href={`/admin?period=${days}`}
+          key={days}
+          className="tvx-period-switch__link"
+          aria-current={period === days ? 'page' : undefined}
+        >
+          {days} days
+        </Link>
+      ))}
+    </nav>
+  )
+}
+
+function PerformancePanel({
+  operations,
+  period,
+}: {
+  operations: OperationsData
+  period: ReportingPeriod
+}) {
+  const maxRevenue = Math.max(...operations.performance.map((point) => point.revenue), 1)
+  const maxBookings = Math.max(...operations.performance.map((point) => point.bookings), 1)
+  const summaries = [
+    {
+      icon: CircleDollarSign,
+      label: 'Paid revenue',
+      value: `GHS ${currencyFormatter.format(operations.periodRevenue)}`,
+    },
+    {
+      icon: ReceiptText,
+      label: 'Bookings created',
+      value: numberFormatter.format(operations.periodBookings),
+    },
+    {
+      icon: BarChart3,
+      label: 'Average paid booking',
+      value: `GHS ${currencyFormatter.format(operations.averageBookingValue)}`,
+    },
+    {
+      icon: Gauge,
+      label: 'Next 30-day capacity',
+      value: `${operations.capacityUtilisation}%`,
+    },
+  ]
+
+  return (
+    <section className="tvx-panel tvx-performance-panel" aria-labelledby="performance-heading">
+      <div className="tvx-section-heading tvx-section-heading--responsive">
+        <div>
+          <span className="tvx-section-kicker">Business performance</span>
+          <h2 id="performance-heading">Revenue & booking trend</h2>
+        </div>
+        <PeriodSwitch period={period} />
+      </div>
+
+      <div className="tvx-performance-summary">
+        {summaries.map(({ icon: Icon, label, value }) => (
+          <div className="tvx-performance-summary__item" key={label}>
+            <Icon size={16} aria-hidden="true" />
+            <span>
+              <strong>{value}</strong>
+              <small>{label}</small>
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <figure className="tvx-performance-chart">
+        <div
+          className="tvx-performance-chart__plot"
+          role="img"
+          aria-label={`${period}-day revenue chart`}
+        >
+          {operations.performance.map((point, index) => {
+            const revenueHeight = point.revenue
+              ? Math.max(10, Math.round((point.revenue / maxRevenue) * 100))
+              : 4
+            const bookingHeight = point.bookings
+              ? Math.max(8, Math.round((point.bookings / maxBookings) * 86))
+              : 3
+            return (
+              <div
+                className="tvx-performance-chart__bucket"
+                key={point.label}
+                aria-label={`${point.label}: GHS ${currencyFormatter.format(point.revenue)}, ${point.bookings} bookings`}
+              >
+                <span className="tvx-performance-chart__track">
+                  <span
+                    className="tvx-performance-chart__bar"
+                    style={{ height: `${revenueHeight}%` }}
+                  />
+                  <span
+                    className="tvx-performance-chart__booking-dot"
+                    style={{ bottom: `${bookingHeight}%` }}
+                  />
+                </span>
+                <small
+                  className={
+                    index === 0 || index === operations.performance.length - 1
+                      ? 'tvx-performance-chart__label tvx-performance-chart__label--visible'
+                      : 'tvx-performance-chart__label'
+                  }
+                >
+                  {point.shortLabel}
+                </small>
+              </div>
+            )
+          })}
+        </div>
+        <figcaption className="tvx-chart-legend">
+          <span>
+            <i className="tvx-chart-legend__revenue" /> Revenue
+          </span>
+          <span>
+            <i className="tvx-chart-legend__bookings" /> Bookings
+          </span>
+        </figcaption>
+      </figure>
+    </section>
+  )
+}
+
+function SourceAndCapacityPanel({
+  operations,
+  period,
+}: {
+  operations: OperationsData
+  period: ReportingPeriod
+}) {
+  return (
+    <section className="tvx-panel tvx-source-panel" aria-labelledby="sources-heading">
+      <div className="tvx-section-heading">
+        <div>
+          <span className="tvx-section-kicker">Demand mix</span>
+          <h2 id="sources-heading">Booking sources</h2>
+        </div>
+        <span className="tvx-panel-period">{period} days</span>
+      </div>
+
+      <div className="tvx-capacity-overview">
+        <span
+          className="tvx-capacity-ring"
+          style={{
+            background: `conic-gradient(var(--tvx-green) ${operations.capacityUtilisation}%, var(--tvx-navy-soft) 0)`,
+          }}
+          aria-label={`${operations.capacityUtilisation}% of upcoming capacity booked`}
+        >
+          <span>
+            <strong>{operations.capacityUtilisation}%</strong>
+            <small>booked</small>
+          </span>
+        </span>
+        <span className="tvx-capacity-overview__copy">
+          <strong>
+            {operations.capacityBooked} of {operations.capacityTotal} seats
+          </strong>
+          <small>
+            Across {operations.upcomingDepartureCount} scheduled departures in the next 30 days.
+          </small>
+          <Link href="/admin/collections/departures">
+            Manage capacity <ArrowRight size={14} aria-hidden="true" />
+          </Link>
+        </span>
+      </div>
+
+      {operations.sourceBreakdown.length > 0 ? (
+        <div className="tvx-source-list">
+          {operations.sourceBreakdown.map((source) => (
+            <div className="tvx-source-row" key={source.source}>
+              <span className="tvx-source-row__label">
+                <strong>{source.label}</strong>
+                <small>{source.count}</small>
+              </span>
+              <span className="tvx-source-row__track" aria-hidden="true">
+                <span style={{ width: `${source.percentage}%` }} />
+              </span>
+              <span className="tvx-source-row__percentage">{source.percentage}%</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <EmptyState>No bookings were created during this reporting period.</EmptyState>
+      )}
+    </section>
+  )
+}
+
+function RecentBookingsPanel({ bookings }: { bookings: RecentBooking[] }) {
+  return (
+    <section className="tvx-panel tvx-recent-bookings" aria-labelledby="recent-bookings-heading">
+      <div className="tvx-section-heading">
+        <div>
+          <span className="tvx-section-kicker">Latest activity</span>
+          <h2 id="recent-bookings-heading">Recent bookings</h2>
+        </div>
+        <Link href="/admin/collections/bookings" className="tvx-section-link">
+          View all bookings <ArrowRight size={15} aria-hidden="true" />
+        </Link>
+      </div>
+
+      {bookings.length > 0 ? (
+        <div className="tvx-booking-table" role="table" aria-label="Recent bookings">
+          <div className="tvx-booking-table__header" role="row">
+            <span role="columnheader">Booking</span>
+            <span role="columnheader">Experience</span>
+            <span role="columnheader">Source</span>
+            <span role="columnheader">Status</span>
+            <span role="columnheader">Total</span>
+          </div>
+          {bookings.map((booking) => (
+            <Link
+              href={`/admin/collections/bookings/${booking.id}`}
+              className="tvx-booking-row"
+              role="row"
+              key={booking.id}
+            >
+              <span className="tvx-booking-row__primary" role="cell">
+                <strong>{booking.reference}</strong>
+                <small>
+                  {booking.guest} ·{' '}
+                  <time dateTime={booking.createdAt}>{formatBookingDate(booking.createdAt)}</time>
+                </small>
+              </span>
+              <span className="tvx-booking-row__experience" role="cell">
+                {booking.experience}
+              </span>
+              <span role="cell">
+                <small className="tvx-source-pill">{booking.source}</small>
+              </span>
+              <span role="cell">
+                <small className="tvx-status-pill" data-status={booking.status}>
+                  {humanize(booking.status)}
+                </small>
+              </span>
+              <span className="tvx-booking-row__total" role="cell">
+                <strong>GHS {currencyFormatter.format(booking.totalAmount)}</strong>
+                <ArrowRight size={15} aria-hidden="true" />
+              </span>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <EmptyState>No bookings have been created yet.</EmptyState>
+      )}
+    </section>
   )
 }
 
@@ -372,7 +831,7 @@ export function AdminIcon() {
 }
 
 /** Role-aware operations cockpit replacing Payload's generic card dashboard. */
-export async function AdminDashboard({ payload, user }: AdminViewServerProps) {
+export async function AdminDashboard({ payload, searchParams, user }: AdminViewServerProps) {
   const staff = user as User | null | undefined
   const roles = staff?.roles ?? []
   const canViewOperations = hasAnyRole(roles, 'operations', 'finance')
@@ -382,11 +841,21 @@ export async function AdminDashboard({ payload, user }: AdminViewServerProps) {
   const canManageOperations = hasAnyRole(roles, 'operations')
   const canManageContent = hasAnyRole(roles, 'operations', 'content-editor')
   const canManageEvents = hasAnyRole(roles, 'operations', 'event-manager')
-  const { end, inSevenDays, start } = ghanaDayBounds()
+  const reportingPeriod = getReportingPeriod(searchParams?.period)
+  const { end, inSevenDays, inThirtyDays, start } = ghanaDayBounds()
+  const reportingStart = periodStartFor(start, reportingPeriod)
 
   const [operations, enquiries, content, upcomingEvents] = await Promise.all([
     canViewOperations
-      ? loadOperationsData(payload, start, end, inSevenDays)
+      ? loadOperationsData(
+          payload,
+          start,
+          end,
+          inSevenDays,
+          inThirtyDays,
+          reportingStart,
+          reportingPeriod,
+        )
       : Promise.resolve<OperationsData | null>(null),
     canViewEnquiries ? loadEnquiryData(payload, roles) : Promise.resolve<EnquiryData | null>(null),
     canViewContent ? loadContentData(payload) : Promise.resolve<ContentData | null>(null),
@@ -598,6 +1067,13 @@ export async function AdminDashboard({ payload, user }: AdminViewServerProps) {
         </section>
       ) : null}
 
+      {operations ? (
+        <div className="tvx-insights-grid">
+          <PerformancePanel operations={operations} period={reportingPeriod} />
+          <SourceAndCapacityPanel operations={operations} period={reportingPeriod} />
+        </div>
+      ) : null}
+
       <div className={`tvx-dashboard-grid${operations ? '' : ' tvx-dashboard-grid--single'}`}>
         {operations ? (
           <section className="tvx-panel" aria-labelledby="departures-heading">
@@ -700,6 +1176,8 @@ export async function AdminDashboard({ payload, user }: AdminViewServerProps) {
           )}
         </section>
       </div>
+
+      {operations ? <RecentBookingsPanel bookings={operations.recentBookings} /> : null}
 
       {(content || upcomingEvents !== null) && !operations ? (
         <section

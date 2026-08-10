@@ -29,8 +29,15 @@ test.describe('Admin Panel', () => {
     await expect(dashboardArtifact).toBeVisible()
     await expect(page.getByRole('region', { name: 'Business overview' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Quick actions' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Revenue & booking trend' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Booking sources' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent bookings' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Upcoming departures' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Needs attention' })).toBeVisible()
+
+    await page.getByRole('link', { name: '7 days' }).click()
+    await expect(page).toHaveURL('http://localhost:3000/admin?period=7')
+    await expect(page.getByRole('link', { name: '7 days' })).toHaveAttribute('aria-current', 'page')
   })
 
   test('can navigate to list view', async () => {
