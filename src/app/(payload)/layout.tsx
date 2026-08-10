@@ -8,6 +8,7 @@ import React from 'react'
 
 import { importMap } from './admin/importMap.js'
 import './custom.css'
+import './professional-dashboard.css'
 
 type Args = {
   children: React.ReactNode

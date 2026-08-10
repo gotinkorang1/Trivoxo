@@ -1141,12 +1141,8 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
       : `${numberFormatter.format(attentionTotal)} record${attentionTotal === 1 ? '' : 's'} across ${tasks.length} queue${tasks.length === 1 ? '' : 's'} need review.`
 
   return (
-    <Gutter className="tvx-dashboard">
+    <Gutter className="tvx-dashboard ops-dashboard">
       <header className="tvx-dashboard-hero">
-        <div className="tvx-dashboard-hero__glow" aria-hidden="true" />
-        <span className="tvx-dashboard-hero__symbol" aria-hidden="true">
-          <Compass size={54} strokeWidth={1.15} />
-        </span>
         <div className="tvx-dashboard-hero__content">
           <div className="tvx-dashboard-hero__eyebrow">
             <span className="tvx-live-dot" aria-hidden="true" />
@@ -1158,12 +1154,7 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
           <p>{today} · Your live view of bookings, departures, enquiries, and content.</p>
         </div>
         <div className="tvx-dashboard-hero__aside">
-          <div className="tvx-dashboard-hero__aside-topline">
-            <span className="tvx-role-badge">{primaryRole}</span>
-            <span className="tvx-connection-status">
-              <span className="tvx-live-dot" aria-hidden="true" /> Connected
-            </span>
-          </div>
+          <span className="tvx-role-badge">{primaryRole}</span>
           <div className="tvx-dashboard-pulse">
             <span
               className={`tvx-dashboard-pulse__icon${attentionTotal > 0 ? ' tvx-dashboard-pulse__icon--attention' : ''}`}
@@ -1175,23 +1166,6 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
               <small>Operations pulse</small>
               <strong>{attentionTotal > 0 ? 'Action required' : 'Everything looks clear'}</strong>
               <span>{queueSummary}</span>
-            </span>
-          </div>
-          <div className="tvx-dashboard-hero__mini-stats">
-            <span>
-              <small>Priority items</small>
-              <strong>{numberFormatter.format(attentionTotal)}</strong>
-            </span>
-            <span>
-              <small>{operations ? 'Next 30 days' : 'Upcoming events'}</small>
-              <strong>
-                {numberFormatter.format(
-                  operations?.upcomingDepartureCount ??
-                    upcomingEvents ??
-                    content?.publishedGuides ??
-                    0,
-                )}
-              </strong>
             </span>
           </div>
           <Link href="/" target="_blank" rel="noreferrer" className="tvx-view-site-link">
