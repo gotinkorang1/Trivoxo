@@ -63,6 +63,7 @@ test.describe('Admin Panel', () => {
     await page.waitForTimeout(1_000)
 
     const mobileNav = page.locator('.nav')
+    await expect(page.locator('.nav__mobile-close')).toBeHidden()
     const mobileNavClasses = await mobileNav.getAttribute('class')
     if (!mobileNavClasses?.includes('nav--nav-open')) {
       await page.locator('.template-default__nav-toggler').click()

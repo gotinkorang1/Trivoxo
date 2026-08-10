@@ -11,6 +11,12 @@
   display: none;
 }
 
+/* The template toggle already opens and closes the drawer. Payload's internal
+ * close control otherwise sits behind it and creates a visible ghost button. */
+.nav__mobile-close {
+  display: none;
+}
+
 .template-default__nav-toggler .hamburger {
   display: none;
 }
