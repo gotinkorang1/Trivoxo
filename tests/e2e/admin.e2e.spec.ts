@@ -40,6 +40,25 @@ test.describe('Admin Panel', () => {
     await expect(page.getByRole('link', { name: '7 days' })).toHaveAttribute('aria-current', 'page')
   })
 
+  test('dashboard branding and controls remain usable on mobile', async () => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('http://localhost:3000/admin?period=30', {
+      waitUntil: 'domcontentloaded',
+    })
+
+    await expect(page.locator('.tvx-admin-icon')).toBeVisible()
+    await expect(page.locator('.tvx-section-heading__icon')).toHaveCount(6)
+    await expect(page.getByRole('heading', { name: 'Quick actions' })).toBeVisible()
+    await expect(page.locator('.tvx-stat-card').first()).toBeVisible()
+
+    const hasHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth,
+    )
+    expect(hasHorizontalOverflow).toBe(false)
+
+    await page.setViewportSize({ width: 1280, height: 720 })
+  })
+
   test('can navigate to list view', async () => {
     await page.goto('http://localhost:3000/admin/collections/users')
     await expect(page).toHaveURL(/^http:\/\/localhost:3000\/admin\/collections\/users(?:\?.*)?$/)

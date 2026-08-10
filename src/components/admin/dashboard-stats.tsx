@@ -541,6 +541,30 @@ function EmptyState({ children }: { children: React.ReactNode }) {
   )
 }
 
+function SectionTitle({
+  icon: Icon,
+  id,
+  kicker,
+  title,
+}: {
+  icon: LucideIcon
+  id: string
+  kicker: string
+  title: string
+}) {
+  return (
+    <div className="tvx-section-heading__title">
+      <span className="tvx-section-heading__icon" aria-hidden="true">
+        <Icon size={17} strokeWidth={1.9} />
+      </span>
+      <div>
+        <span className="tvx-section-kicker">{kicker}</span>
+        <h2 id={id}>{title}</h2>
+      </div>
+    </div>
+  )
+}
+
 function PeriodSwitch({ period }: { period: ReportingPeriod }) {
   return (
     <nav className="tvx-period-switch" aria-label="Reporting period">
@@ -593,10 +617,12 @@ function PerformancePanel({
   return (
     <section className="tvx-panel tvx-performance-panel" aria-labelledby="performance-heading">
       <div className="tvx-section-heading tvx-section-heading--responsive">
-        <div>
-          <span className="tvx-section-kicker">Business performance</span>
-          <h2 id="performance-heading">Revenue & booking trend</h2>
-        </div>
+        <SectionTitle
+          icon={BarChart3}
+          id="performance-heading"
+          kicker="Business performance"
+          title="Revenue & booking trend"
+        />
         <PeriodSwitch period={period} />
       </div>
 
@@ -677,10 +703,12 @@ function SourceAndCapacityPanel({
   return (
     <section className="tvx-panel tvx-source-panel" aria-labelledby="sources-heading">
       <div className="tvx-section-heading">
-        <div>
-          <span className="tvx-section-kicker">Demand mix</span>
-          <h2 id="sources-heading">Booking sources</h2>
-        </div>
+        <SectionTitle
+          icon={Gauge}
+          id="sources-heading"
+          kicker="Demand mix"
+          title="Booking sources"
+        />
         <span className="tvx-panel-period">{period} days</span>
       </div>
 
@@ -736,10 +764,12 @@ function RecentBookingsPanel({ bookings }: { bookings: RecentBooking[] }) {
   return (
     <section className="tvx-panel tvx-recent-bookings" aria-labelledby="recent-bookings-heading">
       <div className="tvx-section-heading">
-        <div>
-          <span className="tvx-section-kicker">Latest activity</span>
-          <h2 id="recent-bookings-heading">Recent bookings</h2>
-        </div>
+        <SectionTitle
+          icon={ReceiptText}
+          id="recent-bookings-heading"
+          kicker="Latest activity"
+          title="Recent bookings"
+        />
         <Link href="/admin/collections/bookings" className="tvx-section-link">
           View all bookings <ArrowRight size={15} aria-hidden="true" />
         </Link>
@@ -799,17 +829,17 @@ export function AdminLogo() {
       <Image
         className="tvx-admin-brand__logo tvx-admin-brand__logo--light"
         src="/logo/colored.webp"
-        alt="Trivoxo"
-        width={196}
-        height={56}
+        alt=""
+        width={301}
+        height={96}
         loading="eager"
       />
       <Image
         className="tvx-admin-brand__logo tvx-admin-brand__logo--dark"
         src="/logo/white.webp"
-        alt="Trivoxo"
-        width={196}
-        height={56}
+        alt=""
+        width={301}
+        height={96}
         loading="eager"
       />
       <span className="tvx-admin-brand__label">Operations</span>
@@ -820,12 +850,22 @@ export function AdminLogo() {
 export function AdminIcon() {
   return (
     <span className="tvx-admin-icon" aria-label="Trivoxo">
-      <span className="tvx-admin-icon__letter" aria-hidden="true">
-        T
-      </span>
-      <span className="tvx-admin-icon__mark" aria-hidden="true">
-        V
-      </span>
+      <Image
+        className="tvx-admin-icon__logo tvx-admin-icon__logo--light"
+        src="/logo/colored.webp"
+        alt=""
+        width={301}
+        height={96}
+        loading="eager"
+      />
+      <Image
+        className="tvx-admin-icon__logo tvx-admin-icon__logo--dark"
+        src="/logo/white.webp"
+        alt=""
+        width={301}
+        height={96}
+        loading="eager"
+      />
     </span>
   )
 }
@@ -1019,6 +1059,9 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
     <Gutter className="tvx-dashboard">
       <header className="tvx-dashboard-hero">
         <div className="tvx-dashboard-hero__glow" aria-hidden="true" />
+        <span className="tvx-dashboard-hero__symbol" aria-hidden="true">
+          <Compass size={54} strokeWidth={1.15} />
+        </span>
         <div className="tvx-dashboard-hero__content">
           <div className="tvx-dashboard-hero__eyebrow">
             <span className="tvx-live-dot" aria-hidden="true" />
@@ -1048,10 +1091,12 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
       {quickActions.length > 0 ? (
         <section className="tvx-quick-actions" aria-labelledby="quick-actions-heading">
           <div className="tvx-section-heading tvx-section-heading--inline">
-            <div>
-              <span className="tvx-section-kicker">Shortcuts</span>
-              <h2 id="quick-actions-heading">Quick actions</h2>
-            </div>
+            <SectionTitle
+              icon={Sparkles}
+              id="quick-actions-heading"
+              kicker="Shortcuts"
+              title="Quick actions"
+            />
           </div>
           <div className="tvx-quick-actions__list">
             {quickActions.map(({ href, icon: Icon, label }) => (
@@ -1078,10 +1123,12 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
         {operations ? (
           <section className="tvx-panel" aria-labelledby="departures-heading">
             <div className="tvx-section-heading">
-              <div>
-                <span className="tvx-section-kicker">Next 7 days</span>
-                <h2 id="departures-heading">Upcoming departures</h2>
-              </div>
+              <SectionTitle
+                icon={CalendarDays}
+                id="departures-heading"
+                kicker="Next 7 days"
+                title="Upcoming departures"
+              />
               <Link href="/admin/collections/departures" className="tvx-section-link">
                 View schedule <ArrowRight size={15} aria-hidden="true" />
               </Link>
@@ -1148,10 +1195,12 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
 
         <section className="tvx-panel" aria-labelledby="attention-heading">
           <div className="tvx-section-heading">
-            <div>
-              <span className="tvx-section-kicker">Priority queue</span>
-              <h2 id="attention-heading">Needs attention</h2>
-            </div>
+            <SectionTitle
+              icon={AlertTriangle}
+              id="attention-heading"
+              kicker="Priority queue"
+              title="Needs attention"
+            />
             {tasks.length > 0 ? <span className="tvx-task-count">{tasks.length}</span> : null}
           </div>
           {tasks.length > 0 ? (
@@ -1185,10 +1234,12 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
           aria-labelledby="workspace-summary-heading"
         >
           <div className="tvx-section-heading">
-            <div>
-              <span className="tvx-section-kicker">Workspace</span>
-              <h2 id="workspace-summary-heading">At a glance</h2>
-            </div>
+            <SectionTitle
+              icon={Compass}
+              id="workspace-summary-heading"
+              kicker="Workspace"
+              title="At a glance"
+            />
           </div>
           <div className="tvx-content-summary__grid">
             {content ? (
