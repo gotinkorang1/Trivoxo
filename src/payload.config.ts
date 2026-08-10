@@ -44,18 +44,18 @@ export default buildConfig({
       titleSuffix: '— Trivoxo Admin',
     },
     components: {
-      beforeDashboard: ['/components/admin/dashboard-stats#DashboardStats'],
+      graphics: {
+        Icon: '/components/admin/dashboard-stats#AdminIcon',
+        Logo: '/components/admin/dashboard-stats#AdminLogo',
+      },
+      views: {
+        dashboard: {
+          Component: '/components/admin/dashboard-stats#AdminDashboard',
+        },
+      },
     },
   },
   collections: [
-    // System
-    Users,
-    Media,
-    // Catalogue
-    Destinations,
-    ExperienceCategories,
-    Experiences,
-    Reviews,
     // Operations
     Departures,
     Bookings,
@@ -63,16 +63,24 @@ export default buildConfig({
     Notifications,
     Customers,
     Coupons,
-    // Events
-    Events,
-    // Content
-    Posts,
-    Pages,
-    NewsletterSubscribers,
     // Enquiries
     CorporateEnquiries,
     CustomTripRequests,
     TravelServiceRequests,
+    // Catalogue
+    Experiences,
+    Destinations,
+    ExperienceCategories,
+    Reviews,
+    // Events
+    Events,
+    // Content
+    Media,
+    Posts,
+    Pages,
+    NewsletterSubscribers,
+    // System
+    Users,
   ],
   globals: [SiteSettings],
   editor: lexicalEditor(),

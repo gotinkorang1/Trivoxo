@@ -21,7 +21,9 @@ import { StrikethroughFeatureClient as StrikethroughFeatureClient_e70f5e05f09f93
 import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
-import { DashboardStats as DashboardStats_2dac2c04795ce60b8dff94e714211602 } from '../../../components/admin/dashboard-stats'
+import { AdminIcon as AdminIcon_2dac2c04795ce60b8dff94e714211602 } from '../../../components/admin/dashboard-stats'
+import { AdminLogo as AdminLogo_2dac2c04795ce60b8dff94e714211602 } from '../../../components/admin/dashboard-stats'
+import { AdminDashboard as AdminDashboard_2dac2c04795ce60b8dff94e714211602 } from '../../../components/admin/dashboard-stats'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -49,6 +51,8 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#UnderlineFeatureClient": UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
-  "/components/admin/dashboard-stats#DashboardStats": DashboardStats_2dac2c04795ce60b8dff94e714211602,
+  "/components/admin/dashboard-stats#AdminIcon": AdminIcon_2dac2c04795ce60b8dff94e714211602,
+  "/components/admin/dashboard-stats#AdminLogo": AdminLogo_2dac2c04795ce60b8dff94e714211602,
+  "/components/admin/dashboard-stats#AdminDashboard": AdminDashboard_2dac2c04795ce60b8dff94e714211602,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

@@ -67,25 +67,25 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
-    media: Media;
-    destinations: Destination;
-    'experience-categories': ExperienceCategory;
-    experiences: Experience;
-    reviews: Review;
     departures: Departure;
     bookings: Booking;
     payments: Payment;
     notifications: Notification;
     customers: Customer;
     coupons: Coupon;
-    events: Event;
-    posts: Post;
-    pages: Page;
-    'newsletter-subscribers': NewsletterSubscriber;
     'corporate-enquiries': CorporateEnquiry;
     'custom-trip-requests': CustomTripRequest;
     'travel-service-requests': TravelServiceRequest;
+    experiences: Experience;
+    destinations: Destination;
+    'experience-categories': ExperienceCategory;
+    reviews: Review;
+    events: Event;
+    media: Media;
+    posts: Post;
+    pages: Page;
+    'newsletter-subscribers': NewsletterSubscriber;
+    users: User;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -94,25 +94,25 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
-    destinations: DestinationsSelect<false> | DestinationsSelect<true>;
-    'experience-categories': ExperienceCategoriesSelect<false> | ExperienceCategoriesSelect<true>;
-    experiences: ExperiencesSelect<false> | ExperiencesSelect<true>;
-    reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     departures: DeparturesSelect<false> | DeparturesSelect<true>;
     bookings: BookingsSelect<false> | BookingsSelect<true>;
     payments: PaymentsSelect<false> | PaymentsSelect<true>;
     notifications: NotificationsSelect<false> | NotificationsSelect<true>;
     customers: CustomersSelect<false> | CustomersSelect<true>;
     coupons: CouponsSelect<false> | CouponsSelect<true>;
-    events: EventsSelect<false> | EventsSelect<true>;
-    posts: PostsSelect<false> | PostsSelect<true>;
-    pages: PagesSelect<false> | PagesSelect<true>;
-    'newsletter-subscribers': NewsletterSubscribersSelect<false> | NewsletterSubscribersSelect<true>;
     'corporate-enquiries': CorporateEnquiriesSelect<false> | CorporateEnquiriesSelect<true>;
     'custom-trip-requests': CustomTripRequestsSelect<false> | CustomTripRequestsSelect<true>;
     'travel-service-requests': TravelServiceRequestsSelect<false> | TravelServiceRequestsSelect<true>;
+    experiences: ExperiencesSelect<false> | ExperiencesSelect<true>;
+    destinations: DestinationsSelect<false> | DestinationsSelect<true>;
+    'experience-categories': ExperienceCategoriesSelect<false> | ExperienceCategoriesSelect<true>;
+    reviews: ReviewsSelect<false> | ReviewsSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    'newsletter-subscribers': NewsletterSubscribersSelect<false> | NewsletterSubscribersSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -164,211 +164,32 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Scheduled experience dates and seat capacity. Active holds and confirmed bookings consume this capacity automatically.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "departures".
  */
-export interface User {
+export interface Departure {
   id: number;
-  name: string;
+  experience: number | Experience;
+  startsAt: string;
   /**
-   * Determines what this staff member can access across the admin.
+   * Turn off when only the travel date has been agreed.
    */
-  roles: ('super-admin' | 'operations' | 'content-editor' | 'event-manager' | 'finance' | 'checkin')[];
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
+  timeConfirmed?: boolean | null;
+  capacity: number;
+  status: 'scheduled' | 'closed' | 'sold-out' | 'cancelled';
   /**
-   * Describe the image for screen readers and SEO.
+   * Created from an eligible website date request.
    */
-  alt: string;
+  autoCreated?: boolean | null;
+  dateKey?: string | null;
+  inventoryKey: string;
   /**
-   * Optional photographer / source credit.
+   * Leave blank to use the experience meeting point.
    */
-  credit?: string | null;
-  /**
-   * Loose grouping for the media library (Accra, Volta, Hiking, …).
-   */
-  category?:
-    | (
-        | 'accra'
-        | 'cape-coast'
-        | 'volta'
-        | 'eastern-region'
-        | 'hiking'
-        | 'cycling'
-        | 'corporate'
-        | 'events'
-        | 'food'
-        | 'people'
-        | 'other'
-      )
-    | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    card?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    hero?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "destinations".
- */
-export interface Destination {
-  id: number;
-  title: string;
-  /**
-   * URL path segment. Leave blank to auto-generate from "title".
-   */
-  slug?: string | null;
-  region:
-    | 'Greater Accra'
-    | 'Central Region'
-    | 'Volta Region'
-    | 'Eastern Region'
-    | 'Ashanti Region'
-    | 'Western Region'
-    | 'Northern Region'
-    | 'Other';
-  /**
-   * Show on the homepage "Explore Ghana" section.
-   */
-  featured?: boolean | null;
-  heroImage?: (number | null) | Media;
-  shortDescription?: string | null;
-  whyVisit?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  thingsToDo?:
-    | {
-        title: string;
-        description?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  bestTimeToVisit?: string | null;
-  travelTips?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * Search & social preview. Leave blank to inherit from the page content.
-   */
-  meta?: {
-    /**
-     * Overrides the <title>. ~60 characters.
-     */
-    title?: string | null;
-    /**
-     * Meta description / social preview. ~155 characters.
-     */
-    description?: string | null;
-    /**
-     * Open Graph / social share image (1200×630).
-     */
-    image?: (number | null) | Media;
-  };
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "experience-categories".
- */
-export interface ExperienceCategory {
-  id: number;
-  title: string;
-  /**
-   * URL path segment. Leave blank to auto-generate from "title".
-   */
-  slug?: string | null;
-  /**
-   * One-line summary shown under the title.
-   */
-  blurb?: string | null;
-  /**
-   * lucide-react icon name, e.g. "Mountain".
-   */
-  icon?: string | null;
-  image?: (number | null) | Media;
-  order?: number | null;
+  meetingPointOverride?: string | null;
+  operationsNotes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -544,54 +365,182 @@ export interface Experience {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "reviews".
+ * via the `definition` "media".
  */
-export interface Review {
+export interface Media {
+  id: number;
+  /**
+   * Describe the image for screen readers and SEO.
+   */
+  alt: string;
+  /**
+   * Optional photographer / source credit.
+   */
+  credit?: string | null;
+  /**
+   * Loose grouping for the media library (Accra, Volta, Hiking, …).
+   */
+  category?:
+    | (
+        | 'accra'
+        | 'cape-coast'
+        | 'volta'
+        | 'eastern-region'
+        | 'hiking'
+        | 'cycling'
+        | 'corporate'
+        | 'events'
+        | 'food'
+        | 'people'
+        | 'other'
+      )
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    hero?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "experience-categories".
+ */
+export interface ExperienceCategory {
   id: number;
   title: string;
-  body: string;
-  rating: number;
-  authorName: string;
-  travellerType?: ('solo' | 'couples' | 'friends' | 'family' | 'corporate') | null;
-  experience?: (number | null) | Experience;
-  status?: ('pending' | 'approved' | 'rejected') | null;
   /**
-   * Linked to a completed booking.
+   * URL path segment. Leave blank to auto-generate from "title".
    */
-  verified?: boolean | null;
-  bookingReference?: string | null;
+  slug?: string | null;
+  /**
+   * One-line summary shown under the title.
+   */
+  blurb?: string | null;
+  /**
+   * lucide-react icon name, e.g. "Mountain".
+   */
+  icon?: string | null;
+  image?: (number | null) | Media;
+  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Scheduled experience dates and seat capacity. Active holds and confirmed bookings consume this capacity automatically.
- *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "departures".
+ * via the `definition` "destinations".
  */
-export interface Departure {
+export interface Destination {
   id: number;
-  experience: number | Experience;
-  startsAt: string;
+  title: string;
   /**
-   * Turn off when only the travel date has been agreed.
+   * URL path segment. Leave blank to auto-generate from "title".
    */
-  timeConfirmed?: boolean | null;
-  capacity: number;
-  status: 'scheduled' | 'closed' | 'sold-out' | 'cancelled';
+  slug?: string | null;
+  region:
+    | 'Greater Accra'
+    | 'Central Region'
+    | 'Volta Region'
+    | 'Eastern Region'
+    | 'Ashanti Region'
+    | 'Western Region'
+    | 'Northern Region'
+    | 'Other';
   /**
-   * Created from an eligible website date request.
+   * Show on the homepage "Explore Ghana" section.
    */
-  autoCreated?: boolean | null;
-  dateKey?: string | null;
-  inventoryKey: string;
+  featured?: boolean | null;
+  heroImage?: (number | null) | Media;
+  shortDescription?: string | null;
+  whyVisit?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  thingsToDo?:
+    | {
+        title: string;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  bestTimeToVisit?: string | null;
+  travelTips?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   /**
-   * Leave blank to use the experience meeting point.
+   * Search & social preview. Leave blank to inherit from the page content.
    */
-  meetingPointOverride?: string | null;
-  operationsNotes?: string | null;
+  meta?: {
+    /**
+     * Overrides the <title>. ~60 characters.
+     */
+    title?: string | null;
+    /**
+     * Meta description / social preview. ~155 characters.
+     */
+    description?: string | null;
+    /**
+     * Open Graph / social share image (1200×630).
+     */
+    image?: (number | null) | Media;
+  };
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -889,6 +838,156 @@ export interface Event {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "corporate-enquiries".
+ */
+export interface CorporateEnquiry {
+  id: number;
+  pipelineStatus?:
+    | (
+        | 'new'
+        | 'contacted'
+        | 'consultation'
+        | 'proposal-preparation'
+        | 'proposal-sent'
+        | 'negotiation'
+        | 'awaiting-deposit'
+        | 'confirmed'
+        | 'in-progress'
+        | 'completed'
+        | 'lost'
+      )
+    | null;
+  eventType:
+    | 'conference'
+    | 'corporate-retreat'
+    | 'company-outing'
+    | 'team-building'
+    | 'product-launch'
+    | 'private-event'
+    | 'other';
+  organisation?: string | null;
+  expectedGuests?: number | null;
+  preferredDate?: string | null;
+  durationDays?: number | null;
+  location?: string | null;
+  budget?: string | null;
+  services?:
+    | (
+        | 'venue'
+        | 'catering'
+        | 'transport'
+        | 'hotel'
+        | 'av'
+        | 'photography'
+        | 'branding'
+        | 'registration'
+        | 'entertainment'
+        | 'security'
+        | 'logistics'
+        | 'event-staffing'
+      )[]
+    | null;
+  contact: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  message?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-trip-requests".
+ */
+export interface CustomTripRequest {
+  id: number;
+  status?: ('new' | 'in-review' | 'itinerary-sent' | 'confirmed' | 'closed') | null;
+  visitDates?: string | null;
+  travellers?: number | null;
+  days?: number | null;
+  interests?:
+    | (
+        | 'history'
+        | 'culture'
+        | 'food'
+        | 'hiking'
+        | 'adventure'
+        | 'beaches'
+        | 'nature'
+        | 'nightlife'
+        | 'art'
+        | 'wellness'
+      )[]
+    | null;
+  budget?: string | null;
+  needs?: {
+    accommodation?: boolean | null;
+    transport?: boolean | null;
+    airportTransfer?: boolean | null;
+    privateGuide?: boolean | null;
+  };
+  notes?: string | null;
+  contact: {
+    name: string;
+    email: string;
+    phone?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "travel-service-requests".
+ */
+export interface TravelServiceRequest {
+  id: number;
+  status?: ('new' | 'contacted' | 'quoted' | 'confirmed' | 'closed') | null;
+  serviceType: 'airport-transfer' | 'flights' | 'accommodation' | 'car-rental';
+  summary?: string | null;
+  contact: {
+    name: string;
+    email: string;
+    phone?: string | null;
+  };
+  /**
+   * The service-specific request details submitted by the customer.
+   */
+  details?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews".
+ */
+export interface Review {
+  id: number;
+  title: string;
+  body: string;
+  rating: number;
+  authorName: string;
+  travellerType?: ('solo' | 'couples' | 'friends' | 'family' | 'corporate') | null;
+  experience?: (number | null) | Experience;
+  status?: ('pending' | 'approved' | 'rejected') | null;
+  /**
+   * Linked to a completed booking.
+   */
+  verified?: boolean | null;
+  bookingReference?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
@@ -1034,132 +1133,33 @@ export interface NewsletterSubscriber {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "corporate-enquiries".
+ * via the `definition` "users".
  */
-export interface CorporateEnquiry {
+export interface User {
   id: number;
-  pipelineStatus?:
-    | (
-        | 'new'
-        | 'contacted'
-        | 'consultation'
-        | 'proposal-preparation'
-        | 'proposal-sent'
-        | 'negotiation'
-        | 'awaiting-deposit'
-        | 'confirmed'
-        | 'in-progress'
-        | 'completed'
-        | 'lost'
-      )
-    | null;
-  eventType:
-    | 'conference'
-    | 'corporate-retreat'
-    | 'company-outing'
-    | 'team-building'
-    | 'product-launch'
-    | 'private-event'
-    | 'other';
-  organisation?: string | null;
-  expectedGuests?: number | null;
-  preferredDate?: string | null;
-  durationDays?: number | null;
-  location?: string | null;
-  budget?: string | null;
-  services?:
-    | (
-        | 'venue'
-        | 'catering'
-        | 'transport'
-        | 'hotel'
-        | 'av'
-        | 'photography'
-        | 'branding'
-        | 'registration'
-        | 'entertainment'
-        | 'security'
-        | 'logistics'
-        | 'event-staffing'
-      )[]
-    | null;
-  contact: {
-    name: string;
-    email: string;
-    phone: string;
-  };
-  message?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-trip-requests".
- */
-export interface CustomTripRequest {
-  id: number;
-  status?: ('new' | 'in-review' | 'itinerary-sent' | 'confirmed' | 'closed') | null;
-  visitDates?: string | null;
-  travellers?: number | null;
-  days?: number | null;
-  interests?:
-    | (
-        | 'history'
-        | 'culture'
-        | 'food'
-        | 'hiking'
-        | 'adventure'
-        | 'beaches'
-        | 'nature'
-        | 'nightlife'
-        | 'art'
-        | 'wellness'
-      )[]
-    | null;
-  budget?: string | null;
-  needs?: {
-    accommodation?: boolean | null;
-    transport?: boolean | null;
-    airportTransfer?: boolean | null;
-    privateGuide?: boolean | null;
-  };
-  notes?: string | null;
-  contact: {
-    name: string;
-    email: string;
-    phone?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "travel-service-requests".
- */
-export interface TravelServiceRequest {
-  id: number;
-  status?: ('new' | 'contacted' | 'quoted' | 'confirmed' | 'closed') | null;
-  serviceType: 'airport-transfer' | 'flights' | 'accommodation' | 'car-rental';
-  summary?: string | null;
-  contact: {
-    name: string;
-    email: string;
-    phone?: string | null;
-  };
+  name: string;
   /**
-   * The service-specific request details submitted by the customer.
+   * Determines what this staff member can access across the admin.
    */
-  details?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+  roles: ('super-admin' | 'operations' | 'content-editor' | 'event-manager' | 'finance' | 'checkin')[];
   updatedAt: string;
   createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1278,30 +1278,6 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: number | Media;
-      } | null)
-    | ({
-        relationTo: 'destinations';
-        value: number | Destination;
-      } | null)
-    | ({
-        relationTo: 'experience-categories';
-        value: number | ExperienceCategory;
-      } | null)
-    | ({
-        relationTo: 'experiences';
-        value: number | Experience;
-      } | null)
-    | ({
-        relationTo: 'reviews';
-        value: number | Review;
-      } | null)
-    | ({
         relationTo: 'departures';
         value: number | Departure;
       } | null)
@@ -1326,8 +1302,40 @@ export interface PayloadLockedDocument {
         value: number | Coupon;
       } | null)
     | ({
+        relationTo: 'corporate-enquiries';
+        value: number | CorporateEnquiry;
+      } | null)
+    | ({
+        relationTo: 'custom-trip-requests';
+        value: number | CustomTripRequest;
+      } | null)
+    | ({
+        relationTo: 'travel-service-requests';
+        value: number | TravelServiceRequest;
+      } | null)
+    | ({
+        relationTo: 'experiences';
+        value: number | Experience;
+      } | null)
+    | ({
+        relationTo: 'destinations';
+        value: number | Destination;
+      } | null)
+    | ({
+        relationTo: 'experience-categories';
+        value: number | ExperienceCategory;
+      } | null)
+    | ({
+        relationTo: 'reviews';
+        value: number | Review;
+      } | null)
+    | ({
         relationTo: 'events';
         value: number | Event;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'posts';
@@ -1342,16 +1350,8 @@ export interface PayloadLockedDocument {
         value: number | NewsletterSubscriber;
       } | null)
     | ({
-        relationTo: 'corporate-enquiries';
-        value: number | CorporateEnquiry;
-      } | null)
-    | ({
-        relationTo: 'custom-trip-requests';
-        value: number | CustomTripRequest;
-      } | null)
-    | ({
-        relationTo: 'travel-service-requests';
-        value: number | TravelServiceRequest;
+        relationTo: 'users';
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1394,263 +1394,6 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
- */
-export interface UsersSelect<T extends boolean = true> {
-  name?: T;
-  roles?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  credit?: T;
-  category?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-  sizes?:
-    | T
-    | {
-        thumbnail?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        card?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        hero?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "destinations_select".
- */
-export interface DestinationsSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  region?: T;
-  featured?: T;
-  heroImage?: T;
-  shortDescription?: T;
-  whyVisit?: T;
-  thingsToDo?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        id?: T;
-      };
-  bestTimeToVisit?: T;
-  travelTips?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "experience-categories_select".
- */
-export interface ExperienceCategoriesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  blurb?: T;
-  icon?: T;
-  image?: T;
-  order?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "experiences_select".
- */
-export interface ExperiencesSelect<T extends boolean = true> {
-  title?: T;
-  shortDescription?: T;
-  description?: T;
-  highlights?:
-    | T
-    | {
-        text?: T;
-        id?: T;
-      };
-  whoFor?: T;
-  itinerary?:
-    | T
-    | {
-        time?: T;
-        title?: T;
-        description?: T;
-        id?: T;
-      };
-  included?:
-    | T
-    | {
-        text?: T;
-        id?: T;
-      };
-  excluded?:
-    | T
-    | {
-        text?: T;
-        id?: T;
-      };
-  whatToBring?:
-    | T
-    | {
-        text?: T;
-        id?: T;
-      };
-  pricingStrategy?: T;
-  priceFrom?: T;
-  priceTiers?:
-    | T
-    | {
-        minGuests?: T;
-        maxGuests?: T;
-        pricePerPerson?: T;
-        requestQuote?: T;
-        id?: T;
-      };
-  privatePrice?: T;
-  visitorPricing?:
-    | T
-    | {
-        enabled?: T;
-        residentPrice?: T;
-      };
-  availabilityType?: T;
-  weekdays?: T;
-  includePublicHolidays?: T;
-  minGuests?: T;
-  maxGuests?: T;
-  minNoticeHours?: T;
-  maxAdvanceDays?: T;
-  soldOut?: T;
-  duration?: T;
-  difficulty?: T;
-  meetingPoint?: T;
-  pickupInfo?: T;
-  latitude?: T;
-  longitude?: T;
-  activityDetails?:
-    | T
-    | {
-        distanceKm?: T;
-        elevationM?: T;
-        terrain?: T;
-        fitnessNote?: T;
-        equipmentProvided?: T;
-        minimumAge?: T;
-        mealIncluded?: T;
-      };
-  faqs?:
-    | T
-    | {
-        question?: T;
-        answer?: T;
-        id?: T;
-      };
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
-      };
-  slug?: T;
-  category?: T;
-  destination?: T;
-  badge?: T;
-  featured?: T;
-  rating?: T;
-  reviewCount?: T;
-  heroImage?: T;
-  gallery?:
-    | T
-    | {
-        image?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "reviews_select".
- */
-export interface ReviewsSelect<T extends boolean = true> {
-  title?: T;
-  body?: T;
-  rating?: T;
-  authorName?: T;
-  travellerType?: T;
-  experience?: T;
-  status?: T;
-  verified?: T;
-  bookingReference?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1793,122 +1536,6 @@ export interface CouponsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "events_select".
- */
-export interface EventsSelect<T extends boolean = true> {
-  title?: T;
-  shortDescription?: T;
-  description?: T;
-  coverImage?: T;
-  startsAt?: T;
-  endsAt?: T;
-  venue?: T;
-  location?: T;
-  destination?: T;
-  about?: T;
-  highlights?:
-    | T
-    | {
-        text?: T;
-        id?: T;
-      };
-  included?:
-    | T
-    | {
-        text?: T;
-        id?: T;
-      };
-  whatToExpect?: T;
-  ticketTypes?:
-    | T
-    | {
-        name?: T;
-        price?: T;
-        quantity?: T;
-        saleStart?: T;
-        saleEnd?: T;
-        perOrderLimit?: T;
-        soldOut?: T;
-        id?: T;
-      };
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
-      };
-  slug?: T;
-  featured?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
- */
-export interface PostsSelect<T extends boolean = true> {
-  title?: T;
-  excerpt?: T;
-  coverImage?: T;
-  body?:
-    | T
-    | {
-        heading?: T;
-        text?: T;
-        id?: T;
-      };
-  content?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
-      };
-  slug?: T;
-  category?: T;
-  relatedDestination?: T;
-  publishedAt?: T;
-  featured?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages_select".
- */
-export interface PagesSelect<T extends boolean = true> {
-  title?: T;
-  subtitle?: T;
-  content?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
-      };
-  slug?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "newsletter-subscribers_select".
- */
-export interface NewsletterSubscribersSelect<T extends boolean = true> {
-  email?: T;
-  source?: T;
-  active?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "corporate-enquiries_select".
  */
 export interface CorporateEnquiriesSelect<T extends boolean = true> {
@@ -1980,6 +1607,379 @@ export interface TravelServiceRequestsSelect<T extends boolean = true> {
   details?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "experiences_select".
+ */
+export interface ExperiencesSelect<T extends boolean = true> {
+  title?: T;
+  shortDescription?: T;
+  description?: T;
+  highlights?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  whoFor?: T;
+  itinerary?:
+    | T
+    | {
+        time?: T;
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  included?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  excluded?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  whatToBring?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  pricingStrategy?: T;
+  priceFrom?: T;
+  priceTiers?:
+    | T
+    | {
+        minGuests?: T;
+        maxGuests?: T;
+        pricePerPerson?: T;
+        requestQuote?: T;
+        id?: T;
+      };
+  privatePrice?: T;
+  visitorPricing?:
+    | T
+    | {
+        enabled?: T;
+        residentPrice?: T;
+      };
+  availabilityType?: T;
+  weekdays?: T;
+  includePublicHolidays?: T;
+  minGuests?: T;
+  maxGuests?: T;
+  minNoticeHours?: T;
+  maxAdvanceDays?: T;
+  soldOut?: T;
+  duration?: T;
+  difficulty?: T;
+  meetingPoint?: T;
+  pickupInfo?: T;
+  latitude?: T;
+  longitude?: T;
+  activityDetails?:
+    | T
+    | {
+        distanceKm?: T;
+        elevationM?: T;
+        terrain?: T;
+        fitnessNote?: T;
+        equipmentProvided?: T;
+        minimumAge?: T;
+        mealIncluded?: T;
+      };
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  slug?: T;
+  category?: T;
+  destination?: T;
+  badge?: T;
+  featured?: T;
+  rating?: T;
+  reviewCount?: T;
+  heroImage?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destinations_select".
+ */
+export interface DestinationsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  region?: T;
+  featured?: T;
+  heroImage?: T;
+  shortDescription?: T;
+  whyVisit?: T;
+  thingsToDo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  bestTimeToVisit?: T;
+  travelTips?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "experience-categories_select".
+ */
+export interface ExperienceCategoriesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  blurb?: T;
+  icon?: T;
+  image?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews_select".
+ */
+export interface ReviewsSelect<T extends boolean = true> {
+  title?: T;
+  body?: T;
+  rating?: T;
+  authorName?: T;
+  travellerType?: T;
+  experience?: T;
+  status?: T;
+  verified?: T;
+  bookingReference?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  shortDescription?: T;
+  description?: T;
+  coverImage?: T;
+  startsAt?: T;
+  endsAt?: T;
+  venue?: T;
+  location?: T;
+  destination?: T;
+  about?: T;
+  highlights?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  included?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  whatToExpect?: T;
+  ticketTypes?:
+    | T
+    | {
+        name?: T;
+        price?: T;
+        quantity?: T;
+        saleStart?: T;
+        saleEnd?: T;
+        perOrderLimit?: T;
+        soldOut?: T;
+        id?: T;
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  slug?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  credit?: T;
+  category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        hero?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  excerpt?: T;
+  coverImage?: T;
+  body?:
+    | T
+    | {
+        heading?: T;
+        text?: T;
+        id?: T;
+      };
+  content?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  slug?: T;
+  category?: T;
+  relatedDestination?: T;
+  publishedAt?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  content?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletter-subscribers_select".
+ */
+export interface NewsletterSubscribersSelect<T extends boolean = true> {
+  email?: T;
+  source?: T;
+  active?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  roles?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

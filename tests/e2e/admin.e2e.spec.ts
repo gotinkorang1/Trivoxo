@@ -27,6 +27,10 @@ test.describe('Admin Panel', () => {
       name: /Good (morning|afternoon|evening)/,
     })
     await expect(dashboardArtifact).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Business overview' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Quick actions' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Upcoming departures' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Needs attention' })).toBeVisible()
   })
 
   test('can navigate to list view', async () => {
