@@ -56,6 +56,17 @@ test.describe('Admin Panel', () => {
     )
     expect(hasHorizontalOverflow).toBe(false)
 
+    const mobileNav = page.locator('.nav')
+    const mobileNavClasses = await mobileNav.getAttribute('class')
+    if (!mobileNavClasses?.includes('nav--nav-open')) {
+      await page.locator('.template-default__nav-toggler').click()
+    }
+    await expect(mobileNav).toHaveClass(/nav--nav-open/)
+    await expect(page.getByRole('link', { name: 'Bookings' })).toBeVisible()
+    await page.getByRole('link', { name: 'Bookings' }).click()
+    await expect(page).toHaveURL(/\/admin\/collections\/bookings/)
+    await expect(page.locator('#nav-bookings')).toBeVisible()
+
     await page.setViewportSize({ width: 1280, height: 720 })
   })
 
