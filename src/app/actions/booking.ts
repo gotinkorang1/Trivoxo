@@ -6,6 +6,7 @@ import config from '@payload-config'
 import { evaluateDateAvailability, getBookingWindow, isIsoDate } from '@/lib/availability'
 import { createBookingHold, InventoryError } from '@/lib/booking-inventory'
 import { CAPACITY, quoteBooking } from '@/lib/policies'
+import { createBookingAccessToken } from '@/lib/booking-access'
 
 export type BookingFormState = {
   error?: string
@@ -161,5 +162,6 @@ export async function createBookingAction(
   }
 
   // Must be outside try/catch — redirect() throws a control-flow signal.
-  redirect(`/booking/${reference}`)
+  const access = createBookingAccessToken(reference)
+  redirect(`/booking/${reference}?access=${encodeURIComponent(access)}`)
 }

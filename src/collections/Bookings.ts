@@ -9,6 +9,7 @@ export const BOOKING_STATUSES = [
   { label: 'Held', value: 'held' },
   { label: 'Pending payment', value: 'pending_payment' },
   { label: 'Paid', value: 'paid' },
+  { label: 'Paid — inventory review', value: 'payment_review' },
   { label: 'Confirmed', value: 'confirmed' },
   { label: 'In progress', value: 'in_progress' },
   { label: 'Completed', value: 'completed' },

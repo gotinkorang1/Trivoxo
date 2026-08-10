@@ -5,7 +5,7 @@ import {
   type Payload,
   type PayloadRequest,
 } from 'payload'
-import type { Booking, Departure, Experience } from '@/payload-types'
+import type { Booking, Departure, Experience, Payment } from '@/payload-types'
 import { BOOKING_HOLD, CAPACITY } from '@/lib/policies'
 
 const ACTIVE_BOOKING_STATES = ['held', 'confirmed'] as const
@@ -80,7 +80,14 @@ function dayBounds(date: string): { start: string; end: string } {
 function statusToInventoryState(status: Booking['status']): NonNullable<Booking['inventoryState']> {
   if (status === 'draft') return 'none'
   if (status === 'held' || status === 'pending_payment') return 'held'
-  if (status === 'cancelled' || status === 'expired' || status === 'refunded') return 'released'
+  if (
+    status === 'cancelled' ||
+    status === 'expired' ||
+    status === 'refunded' ||
+    status === 'payment_review'
+  ) {
+    return 'released'
+  }
   return 'confirmed'
 }
 
@@ -125,6 +132,16 @@ async function lockDeparture(req: PayloadRequest, departureID: number): Promise<
   await db.execute(sql`SELECT id FROM departures WHERE id = ${departureID} FOR UPDATE`)
 }
 
+async function lockBooking(req: PayloadRequest, bookingID: number): Promise<void> {
+  const db = await transactionDB(req)
+  await db.execute(sql`SELECT id FROM bookings WHERE id = ${bookingID} FOR UPDATE`)
+}
+
+async function lockPayment(req: PayloadRequest, paymentID: number): Promise<void> {
+  const db = await transactionDB(req)
+  await db.execute(sql`SELECT id FROM payments WHERE id = ${paymentID} FOR UPDATE`)
+}
+
 async function lockDepartureDate(
   req: PayloadRequest,
   experienceID: number,
@@ -153,6 +170,270 @@ async function withInventoryTransaction<T>(
     await payload.db.rollbackTransaction(transactionID)
     throw error
   }
+}
+
+type PaymentAuditData = {
+  gatewayTransactionId: string
+  channel?: string
+  paidAt?: string
+  verifiedAt: string
+  verificationSnapshot: Record<string, unknown>
+}
+
+export type PaymentSettlementResult = {
+  booking: Booking
+  payment: Payment
+  outcome: 'confirmed' | 'review' | 'already_processed'
+  reason?: string
+}
+
+function paymentAuditFields(data: PaymentAuditData) {
+  return {
+    gatewayTransactionId: data.gatewayTransactionId,
+    channel: data.channel,
+    paidAt: data.paidAt,
+    lastVerifiedAt: data.verifiedAt,
+    verificationSnapshot: data.verificationSnapshot,
+  }
+}
+
+/**
+ * Convert a verified gateway payment to confirmed inventory in one database
+ * transaction. Duplicate callbacks/webhooks serialize on the payment row.
+ */
+export async function settleVerifiedBookingPayment(
+  payload: Payload,
+  paymentID: number,
+  audit: PaymentAuditData,
+): Promise<PaymentSettlementResult> {
+  return withInventoryTransaction(payload, async (req) => {
+    await lockPayment(req, paymentID)
+    let payment = await payload.findByID({
+      collection: 'payments',
+      id: paymentID,
+      depth: 0,
+      overrideAccess: true,
+      req,
+    })
+    const bookingID = relationshipID(payment.booking)
+    if (!bookingID) {
+      throw new InventoryError('INVALID_INVENTORY', 'Payment has no booking relationship.')
+    }
+
+    if (payment.status === 'succeeded' || payment.status === 'review') {
+      const booking = await payload.findByID({
+        collection: 'bookings',
+        id: bookingID,
+        depth: 0,
+        overrideAccess: true,
+        req,
+      })
+      return {
+        booking,
+        payment,
+        outcome: 'already_processed',
+        reason: payment.reviewReason ?? undefined,
+      }
+    }
+
+    const initialBooking = await payload.findByID({
+      collection: 'bookings',
+      id: bookingID,
+      depth: 0,
+      overrideAccess: true,
+      req,
+    })
+    const departureID = relationshipID(initialBooking.departure)
+    if (departureID) await lockDeparture(req, departureID)
+    await lockBooking(req, bookingID)
+
+    let booking = await payload.findByID({
+      collection: 'bookings',
+      id: bookingID,
+      depth: 0,
+      overrideAccess: true,
+      req,
+    })
+
+    const priorSuccessful = await payload.find({
+      collection: 'payments',
+      depth: 0,
+      limit: 1,
+      overrideAccess: true,
+      req,
+      where: {
+        and: [
+          { booking: { equals: bookingID } },
+          { status: { equals: 'succeeded' } },
+          { id: { not_equals: paymentID } },
+        ],
+      },
+    })
+    if (priorSuccessful.totalDocs > 0) {
+      const reason = 'Duplicate successful payment. Finance must refund or reconcile this attempt.'
+      payment = await payload.update({
+        collection: 'payments',
+        id: payment.id,
+        depth: 0,
+        overrideAccess: true,
+        req,
+        data: {
+          ...paymentAuditFields(audit),
+          status: 'review',
+          reviewReason: reason,
+        },
+      })
+      return { booking, payment, outcome: 'review', reason }
+    }
+
+    if (booking.inventoryState === 'confirmed' && booking.paymentState === 'paid') {
+      payment = await payload.update({
+        collection: 'payments',
+        id: payment.id,
+        depth: 0,
+        overrideAccess: true,
+        req,
+        data: {
+          ...paymentAuditFields(audit),
+          status: 'succeeded',
+          reviewReason: null,
+          failureReason: null,
+        },
+      })
+      return { booking, payment, outcome: 'confirmed' }
+    }
+
+    try {
+      booking = await payload.update({
+        collection: 'bookings',
+        id: booking.id,
+        depth: 0,
+        overrideAccess: true,
+        req,
+        data: {
+          status: 'paid',
+          paymentState: 'paid',
+          holdExpiresAt: null,
+        },
+      })
+      payment = await payload.update({
+        collection: 'payments',
+        id: payment.id,
+        depth: 0,
+        overrideAccess: true,
+        req,
+        data: {
+          ...paymentAuditFields(audit),
+          status: 'succeeded',
+          reviewReason: null,
+          failureReason: null,
+        },
+      })
+      return { booking, payment, outcome: 'confirmed' }
+    } catch (error) {
+      if (
+        !(error instanceof InventoryError) ||
+        !['CAPACITY_UNAVAILABLE', 'DEPARTURE_CLOSED', 'NO_DEPARTURE'].includes(error.code)
+      ) {
+        throw error
+      }
+
+      const reason = `Payment succeeded but inventory could not be confirmed: ${error.message}`
+      booking = await payload.update({
+        collection: 'bookings',
+        id: booking.id,
+        depth: 0,
+        overrideAccess: true,
+        req,
+        data: {
+          status: 'payment_review',
+          paymentState: 'paid',
+          holdExpiresAt: null,
+        },
+      })
+      payment = await payload.update({
+        collection: 'payments',
+        id: payment.id,
+        depth: 0,
+        overrideAccess: true,
+        req,
+        data: {
+          ...paymentAuditFields(audit),
+          status: 'review',
+          reviewReason: reason,
+        },
+      })
+      return { booking, payment, outcome: 'review', reason }
+    }
+  })
+}
+
+/** Release an unconfirmed hold when money was received but verification failed. */
+export async function markBookingPaymentForReview(
+  payload: Payload,
+  paymentID: number,
+  reason: string,
+  audit: Partial<PaymentAuditData> = {},
+): Promise<PaymentSettlementResult> {
+  return withInventoryTransaction(payload, async (req) => {
+    await lockPayment(req, paymentID)
+    let payment = await payload.findByID({
+      collection: 'payments',
+      id: paymentID,
+      depth: 0,
+      overrideAccess: true,
+      req,
+    })
+    const bookingID = relationshipID(payment.booking)
+    if (!bookingID) {
+      throw new InventoryError('INVALID_INVENTORY', 'Payment has no booking relationship.')
+    }
+    const initialBooking = await payload.findByID({
+      collection: 'bookings',
+      id: bookingID,
+      depth: 0,
+      overrideAccess: true,
+      req,
+    })
+    const departureID = relationshipID(initialBooking.departure)
+    if (departureID) await lockDeparture(req, departureID)
+    await lockBooking(req, bookingID)
+
+    let booking = await payload.findByID({
+      collection: 'bookings',
+      id: bookingID,
+      depth: 0,
+      overrideAccess: true,
+      req,
+    })
+    if (booking.inventoryState !== 'confirmed') {
+      booking = await payload.update({
+        collection: 'bookings',
+        id: booking.id,
+        depth: 0,
+        overrideAccess: true,
+        req,
+        data: { status: 'payment_review', paymentState: 'paid', holdExpiresAt: null },
+      })
+    }
+    payment = await payload.update({
+      collection: 'payments',
+      id: payment.id,
+      depth: 0,
+      overrideAccess: true,
+      req,
+      data: {
+        status: 'review',
+        reviewReason: reason,
+        ...(audit.gatewayTransactionId ? { gatewayTransactionId: audit.gatewayTransactionId } : {}),
+        ...(audit.channel ? { channel: audit.channel } : {}),
+        ...(audit.paidAt ? { paidAt: audit.paidAt } : {}),
+        ...(audit.verifiedAt ? { lastVerifiedAt: audit.verifiedAt } : {}),
+        ...(audit.verificationSnapshot ? { verificationSnapshot: audit.verificationSnapshot } : {}),
+      },
+    })
+    return { booking, payment, outcome: 'review', reason }
+  })
 }
 
 async function activeBookingsForDeparture(

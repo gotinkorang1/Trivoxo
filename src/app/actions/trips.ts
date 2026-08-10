@@ -3,6 +3,7 @@
 import { getPayload } from 'payload'
 import { redirect } from 'next/navigation'
 import config from '@payload-config'
+import { createBookingAccessToken } from '@/lib/booking-access'
 
 export type TripLookupState = {
   error?: string
@@ -21,8 +22,12 @@ export async function lookupTripAction(
   _prev: TripLookupState,
   formData: FormData,
 ): Promise<TripLookupState> {
-  const reference = String(formData.get('reference') ?? '').trim().toUpperCase()
-  const email = String(formData.get('email') ?? '').trim().toLowerCase()
+  const reference = String(formData.get('reference') ?? '')
+    .trim()
+    .toUpperCase()
+  const email = String(formData.get('email') ?? '')
+    .trim()
+    .toLowerCase()
   const values = { reference, email }
 
   if (!reference || !email) {
@@ -40,7 +45,8 @@ export async function lookupTripAction(
     })
     const booking = found.docs[0]
     if (booking && booking.booker?.email?.toLowerCase() === email) {
-      redirectTo = `/booking/${reference}`
+      const access = createBookingAccessToken(reference)
+      redirectTo = `/booking/${reference}?access=${encodeURIComponent(access)}`
     }
   } catch (err) {
     console.error('Trip lookup failed', err)
@@ -48,7 +54,10 @@ export async function lookupTripAction(
   }
 
   if (!redirectTo) {
-    return { error: 'We couldn’t find a trip with those details. Check your reference and email.', values }
+    return {
+      error: 'We couldn’t find a trip with those details. Check your reference and email.',
+      values,
+    }
   }
 
   // Outside try/catch — redirect() throws a control-flow signal.

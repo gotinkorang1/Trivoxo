@@ -18,6 +18,7 @@ import { Bookings } from './collections/Bookings'
 import { Departures } from './collections/Departures'
 import { Customers } from './collections/Customers'
 import { Coupons } from './collections/Coupons'
+import { Payments } from './collections/Payments'
 // Events
 import { Events } from './collections/Events'
 // Content
@@ -57,6 +58,7 @@ export default buildConfig({
     // Operations
     Departures,
     Bookings,
+    Payments,
     Customers,
     Coupons,
     // Events

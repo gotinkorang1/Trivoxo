@@ -75,6 +75,7 @@ export interface Config {
     reviews: Review;
     departures: Departure;
     bookings: Booking;
+    payments: Payment;
     customers: Customer;
     coupons: Coupon;
     events: Event;
@@ -100,6 +101,7 @@ export interface Config {
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     departures: DeparturesSelect<false> | DeparturesSelect<true>;
     bookings: BookingsSelect<false> | BookingsSelect<true>;
+    payments: PaymentsSelect<false> | PaymentsSelect<true>;
     customers: CustomersSelect<false> | CustomersSelect<true>;
     coupons: CouponsSelect<false> | CouponsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
@@ -604,6 +606,7 @@ export interface Booking {
     | 'held'
     | 'pending_payment'
     | 'paid'
+    | 'payment_review'
     | 'confirmed'
     | 'in_progress'
     | 'completed'
@@ -676,6 +679,46 @@ export interface Customer {
   phone?: string | null;
   country?: string | null;
   marketingOptIn?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Paystack attempts, verification results, and Finance review items.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payments".
+ */
+export interface Payment {
+  id: number;
+  reference: string;
+  booking: number | Booking;
+  gateway: 'paystack';
+  status: 'initializing' | 'initialized' | 'pending' | 'succeeded' | 'failed' | 'abandoned' | 'review' | 'refunded';
+  amountMinor: number;
+  currency: 'GHS';
+  gatewayReference?: string | null;
+  /**
+   * Stored as text because Paystack IDs can exceed signed 32-bit integer range.
+   */
+  gatewayTransactionId?: string | null;
+  channel?: string | null;
+  checkoutURL?: string | null;
+  paidAt?: string | null;
+  lastVerifiedAt?: string | null;
+  reviewReason?: string | null;
+  failureReason?: string | null;
+  /**
+   * A deliberately limited, non-card verification record for audit purposes.
+   */
+  verificationSnapshot?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1227,6 +1270,10 @@ export interface PayloadLockedDocument {
         value: number | Booking;
       } | null)
     | ({
+        relationTo: 'payments';
+        value: number | Payment;
+      } | null)
+    | ({
         relationTo: 'customers';
         value: number | Customer;
       } | null)
@@ -1619,6 +1666,29 @@ export interface BookingsSelect<T extends boolean = true> {
   totalAmount?: T;
   paymentState?: T;
   internalNotes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payments_select".
+ */
+export interface PaymentsSelect<T extends boolean = true> {
+  reference?: T;
+  booking?: T;
+  gateway?: T;
+  status?: T;
+  amountMinor?: T;
+  currency?: T;
+  gatewayReference?: T;
+  gatewayTransactionId?: T;
+  channel?: T;
+  checkoutURL?: T;
+  paidAt?: T;
+  lastVerifiedAt?: T;
+  reviewReason?: T;
+  failureReason?: T;
+  verificationSnapshot?: T;
   updatedAt?: T;
   createdAt?: T;
 }

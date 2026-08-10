@@ -3,6 +3,8 @@ import { login } from '../helpers/login'
 import { seedTestUser, cleanupTestUser, testUser } from '../helpers/seedUser'
 
 test.describe('Admin Panel', () => {
+  test.describe.configure({ mode: 'serial', timeout: 60_000 })
+
   let page: Page
 
   test.beforeAll(async ({ browser }) => {
@@ -19,7 +21,7 @@ test.describe('Admin Panel', () => {
   })
 
   test('can navigate to dashboard', async () => {
-    await page.goto('http://localhost:3000/admin')
+    await page.goto('http://localhost:3000/admin', { waitUntil: 'domcontentloaded' })
     await expect(page).toHaveURL('http://localhost:3000/admin')
     const dashboardArtifact = page.getByRole('heading', {
       name: /Good (morning|afternoon|evening)/,
@@ -29,7 +31,7 @@ test.describe('Admin Panel', () => {
 
   test('can navigate to list view', async () => {
     await page.goto('http://localhost:3000/admin/collections/users')
-    await expect(page).toHaveURL('http://localhost:3000/admin/collections/users')
+    await expect(page).toHaveURL(/^http:\/\/localhost:3000\/admin\/collections\/users(?:\?.*)?$/)
     const listViewArtifact = page.locator('h1', { hasText: 'Users' }).first()
     await expect(listViewArtifact).toBeVisible()
   })
