@@ -34,10 +34,19 @@ type ReportingPeriod = 7 | 30 | 90
 
 type DashboardMetric = {
   helper: string
+  href?: string
   icon: LucideIcon
   label: string
   tone: Tone
   value: string
+}
+
+type DashboardQuickAction = {
+  description: string
+  href: string
+  icon: LucideIcon
+  label: string
+  tone: Tone
 }
 
 type DashboardTask = {
@@ -515,9 +524,9 @@ function formatBookingDate(value: string) {
   }).format(new Date(value))
 }
 
-function StatCard({ helper, icon: Icon, label, tone, value }: DashboardMetric) {
-  return (
-    <article className={`tvx-stat-card tvx-stat-card--${tone}`}>
+function StatCard({ helper, href, icon: Icon, label, tone, value }: DashboardMetric) {
+  const content = (
+    <>
       <div className="tvx-stat-card__topline">
         <span className="tvx-stat-card__icon" aria-hidden="true">
           <Icon size={19} strokeWidth={1.9} />
@@ -525,8 +534,23 @@ function StatCard({ helper, icon: Icon, label, tone, value }: DashboardMetric) {
         <span className="tvx-stat-card__helper">{helper}</span>
       </div>
       <strong className="tvx-stat-card__value">{value}</strong>
-      <span className="tvx-stat-card__label">{label}</span>
-    </article>
+      <span className="tvx-stat-card__footer">
+        <span className="tvx-stat-card__label">{label}</span>
+        {href ? <ArrowRight size={15} aria-hidden="true" /> : null}
+      </span>
+    </>
+  )
+
+  return href ? (
+    <Link
+      href={href}
+      className={`tvx-stat-card tvx-stat-card--${tone} tvx-stat-card--linked`}
+      aria-label={`${label}: ${value}. ${helper}`}
+    >
+      {content}
+    </Link>
+  ) : (
+    <article className={`tvx-stat-card tvx-stat-card--${tone}`}>{content}</article>
   )
 }
 
@@ -700,6 +724,9 @@ function SourceAndCapacityPanel({
   operations: OperationsData
   period: ReportingPeriod
 }) {
+  const topSource = operations.sourceBreakdown[0]
+  const remainingCapacity = Math.max(0, operations.capacityTotal - operations.capacityBooked)
+
   return (
     <section className="tvx-panel tvx-source-panel" aria-labelledby="sources-heading">
       <div className="tvx-section-heading">
@@ -739,20 +766,34 @@ function SourceAndCapacityPanel({
       </div>
 
       {operations.sourceBreakdown.length > 0 ? (
-        <div className="tvx-source-list">
-          {operations.sourceBreakdown.map((source) => (
-            <div className="tvx-source-row" key={source.source}>
-              <span className="tvx-source-row__label">
-                <strong>{source.label}</strong>
-                <small>{source.count}</small>
-              </span>
-              <span className="tvx-source-row__track" aria-hidden="true">
-                <span style={{ width: `${source.percentage}%` }} />
-              </span>
-              <span className="tvx-source-row__percentage">{source.percentage}%</span>
-            </div>
-          ))}
-        </div>
+        <>
+          <div className="tvx-source-list">
+            {operations.sourceBreakdown.map((source) => (
+              <div className="tvx-source-row" key={source.source}>
+                <span className="tvx-source-row__label">
+                  <strong>{source.label}</strong>
+                  <small>{source.count}</small>
+                </span>
+                <span className="tvx-source-row__track" aria-hidden="true">
+                  <span style={{ width: `${source.percentage}%` }} />
+                </span>
+                <span className="tvx-source-row__percentage">{source.percentage}%</span>
+              </div>
+            ))}
+          </div>
+          <div className="tvx-channel-summary">
+            <span>
+              <small>Top booking channel</small>
+              <strong>{topSource.label}</strong>
+              <span>{topSource.percentage}% of period bookings</span>
+            </span>
+            <span>
+              <small>Seats still available</small>
+              <strong>{numberFormatter.format(remainingCapacity)}</strong>
+              <span>Across the next 30 days</span>
+            </span>
+          </div>
+        </>
       ) : (
         <EmptyState>No bookings were created during this reporting period.</EmptyState>
       )}
@@ -792,11 +833,16 @@ function RecentBookingsPanel({ bookings }: { bookings: RecentBooking[] }) {
               key={booking.id}
             >
               <span className="tvx-booking-row__primary" role="cell">
-                <strong>{booking.reference}</strong>
-                <small>
-                  {booking.guest} ·{' '}
-                  <time dateTime={booking.createdAt}>{formatBookingDate(booking.createdAt)}</time>
-                </small>
+                <span className="tvx-booking-avatar" aria-hidden="true">
+                  {booking.guest.charAt(0).toUpperCase()}
+                </span>
+                <span className="tvx-booking-row__primary-copy">
+                  <strong>{booking.reference}</strong>
+                  <small>
+                    {booking.guest} ·{' '}
+                    <time dateTime={booking.createdAt}>{formatBookingDate(booking.createdAt)}</time>
+                  </small>
+                </span>
               </span>
               <span className="tvx-booking-row__experience" role="cell">
                 {booking.experience}
@@ -927,6 +973,7 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
     metrics.push(
       {
         helper: 'Paid via Paystack',
+        href: '/admin/collections/payments',
         icon: CircleDollarSign,
         label: 'Revenue today',
         tone: 'brand',
@@ -934,6 +981,7 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
       },
       {
         helper: `${operations.travellersToday} confirmed traveller${operations.travellersToday === 1 ? '' : 's'}`,
+        href: '/admin/collections/departures',
         icon: CalendarDays,
         label: "Today's departures",
         tone: 'gold',
@@ -941,6 +989,7 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
       },
       {
         helper: 'All booking sources',
+        href: '/admin/collections/bookings',
         icon: TicketCheck,
         label: 'Bookings created today',
         tone: 'green',
@@ -961,6 +1010,7 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
   if (content) {
     metrics.push({
       helper: `${content.draftExperiences} experience draft${content.draftExperiences === 1 ? '' : 's'}`,
+      href: '/admin/collections/experiences',
       icon: Compass,
       label: 'Published experiences',
       tone: 'navy',
@@ -970,6 +1020,7 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
   if (upcomingEvents !== null && !operations) {
     metrics.push({
       helper: 'Published and upcoming',
+      href: '/admin/collections/events',
       icon: CalendarDays,
       label: 'Upcoming events',
       tone: 'gold',
@@ -1033,27 +1084,61 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
       value: enquiries.travelServices,
     })
 
-  const quickActions = [
+  const quickActions: Array<DashboardQuickAction | null> = [
     canManageOperations
-      ? { href: '/admin/collections/bookings/create', icon: Plus, label: 'New manual booking' }
+      ? {
+          description: 'Add a WhatsApp, phone, or walk-in customer.',
+          href: '/admin/collections/bookings/create',
+          icon: Plus,
+          label: 'New manual booking',
+          tone: 'brand',
+        }
       : null,
     canManageOperations
       ? {
+          description: 'Open a date, time, and seat capacity for sale.',
           href: '/admin/collections/departures/create',
           icon: CalendarPlus,
           label: 'Schedule departure',
+          tone: 'gold',
         }
       : null,
     canManageContent
-      ? { href: '/admin/collections/experiences/create', icon: Compass, label: 'Create experience' }
+      ? {
+          description: 'Build pricing, itinerary, photos, and availability.',
+          href: '/admin/collections/experiences/create',
+          icon: Compass,
+          label: 'Create experience',
+          tone: 'green',
+        }
       : null,
     canManageEvents
-      ? { href: '/admin/collections/events/create', icon: CalendarDays, label: 'Create event' }
+      ? {
+          description: 'Publish an event and prepare ticket categories.',
+          href: '/admin/collections/events/create',
+          icon: CalendarDays,
+          label: 'Create event',
+          tone: 'purple',
+        }
       : null,
     canManageContent
-      ? { href: '/admin/collections/posts/create', icon: FileText, label: 'Write Ghana Guide' }
+      ? {
+          description: 'Share destination advice, stories, and travel ideas.',
+          href: '/admin/collections/posts/create',
+          icon: FileText,
+          label: 'Write Ghana Guide',
+          tone: 'navy',
+        }
       : null,
-  ].filter((action): action is NonNullable<typeof action> => action !== null)
+  ]
+  const visibleQuickActions = quickActions.filter(
+    (action): action is DashboardQuickAction => action !== null,
+  )
+  const attentionTotal = tasks.reduce((total, task) => total + task.value, 0)
+  const queueSummary =
+    attentionTotal === 0
+      ? 'No urgent items are waiting for review.'
+      : `${numberFormatter.format(attentionTotal)} record${attentionTotal === 1 ? '' : 's'} across ${tasks.length} queue${tasks.length === 1 ? '' : 's'} need review.`
 
   return (
     <Gutter className="tvx-dashboard">
@@ -1070,25 +1155,73 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
           <h1>
             {greeting}, {firstName}
           </h1>
-          <p>{today} · Here is what is happening across the business.</p>
+          <p>{today} · Your live view of bookings, departures, enquiries, and content.</p>
         </div>
         <div className="tvx-dashboard-hero__aside">
-          <span className="tvx-role-badge">{primaryRole}</span>
+          <div className="tvx-dashboard-hero__aside-topline">
+            <span className="tvx-role-badge">{primaryRole}</span>
+            <span className="tvx-connection-status">
+              <span className="tvx-live-dot" aria-hidden="true" /> Connected
+            </span>
+          </div>
+          <div className="tvx-dashboard-pulse">
+            <span
+              className={`tvx-dashboard-pulse__icon${attentionTotal > 0 ? ' tvx-dashboard-pulse__icon--attention' : ''}`}
+              aria-hidden="true"
+            >
+              {attentionTotal > 0 ? <AlertTriangle size={20} /> : <CheckCircle2 size={20} />}
+            </span>
+            <span className="tvx-dashboard-pulse__copy">
+              <small>Operations pulse</small>
+              <strong>{attentionTotal > 0 ? 'Action required' : 'Everything looks clear'}</strong>
+              <span>{queueSummary}</span>
+            </span>
+          </div>
+          <div className="tvx-dashboard-hero__mini-stats">
+            <span>
+              <small>Priority items</small>
+              <strong>{numberFormatter.format(attentionTotal)}</strong>
+            </span>
+            <span>
+              <small>{operations ? 'Next 30 days' : 'Upcoming events'}</small>
+              <strong>
+                {numberFormatter.format(
+                  operations?.upcomingDepartureCount ??
+                    upcomingEvents ??
+                    content?.publishedGuides ??
+                    0,
+                )}
+              </strong>
+            </span>
+          </div>
           <Link href="/" target="_blank" rel="noreferrer" className="tvx-view-site-link">
-            View website <ExternalLink size={15} aria-hidden="true" />
+            Open public website <ExternalLink size={15} aria-hidden="true" />
           </Link>
         </div>
       </header>
 
       {metrics.length > 0 ? (
-        <section className="tvx-stats-grid" aria-label="Business overview">
-          {metrics.map((metric) => (
-            <StatCard key={metric.label} {...metric} />
-          ))}
+        <section className="tvx-overview" aria-labelledby="business-overview-heading">
+          <div className="tvx-section-heading tvx-overview__heading">
+            <SectionTitle
+              icon={Gauge}
+              id="business-overview-heading"
+              kicker="Today at a glance"
+              title="Business overview"
+            />
+            <span className="tvx-data-status">
+              <span className="tvx-live-dot" aria-hidden="true" /> Live database
+            </span>
+          </div>
+          <div className="tvx-stats-grid">
+            {metrics.map((metric) => (
+              <StatCard key={metric.label} {...metric} />
+            ))}
+          </div>
         </section>
       ) : null}
 
-      {quickActions.length > 0 ? (
+      {visibleQuickActions.length > 0 ? (
         <section className="tvx-quick-actions" aria-labelledby="quick-actions-heading">
           <div className="tvx-section-heading tvx-section-heading--inline">
             <SectionTitle
@@ -1099,12 +1232,15 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
             />
           </div>
           <div className="tvx-quick-actions__list">
-            {quickActions.map(({ href, icon: Icon, label }) => (
-              <Link href={href} key={href} className="tvx-quick-action">
+            {visibleQuickActions.map(({ description, href, icon: Icon, label, tone }) => (
+              <Link href={href} key={href} className={`tvx-quick-action tvx-quick-action--${tone}`}>
                 <span className="tvx-quick-action__icon" aria-hidden="true">
                   <Icon size={18} />
                 </span>
-                <span>{label}</span>
+                <span className="tvx-quick-action__copy">
+                  <strong>{label}</strong>
+                  <small>{description}</small>
+                </span>
                 <ArrowRight className="tvx-quick-action__arrow" size={16} aria-hidden="true" />
               </Link>
             ))}
@@ -1141,6 +1277,12 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
                     Math.round((departure.booked / Math.max(departure.capacity, 1)) * 100),
                   )
                   const remaining = Math.max(0, departure.capacity - departure.booked)
+                  const availability =
+                    remaining === 0
+                      ? 'full'
+                      : remaining <= Math.max(2, Math.ceil(departure.capacity * 0.2))
+                        ? 'limited'
+                        : 'open'
                   return (
                     <Link
                       href={`/admin/collections/departures/${departure.id}`}
@@ -1158,14 +1300,18 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
                         </span>
                       </span>
                       <span className="tvx-departure-row__capacity">
-                        <strong>
-                          {departure.booked}/{departure.capacity}
-                        </strong>
-                        <small>
+                        <small
+                          className={`tvx-availability-pill tvx-availability-pill--${availability}`}
+                        >
                           {remaining === 0
                             ? 'Full'
-                            : `${remaining} seat${remaining === 1 ? '' : 's'} left`}
+                            : availability === 'limited'
+                              ? 'Filling fast'
+                              : 'Open'}
                         </small>
+                        <strong>
+                          {departure.booked}/{departure.capacity} seats
+                        </strong>
                       </span>
                       <ArrowRight
                         className="tvx-departure-row__arrow"

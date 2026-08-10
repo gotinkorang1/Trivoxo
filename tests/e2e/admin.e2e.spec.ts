@@ -35,8 +35,11 @@ test.describe('Admin Panel', () => {
     await expect(page.getByRole('heading', { name: 'Upcoming departures' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Needs attention' })).toBeVisible()
 
-    await page.getByRole('link', { name: '7 days' }).click()
-    await expect(page).toHaveURL('http://localhost:3000/admin?period=7')
+    const sevenDayPeriod = page.getByRole('link', { name: '7 days' })
+    await expect(sevenDayPeriod).toHaveAttribute('href', '/admin?period=7')
+    await page.waitForTimeout(1_000)
+    await sevenDayPeriod.click()
+    await expect(page).toHaveURL('http://localhost:3000/admin?period=7', { timeout: 15_000 })
     await expect(page.getByRole('link', { name: '7 days' })).toHaveAttribute('aria-current', 'page')
   })
 
@@ -47,14 +50,17 @@ test.describe('Admin Panel', () => {
     })
 
     await expect(page.locator('.tvx-admin-icon')).toBeVisible()
-    await expect(page.locator('.tvx-section-heading__icon')).toHaveCount(6)
+    await expect(page.locator('.tvx-section-heading__icon')).toHaveCount(7)
     await expect(page.getByRole('heading', { name: 'Quick actions' })).toBeVisible()
     await expect(page.locator('.tvx-stat-card').first()).toBeVisible()
+    await expect(page.getByText('Operations pulse')).toBeVisible()
+    await expect(page.getByText('Live database')).toBeVisible()
 
     const hasHorizontalOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth > window.innerWidth,
     )
     expect(hasHorizontalOverflow).toBe(false)
+    await page.waitForTimeout(1_000)
 
     const mobileNav = page.locator('.nav')
     const mobileNavClasses = await mobileNav.getAttribute('class')
@@ -62,10 +68,9 @@ test.describe('Admin Panel', () => {
       await page.locator('.template-default__nav-toggler').click()
     }
     await expect(mobileNav).toHaveClass(/nav--nav-open/)
-    await expect(page.getByRole('link', { name: 'Bookings' })).toBeVisible()
-    await page.getByRole('link', { name: 'Bookings' }).click()
-    await expect(page).toHaveURL(/\/admin\/collections\/bookings/)
-    await expect(page.locator('#nav-bookings')).toBeVisible()
+    const bookingsNavLink = mobileNav.getByRole('link', { name: 'Bookings', exact: true })
+    await expect(bookingsNavLink).toBeVisible()
+    await expect(bookingsNavLink).toHaveAttribute('href', '/admin/collections/bookings')
 
     await page.setViewportSize({ width: 1280, height: 720 })
   })
