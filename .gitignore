@@ -23,6 +23,12 @@
 .DS_Store
 *.pem
 
+# Generated booking artefacts (calendar invites, vouchers) must never be
+# committed into the public/ dir — they carry per-booking access tokens and are
+# served at the site root. The app generates them on demand via API routes.
+/public/**/*.ics
+/public/**/voucher*.pdf
+
 # debug
 npm-debug.log*
 yarn-debug.log*
