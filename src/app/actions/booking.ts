@@ -9,6 +9,7 @@ import { createBookingHold, InventoryError } from '@/lib/booking-inventory'
 import { CAPACITY, quoteBooking } from '@/lib/policies'
 import { createBookingAccessToken } from '@/lib/booking-access'
 import { checkRateLimit, rateLimitMessage } from '@/lib/rate-limit'
+import { verifyTurnstile } from '@/lib/turnstile'
 
 export type BookingFormState = {
   error?: string
@@ -79,8 +80,11 @@ export async function createBookingAction(
     return { error: 'Please correct the highlighted fields.', fieldErrors, values }
   }
 
-  const rateLimit = await checkRateLimit('bookingCreate', await nextHeaders())
+  const requestHeaders = await nextHeaders()
+  const rateLimit = await checkRateLimit('bookingCreate', requestHeaders)
   if (!rateLimit.allowed) return { error: rateLimitMessage(rateLimit), values }
+  const verification = await verifyTurnstile(formData, 'booking_create', requestHeaders)
+  if (!verification.success) return { error: verification.error, values }
 
   let reference: string | undefined
   try {

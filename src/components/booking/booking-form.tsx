@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { createBookingAction, type BookingFormState } from '@/app/actions/booking'
 import { GroupPricingTable } from '@/components/experiences/group-pricing'
+import { TurnstileWidget } from '@/components/forms/turnstile-widget'
 import { Button } from '@/components/ui/button'
 import { evaluateDateAvailability, type DateWindow } from '@/lib/availability'
 import type { AvailabilityType, Weekday } from '@/lib/data/experiences'
@@ -290,7 +291,7 @@ export function BookingForm({
                     onClick={() =>
                       setStep(state.fieldErrors?.date || state.fieldErrors?.party ? 0 : 1)
                     }
-                    className="mt-3 min-h-10 font-bold underline underline-offset-4"
+                    className="mt-3 min-h-11 font-bold underline underline-offset-4"
                   >
                     Review the highlighted details
                   </button>
@@ -615,6 +616,12 @@ export function BookingForm({
                       </p>
                     </div>
 
+                    <TurnstileWidget
+                      action="booking_create"
+                      resetKey={state}
+                      className="mt-6"
+                    />
+
                     <div className="mt-8 hidden items-center justify-between lg:flex">
                       <Button
                         type="button"
@@ -921,7 +928,7 @@ function ReviewCard({
         type="button"
         aria-label={`Edit ${title.toLowerCase()}`}
         onClick={onEdit}
-        className="inline-flex min-h-10 items-center gap-1 rounded-full px-3 text-xs font-bold text-brand-link hover:bg-brand-primary-soft"
+        className="inline-flex min-h-11 items-center gap-1 rounded-full px-3 text-xs font-bold text-brand-link hover:bg-brand-primary-soft"
       >
         <Pencil className="size-3.5" /> Edit
       </button>

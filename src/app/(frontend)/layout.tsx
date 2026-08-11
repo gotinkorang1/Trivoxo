@@ -42,11 +42,28 @@ export const metadata: Metadata = {
     template: `%s — ${BRAND.name}`,
   },
   description: BRAND.description,
+  alternates: { canonical: './' },
   openGraph: {
     title: `${BRAND.name} — ${BRAND.headline}`,
     description: BRAND.description,
     type: 'website',
     siteName: BRAND.name,
+    locale: 'en_GH',
+    url: './',
+    images: [
+      {
+        url: '/og',
+        width: 1200,
+        height: 630,
+        alt: `${BRAND.name} — ${BRAND.headline}`,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${BRAND.name} — ${BRAND.headline}`,
+    description: BRAND.description,
+    images: ['/og'],
   },
 }
 

@@ -19,7 +19,7 @@ const buttonVariants = cva(
           'border border-white/30 bg-white/10 text-white backdrop-blur-md hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/18',
       },
       size: {
-        sm: 'min-h-10 px-4 text-sm',
+        sm: 'min-h-11 px-4 text-sm',
         md: 'min-h-11 px-6 text-sm',
         lg: 'min-h-13 px-8 text-base',
       },

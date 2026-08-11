@@ -6,6 +6,7 @@ import { headers as nextHeaders } from 'next/headers'
 import config from '@payload-config'
 import { createBookingAccessToken } from '@/lib/booking-access'
 import { checkRateLimit, rateLimitMessage } from '@/lib/rate-limit'
+import { verifyTurnstile } from '@/lib/turnstile'
 
 export type TripLookupState = {
   error?: string
@@ -36,8 +37,11 @@ export async function lookupTripAction(
     return { error: 'Enter your booking reference and email.', values }
   }
 
-  const rateLimit = await checkRateLimit('tripLookup', await nextHeaders())
+  const requestHeaders = await nextHeaders()
+  const rateLimit = await checkRateLimit('tripLookup', requestHeaders)
   if (!rateLimit.allowed) return { error: rateLimitMessage(rateLimit), values }
+  const verification = await verifyTurnstile(formData, 'trip_lookup', requestHeaders)
+  if (!verification.success) return { error: verification.error, values }
 
   let redirectTo: string | null = null
   try {

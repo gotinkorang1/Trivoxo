@@ -15,6 +15,7 @@ import {
   type VerifiedPaystackTransaction,
 } from '@/lib/paystack'
 import { paymentReference } from '@/lib/reference'
+import { queueEventTicketsIssued } from '@/lib/notifications'
 
 type TransactionDB = { execute: (query: unknown) => Promise<unknown> }
 
@@ -352,7 +353,23 @@ export async function reconcileEventOrderPayment(
     depth: 0,
     overrideAccess: true,
   })
-  if (payment.status === 'succeeded') return { order, payment, outcome: 'confirmed' }
+  if (payment.status === 'succeeded') {
+    const tickets = await payload.find({
+      collection: 'event-tickets',
+      depth: 0,
+      limit: 1000,
+      overrideAccess: true,
+      where: { order: { equals: order.id } },
+    })
+    if (
+      order.inventoryState === 'confirmed' &&
+      order.paymentState === 'paid' &&
+      tickets.totalDocs > 0
+    ) {
+      await queueEventTicketsIssued(payload, order, tickets.docs)
+    }
+    return { order, payment, tickets: tickets.docs, outcome: 'confirmed' }
+  }
   if (payment.status === 'review') {
     return { order, payment, outcome: 'review', reason: payment.reviewReason ?? undefined }
   }

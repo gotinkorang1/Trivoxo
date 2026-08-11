@@ -3,7 +3,7 @@ import { after } from 'next/server'
 import config from '@payload-config'
 import { verifyBookingAccessToken } from '@/lib/booking-access'
 import { reconcilePaymentByReference } from '@/lib/payment-dispatch'
-import { processBookingNotifications } from '@/lib/notifications'
+import { processNotifications } from '@/lib/notifications'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -21,6 +21,18 @@ export async function GET(request: Request): Promise<Response> {
 
   if (result.kind === 'event') {
     const orderReference = result.order?.reference
+    if (result.order?.id && result.outcome === 'confirmed') {
+      const eventOrderID = result.order.id
+      after(async () => {
+        try {
+          await processNotifications(payload, { eventOrderID, limit: 1 })
+        } catch {
+          console.error(
+            'Event ticket email delivery could not start; the retry job will recover it.',
+          )
+        }
+      })
+    }
     if (!orderReference || !verifyBookingAccessToken(orderReference, access)) {
       return Response.redirect(new URL('/events?payment=verification-complete', requestURL), 303)
     }
@@ -35,7 +47,7 @@ export async function GET(request: Request): Promise<Response> {
     const bookingID = result.booking.id
     after(async () => {
       try {
-        await processBookingNotifications(payload, { bookingID, limit: 1 })
+        await processNotifications(payload, { bookingID, limit: 1 })
       } catch {
         console.error(
           'Booking confirmation delivery could not start; the retry job will recover it.',

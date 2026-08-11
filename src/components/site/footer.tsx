@@ -71,10 +71,10 @@ export function Footer() {
               {BRAND.tagline} Tours, events and travel support designed with care in Accra, Ghana.
             </p>
             <div className="mt-6 space-y-3 text-sm text-white/72">
-              <a href={`tel:${CONTACT.primaryPhone}`} className="flex items-center gap-2 hover:text-brand-secondary">
+              <a href={`tel:${CONTACT.primaryPhone}`} className="flex min-h-11 items-center gap-2 hover:text-brand-secondary">
                 <Phone className="size-4" /> {CONTACT.primaryPhone}
               </a>
-              <a href={`mailto:${CONTACT.email}`} className="flex items-center gap-2 hover:text-brand-secondary">
+              <a href={`mailto:${CONTACT.email}`} className="flex min-h-11 items-center gap-2 hover:text-brand-secondary">
                 <Mail className="size-4" /> {CONTACT.email}
               </a>
               <p className="flex items-start gap-2">
@@ -109,7 +109,7 @@ export function Footer() {
               <ul className="mt-4 space-y-2.5">
                 {col.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="inline-flex min-h-11 items-center text-sm text-white/68 transition hover:translate-x-1 hover:text-white sm:min-h-9">
+                    <Link href={link.href} className="inline-flex min-h-11 min-w-11 items-center text-sm text-white/68 transition hover:translate-x-1 hover:text-white">
                       {link.label}
                     </Link>
                   </li>

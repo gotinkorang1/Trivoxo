@@ -11,6 +11,7 @@ import {
   startEventCheckout,
 } from '@/lib/event-payment-service'
 import { checkRateLimit, rateLimitMessage } from '@/lib/rate-limit'
+import { verifyTurnstile } from '@/lib/turnstile'
 
 export type EventOrderFormState = {
   error?: string
@@ -62,8 +63,11 @@ export async function createEventOrderAction(
     return { error: 'Choose at least one ticket to continue.', values }
   }
 
-  const rateLimit = await checkRateLimit('eventOrderCreate', await nextHeaders())
+  const requestHeaders = await nextHeaders()
+  const rateLimit = await checkRateLimit('eventOrderCreate', requestHeaders)
   if (!rateLimit.allowed) return { error: rateLimitMessage(rateLimit), values }
+  const verification = await verifyTurnstile(formData, 'event_order', requestHeaders)
+  if (!verification.success) return { error: verification.error, values }
 
   let orderReference: string | undefined
   let accessToken: string | undefined

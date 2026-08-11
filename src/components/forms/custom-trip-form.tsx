@@ -15,6 +15,7 @@ import {
   ReviewGrid,
   StepHeading,
 } from '@/components/forms/guided-form'
+import { TurnstileWidget } from '@/components/forms/turnstile-widget'
 import { TRIP_INTERESTS } from '@/lib/enquiry-options'
 
 const initial: EnquiryState = {}
@@ -224,6 +225,9 @@ export function CustomTripForm() {
           description="This sends an itinerary request only. No booking or payment is created yet."
         />
         <ReviewGrid items={review} />
+        {step === 3 && (
+          <TurnstileWidget action="custom_trip" resetKey={state} className="mt-6" />
+        )}
         <FormNavigation
           onBack={() => setStep(2)}
           submitLabel="Request my itinerary"

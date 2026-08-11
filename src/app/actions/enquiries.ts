@@ -9,6 +9,7 @@ import {
   TRIP_INTEREST_VALUES,
 } from '@/lib/enquiry-options'
 import { checkRateLimit, rateLimitMessage } from '@/lib/rate-limit'
+import { verifyTurnstile } from '@/lib/turnstile'
 
 export type EnquiryState = {
   success?: boolean
@@ -55,8 +56,11 @@ export async function createCorporateEnquiryAction(
   if (Object.keys(fieldErrors).length)
     return { error: 'Please correct the highlighted fields.', fieldErrors, values }
 
-  const rateLimit = await checkRateLimit('enquiryCreate', await nextHeaders())
+  const requestHeaders = await nextHeaders()
+  const rateLimit = await checkRateLimit('enquiryCreate', requestHeaders)
   if (!rateLimit.allowed) return { error: rateLimitMessage(rateLimit), values }
+  const verification = await verifyTurnstile(formData, 'corporate_enquiry', requestHeaders)
+  if (!verification.success) return { error: verification.error, values }
 
   const services = formData
     .getAll('services')
@@ -113,8 +117,11 @@ export async function createCustomTripAction(
   if (Object.keys(fieldErrors).length)
     return { error: 'Please correct the highlighted fields.', fieldErrors, values }
 
-  const rateLimit = await checkRateLimit('enquiryCreate', await nextHeaders())
+  const requestHeaders = await nextHeaders()
+  const rateLimit = await checkRateLimit('enquiryCreate', requestHeaders)
   if (!rateLimit.allowed) return { error: rateLimitMessage(rateLimit), values }
+  const verification = await verifyTurnstile(formData, 'custom_trip', requestHeaders)
+  if (!verification.success) return { error: verification.error, values }
 
   const interests = formData
     .getAll('interests')
@@ -200,8 +207,11 @@ export async function createServiceRequestAction(
   if (Object.keys(fieldErrors).length)
     return { error: 'Please correct the highlighted fields.', fieldErrors, values }
 
-  const rateLimit = await checkRateLimit('enquiryCreate', await nextHeaders())
+  const requestHeaders = await nextHeaders()
+  const rateLimit = await checkRateLimit('enquiryCreate', requestHeaders)
   if (!rateLimit.allowed) return { error: rateLimitMessage(rateLimit), values }
+  const verification = await verifyTurnstile(formData, 'service_request', requestHeaders)
+  if (!verification.success) return { error: verification.error, values }
 
   const known = new Set(['serviceType', 'name', 'email', 'phone'])
   const details: Record<string, string> = {}

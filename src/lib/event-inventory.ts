@@ -3,6 +3,7 @@ import { createLocalReq, type Payload, type PayloadRequest } from 'payload'
 import type { Event, EventOrder, EventTicket, Payment } from '@/payload-types'
 import { BOOKING_HOLD } from '@/lib/policies'
 import { eventOrderReference, ticketReference } from '@/lib/reference'
+import { queueEventTicketsIssued } from '@/lib/notifications'
 
 /**
  * Event ticket inventory — the transactional twin of src/lib/booking-inventory.ts.
@@ -375,6 +376,17 @@ async function issueTicketsForOrder(
   return tickets
 }
 
+async function issueTicketsAndQueueConfirmation(
+  payload: Payload,
+  req: PayloadRequest,
+  order: EventOrder,
+): Promise<EventTicket[]> {
+  if (order.inventoryState !== 'confirmed' || order.paymentState !== 'paid') return []
+  const tickets = await issueTicketsForOrder(payload, req, order)
+  if (tickets.length > 0) await queueEventTicketsIssued(payload, order, tickets, { req })
+  return tickets
+}
+
 /**
  * Convert a verified event-order payment to confirmed inventory + issued
  * tickets in one transaction. Duplicate callbacks/webhooks serialize on the
@@ -404,7 +416,7 @@ export async function settleVerifiedEventOrderPayment(
 
     if (payment.status === 'succeeded' || payment.status === 'review') {
       const order = await loadOrder()
-      const tickets = await issueTicketsForOrder(payload, req, order)
+      const tickets = await issueTicketsAndQueueConfirmation(payload, req, order)
       return {
         order,
         payment,
@@ -445,7 +457,7 @@ export async function settleVerifiedEventOrderPayment(
         req,
         data: { ...paymentAuditFields(audit), status: 'review', reviewReason: reason },
       })
-      const tickets = await issueTicketsForOrder(payload, req, order)
+      const tickets = await issueTicketsAndQueueConfirmation(payload, req, order)
       return { order, payment, tickets, outcome: 'review', reason }
     }
 
@@ -459,7 +471,7 @@ export async function settleVerifiedEventOrderPayment(
         req,
         data: { ...paymentAuditFields(audit), status: 'succeeded', reviewReason: null, failureReason: null },
       })
-      const tickets = await issueTicketsForOrder(payload, req, order)
+      const tickets = await issueTicketsAndQueueConfirmation(payload, req, order)
       return { order, payment, tickets, outcome: 'confirmed' }
     }
 
@@ -515,7 +527,7 @@ export async function settleVerifiedEventOrderPayment(
       req,
       data: { ...paymentAuditFields(audit), status: 'succeeded', reviewReason: null, failureReason: null },
     })
-    const tickets = await issueTicketsForOrder(payload, req, order)
+    const tickets = await issueTicketsAndQueueConfirmation(payload, req, order)
     return { order, payment, tickets, outcome: 'confirmed' }
   })
 }

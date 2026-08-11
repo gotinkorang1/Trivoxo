@@ -839,7 +839,7 @@ export interface Event {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Booking emails awaiting delivery, sent messages, and items that need attention.
+ * Booking and event emails awaiting delivery, sent messages, and items that need attention.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "notifications".
@@ -847,12 +847,16 @@ export interface Event {
 export interface Notification {
   id: number;
   notificationKey: string;
-  type: 'booking_confirmed';
+  type: 'booking_confirmed' | 'event_tickets_issued';
   status: 'queued' | 'processing' | 'sent' | 'failed' | 'dead_letter';
   /**
    * Set automatically. Kept nullable so deleting a booking does not corrupt the outbox audit.
    */
   booking?: (number | null) | Booking;
+  /**
+   * Set automatically for event-ticket messages.
+   */
+  eventOrder?: (number | null) | EventOrder;
   recipient: string;
   accessExpiresAt: string;
   /**
@@ -1579,6 +1583,7 @@ export interface NotificationsSelect<T extends boolean = true> {
   type?: T;
   status?: T;
   booking?: T;
+  eventOrder?: T;
   recipient?: T;
   accessExpiresAt?: T;
   payloadSnapshot?: T;

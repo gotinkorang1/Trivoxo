@@ -53,7 +53,22 @@ export async function generateMetadata({
   return {
     title: experience.name,
     description: experience.blurb,
-    openGraph: { title: experience.name, description: experience.blurb, type: 'website' },
+    alternates: { canonical: `/experiences/${experience.slug}` },
+    openGraph: {
+      title: experience.name,
+      description: experience.blurb,
+      type: 'website',
+      url: `/experiences/${experience.slug}`,
+      images: experience.heroImage
+        ? [{ url: experience.heroImage.src, alt: experience.heroImage.alt }]
+        : ['/og'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: experience.name,
+      description: experience.blurb,
+      images: [experience.heroImage?.src || '/og'],
+    },
   }
 }
 

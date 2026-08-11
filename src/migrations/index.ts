@@ -3,6 +3,7 @@ import * as migration_20260810_162914_paystack_payments from './20260810_162914_
 import * as migration_20260810_172913_booking_fulfilment from './20260810_172913_booking_fulfilment'
 import * as migration_20260811_012834_event_ticketing from './20260811_012834_event_ticketing'
 import * as migration_20260811_050125_cloudinary_media_storage from './20260811_050125_cloudinary_media_storage'
+import * as migration_20260811_094425_event_ticket_notifications from './20260811_094425_event_ticket_notifications'
 
 export const migrations = [
   {
@@ -29,5 +30,10 @@ export const migrations = [
     up: migration_20260811_050125_cloudinary_media_storage.up,
     down: migration_20260811_050125_cloudinary_media_storage.down,
     name: '20260811_050125_cloudinary_media_storage',
+  },
+  {
+    up: migration_20260811_094425_event_ticket_notifications.up,
+    down: migration_20260811_094425_event_ticket_notifications.down,
+    name: '20260811_094425_event_ticket_notifications',
   },
 ]

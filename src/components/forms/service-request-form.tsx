@@ -10,6 +10,7 @@ import {
   ReviewGrid,
   StepHeading,
 } from '@/components/forms/guided-form'
+import { TurnstileWidget } from '@/components/forms/turnstile-widget'
 
 const initial: EnquiryState = {}
 const STEPS = ['Request', 'Contact', 'Review'] as const
@@ -175,6 +176,9 @@ export function ServiceRequestForm({
           description="Trivoxo will verify availability and pricing before asking you to confirm anything."
         />
         <ReviewGrid items={review} />
+        {step === 2 && (
+          <TurnstileWidget action="service_request" resetKey={state} className="mt-6" />
+        )}
         <FormNavigation onBack={() => setStep(1)} submitLabel={submitLabel} pending={pending} />
       </section>
     </form>

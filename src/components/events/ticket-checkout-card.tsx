@@ -8,6 +8,7 @@ import { formatPrice } from '@/lib/format'
 import { whatsappLink } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
 import { Field, inputCls } from '@/components/forms/fields'
+import { TurnstileWidget } from '@/components/forms/turnstile-widget'
 import { createEventOrderAction, type EventOrderFormState } from '@/app/actions/event-order'
 
 type Props = {
@@ -112,7 +113,7 @@ export function TicketCheckoutCard({
                       type="button"
                       onClick={() => change(ticket, -1)}
                       disabled={quantity === 0}
-                      className="inline-flex size-9 items-center justify-center rounded-full text-text-primary transition hover:bg-surface disabled:opacity-35"
+                      className="inline-flex size-11 items-center justify-center rounded-full text-text-primary transition hover:bg-surface disabled:opacity-35"
                       aria-label={`Remove one ${ticket.name} ticket`}
                     >
                       <Minus className="size-4" aria-hidden="true" />
@@ -123,7 +124,7 @@ export function TicketCheckoutCard({
                     <button
                       type="button"
                       onClick={() => change(ticket, 1)}
-                      className="inline-flex size-9 items-center justify-center rounded-full text-text-primary transition hover:bg-surface"
+                      className="inline-flex size-11 items-center justify-center rounded-full text-text-primary transition hover:bg-surface"
                       aria-label={`Add one ${ticket.name} ticket`}
                     >
                       <Plus className="size-4" aria-hidden="true" />
@@ -170,6 +171,8 @@ export function TicketCheckoutCard({
               <input name="phone" defaultValue={v.phone} className={inputCls()} />
             </Field>
           </div>
+
+          <TurnstileWidget action="event_order" resetKey={state} />
 
           <Button type="submit" size="lg" className="w-full" disabled={pending || selected.length === 0}>
             {pending ? (

@@ -3,7 +3,7 @@ import { after } from 'next/server'
 import config from '@payload-config'
 import { verifyPaystackWebhookSignature } from '@/lib/paystack'
 import { reconcilePaymentByReference } from '@/lib/payment-dispatch'
-import { processBookingNotifications } from '@/lib/notifications'
+import { processNotifications } from '@/lib/notifications'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -36,17 +36,20 @@ export async function POST(request: Request): Promise<Response> {
   try {
     const payload = await getPayload({ config })
     const result = await reconcilePaymentByReference(payload, reference)
-    if (result.kind === 'booking' && result.booking?.id && result.outcome === 'confirmed') {
-      const bookingID = result.booking.id
-      after(async () => {
-        try {
-          await processBookingNotifications(payload, { bookingID, limit: 1 })
-        } catch {
-          console.error(
-            'Booking confirmation delivery could not start; the retry job will recover it.',
-          )
-        }
-      })
+    if (result.outcome === 'confirmed') {
+      const bookingID = result.kind === 'booking' ? result.booking?.id : undefined
+      const eventOrderID = result.kind === 'event' ? result.order?.id : undefined
+      if (bookingID || eventOrderID) {
+        after(async () => {
+          try {
+            await processNotifications(payload, { bookingID, eventOrderID, limit: 1 })
+          } catch {
+            console.error(
+              'Transactional email delivery could not start; the retry job will recover it.',
+            )
+          }
+        })
+      }
     }
     return Response.json({ received: true })
   } catch (error) {

@@ -1,13 +1,14 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run ci",
   "crons": [
     {
       "path": "/api/cron/expire-booking-holds",
-      "schedule": "17 3 * * *"
+      "schedule": "*/10 * * * *"
     },
     {
       "path": "/api/cron/process-notifications",
-      "schedule": "23 3 * * *"
+      "schedule": "*/5 * * * *"
     }
   ]
 }

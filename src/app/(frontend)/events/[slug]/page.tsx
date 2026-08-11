@@ -28,10 +28,19 @@ export async function generateMetadata({
   return {
     title: event.title,
     description: event.blurb,
+    alternates: { canonical: `/events/${event.slug}` },
     openGraph: {
       title: event.title,
       description: event.blurb,
-      images: event.image ? [{ url: event.image.src, alt: event.image.alt }] : undefined,
+      type: 'website',
+      url: `/events/${event.slug}`,
+      images: event.image ? [{ url: event.image.src, alt: event.image.alt }] : ['/og'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: event.title,
+      description: event.blurb,
+      images: [event.image?.src || '/og'],
     },
   }
 }

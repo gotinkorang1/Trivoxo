@@ -203,21 +203,21 @@ export function HeroCarousel({ experienceCount }: { experienceCount: number }) {
               <input
                 name="destination"
                 placeholder="Accra, Volta, Cape Coast..."
-                className="w-full bg-transparent text-sm font-medium text-brand-navy outline-none placeholder:text-slate-500"
+                className="min-h-11 w-full bg-transparent text-sm font-medium text-brand-navy outline-none placeholder:text-slate-500"
               />
             </SearchField>
             <SearchField label="When?" icon={CalendarDays}>
               <input
                 name="date"
                 type="date"
-                className="w-full bg-transparent text-sm font-medium text-brand-navy outline-none [color-scheme:light]"
+                className="min-h-11 w-full bg-transparent text-sm font-medium text-brand-navy outline-none [color-scheme:light]"
               />
             </SearchField>
             <SearchField label="Travellers" icon={Users}>
               <select
                 name="travellers"
                 defaultValue="2"
-                className="w-full bg-transparent text-sm font-medium text-brand-navy outline-none [color-scheme:light]"
+                className="min-h-11 w-full bg-transparent text-sm font-medium text-brand-navy outline-none [color-scheme:light]"
               >
                 {[1, 2, 3, 4, 5, 6].map((count) => (
                   <option key={count} value={count}>

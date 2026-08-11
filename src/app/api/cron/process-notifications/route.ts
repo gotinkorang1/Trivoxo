@@ -1,6 +1,6 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
-import { processBookingNotifications } from '@/lib/notifications'
+import { processNotifications } from '@/lib/notifications'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -13,6 +13,6 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   const payload = await getPayload({ config })
-  const result = await processBookingNotifications(payload, { limit: 50 })
+  const result = await processNotifications(payload, { limit: 50 })
   return Response.json({ ok: true, ...result })
 }

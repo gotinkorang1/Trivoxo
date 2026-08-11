@@ -20,7 +20,7 @@ export const Notifications: CollectionConfig = {
     useAsTitle: 'notificationKey',
     defaultColumns: ['type', 'recipient', 'status', 'attempts', 'sentAt'],
     group: 'Operations',
-    description: 'Booking emails awaiting delivery, sent messages, and items that need attention.',
+    description: 'Booking and event emails awaiting delivery, sent messages, and items that need attention.',
   },
   access: {
     read: hasRole('operations', 'finance'),
@@ -43,7 +43,10 @@ export const Notifications: CollectionConfig = {
       type: 'select',
       required: true,
       defaultValue: 'booking_confirmed',
-      options: [{ label: 'Booking confirmed', value: 'booking_confirmed' }],
+      options: [
+        { label: 'Booking confirmed', value: 'booking_confirmed' },
+        { label: 'Event tickets issued', value: 'event_tickets_issued' },
+      ],
       index: true,
       admin: { readOnly: true, position: 'sidebar' },
     },
@@ -65,6 +68,16 @@ export const Notifications: CollectionConfig = {
         readOnly: true,
         description:
           'Set automatically. Kept nullable so deleting a booking does not corrupt the outbox audit.',
+      },
+    },
+    {
+      name: 'eventOrder',
+      type: 'relationship',
+      relationTo: 'event-orders',
+      index: true,
+      admin: {
+        readOnly: true,
+        description: 'Set automatically for event-ticket messages.',
       },
     },
     {

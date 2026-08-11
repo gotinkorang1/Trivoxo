@@ -5,6 +5,7 @@ import {
   checkRateLimit,
   rateLimitResponseHeaders,
 } from '@/lib/rate-limit'
+import { verifyTurnstile } from '@/lib/turnstile'
 
 /**
  * Newsletter subscription (§23). Accepts the homepage footer/hero form post,
@@ -15,8 +16,9 @@ export async function POST(request: Request) {
   const home = new URL('/', request.url)
 
   let email: string | null = null
+  let form: FormData | null = null
   try {
-    const form = await request.formData()
+    form = await request.formData()
     email = String(form.get('email') ?? '').trim().toLowerCase()
   } catch {
     // ignore malformed body
@@ -30,6 +32,19 @@ export async function POST(request: Request) {
   const rateLimit = await checkRateLimit('newsletterSubscribe', request.headers)
   if (!rateLimit.allowed) {
     home.searchParams.set('newsletter', 'limited')
+    return NextResponse.redirect(home, {
+      status: 303,
+      headers: rateLimitResponseHeaders(rateLimit),
+    })
+  }
+
+  const verification = await verifyTurnstile(
+    form ?? new FormData(),
+    'newsletter_subscribe',
+    request.headers,
+  )
+  if (!verification.success) {
+    home.searchParams.set('newsletter', 'verification')
     return NextResponse.redirect(home, {
       status: 303,
       headers: rateLimitResponseHeaders(rateLimit),

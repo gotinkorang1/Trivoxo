@@ -1,6 +1,31 @@
 import { expect, test } from '@playwright/test'
 
 test.describe('Trivoxo frontend', () => {
+  test('publishes hardened headers and reachable social-sharing images', async ({ page, request }) => {
+    const response = await page.goto('http://localhost:3000')
+    expect(response?.status()).toBe(200)
+
+    const csp = response?.headers()['content-security-policy'] ?? ''
+    expect(csp).toContain("default-src 'self'")
+    expect(csp).toContain("object-src 'none'")
+    expect(csp).toContain('https://challenges.cloudflare.com')
+    expect(response?.headers()['x-content-type-options']).toBe('nosniff')
+    expect(response?.headers()['cross-origin-opener-policy']).toBe('same-origin-allow-popups')
+
+    const canonical = await page.locator('link[rel="canonical"]').getAttribute('href')
+    expect(canonical).toBe('http://localhost:3000')
+
+    const generatedImage = await page.locator('meta[property="og:image"]').first().getAttribute('content')
+    expect(generatedImage).toBeTruthy()
+    const generatedResponse = await request.get(generatedImage!)
+    expect(generatedResponse.status()).toBe(200)
+    expect(generatedResponse.headers()['content-type']).toContain('image/png')
+
+    const stableFallback = await request.get('http://localhost:3000/og')
+    expect(stableFallback.status()).toBe(200)
+    expect(stableFallback.headers()['content-type']).toContain('image/png')
+  })
+
   test('loads the homepage and advances the featured story', async ({ page }) => {
     await page.goto('http://localhost:3000')
 

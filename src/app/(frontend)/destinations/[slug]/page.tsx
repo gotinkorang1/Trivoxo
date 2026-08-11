@@ -30,7 +30,19 @@ export async function generateMetadata({
   return {
     title: dest.title,
     description: dest.blurb,
-    openGraph: { title: dest.title, description: dest.blurb },
+    alternates: { canonical: `/destinations/${dest.slug}` },
+    openGraph: {
+      title: dest.title,
+      description: dest.blurb,
+      url: `/destinations/${dest.slug}`,
+      images: dest.image ? [{ url: dest.image.src, alt: dest.image.alt }] : ['/og'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: dest.title,
+      description: dest.blurb,
+      images: [dest.image?.src || '/og'],
+    },
   }
 }
 

@@ -47,6 +47,7 @@ import {
 import { SITE_MEDIA, CORPORATE_IMAGE } from '@/lib/site-media'
 import { cn } from '@/lib/utils'
 import { EventCard } from '@/components/events/event-card'
+import { TurnstileWidget } from '@/components/forms/turnstile-widget'
 
 const ICONS: Record<string, LucideIcon> = {
   Mountain,
@@ -649,23 +650,29 @@ function Newsletter() {
           <form
             action="/api/newsletter"
             method="post"
-            className="mt-7 flex w-full max-w-lg flex-col gap-3 sm:flex-row lg:mt-0"
+            className="mt-7 w-full max-w-lg space-y-3 lg:mt-0"
           >
-            <label className="sr-only" htmlFor="newsletter-email">
-              Email address
-            </label>
-            <input
-              id="newsletter-email"
-              type="email"
-              name="email"
-              required
-              autoComplete="email"
-              placeholder="you@example.com"
-              className="min-h-13 flex-1 rounded-full border border-brand-navy/15 bg-white px-5 text-sm font-medium text-brand-navy shadow-sm outline-none placeholder:text-slate-500 focus:border-brand-navy focus:ring-2 focus:ring-brand-navy/25 [color-scheme:light]"
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <label className="sr-only" htmlFor="newsletter-email">
+                Email address
+              </label>
+              <input
+                id="newsletter-email"
+                type="email"
+                name="email"
+                required
+                autoComplete="email"
+                placeholder="you@example.com"
+                className="min-h-13 flex-1 rounded-full border border-brand-navy/15 bg-white px-5 text-sm font-medium text-brand-navy shadow-sm outline-none placeholder:text-slate-500 focus:border-brand-navy focus:ring-2 focus:ring-brand-navy/25 [color-scheme:light]"
+              />
+              <Button type="submit" variant="secondary" size="lg">
+                Join Trivoxo
+              </Button>
+            </div>
+            <TurnstileWidget
+              action="newsletter_subscribe"
+              className="rounded-2xl bg-white/90 p-3 text-brand-navy [&_p]:text-slate-600"
             />
-            <Button type="submit" variant="secondary" size="lg">
-              Join Trivoxo
-            </Button>
           </form>
         </div>
       </Reveal>

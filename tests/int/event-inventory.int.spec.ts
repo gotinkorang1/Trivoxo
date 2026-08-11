@@ -1,14 +1,16 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { getPayload, type Payload } from 'payload'
 import config from '@/payload.config'
 import {
   createEventOrderHold,
   EventInventoryError,
+  markEventOrderPaymentForReview,
   settleVerifiedEventOrderPayment,
 } from '@/lib/event-inventory'
 import { checkInTicket } from '@/lib/event-checkin'
 import { paymentReference } from '@/lib/reference'
 import type { Event } from '@/payload-types'
+import { processNotifications, type EventTicketsSender } from '@/lib/notifications'
 
 let payload: Payload
 const createdEventIDs: number[] = []
@@ -76,6 +78,8 @@ describe('transactional event ticket inventory', () => {
 
       const orders = await payload.find({ collection: 'event-orders', depth: 0, limit: 200, overrideAccess: true, where: { event: { equals: eventID } } })
       for (const o of orders.docs) {
+        const notifications = await payload.find({ collection: 'notifications', depth: 0, limit: 100, overrideAccess: true, where: { eventOrder: { equals: o.id } } })
+        for (const notification of notifications.docs) await payload.delete({ collection: 'notifications', id: notification.id, overrideAccess: true })
         const payments = await payload.find({ collection: 'payments', depth: 0, limit: 50, overrideAccess: true, where: { eventOrder: { equals: o.id } } })
         for (const p of payments.docs) await payload.delete({ collection: 'payments', id: p.id, overrideAccess: true })
         await payload.delete({ collection: 'event-orders', id: o.id, overrideAccess: true })
@@ -115,6 +119,27 @@ describe('transactional event ticket inventory', () => {
     expect(first.order.paymentState).toBe('paid')
     expect(first.tickets).toHaveLength(3)
 
+    const queued = await payload.find({
+      collection: 'notifications',
+      depth: 0,
+      limit: 10,
+      overrideAccess: true,
+      where: { eventOrder: { equals: order.id } },
+    })
+    expect(queued.totalDocs).toBe(1)
+    expect(queued.docs[0]?.type).toBe('event_tickets_issued')
+
+    const eventSender = vi.fn(async (_input: Parameters<EventTicketsSender>[0]) => ({
+      id: 'resend-event-test',
+    }))
+    const delivered = await processNotifications(payload, {
+      eventOrderID: order.id,
+      eventSender,
+      limit: 1,
+    })
+    expect(delivered.sent).toBe(1)
+    expect(eventSender).toHaveBeenCalledOnce()
+
     // Re-settling the same payment must not issue duplicate tickets.
     const second = await settleVerifiedEventOrderPayment(payload, payment.id, audit())
     expect(second.outcome).toBe('already_processed')
@@ -122,6 +147,32 @@ describe('transactional event ticket inventory', () => {
 
     const allTickets = await payload.find({ collection: 'event-tickets', depth: 0, limit: 200, overrideAccess: true, where: { order: { equals: order.id } } })
     expect(allTickets.totalDocs).toBe(3)
+    const notifications = await payload.find({ collection: 'notifications', depth: 0, limit: 10, overrideAccess: true, where: { eventOrder: { equals: order.id } } })
+    expect(notifications.totalDocs).toBe(1)
+  })
+
+  it('never issues tickets for a payment that requires review', async () => {
+    const event = await createTestEvent('Review Event', 5)
+    const { order } = await createEventOrderHold(payload, {
+      event,
+      selections: [{ ticketTypeName: 'General', quantity: 1 }],
+      buyer: buyer(),
+    })
+    const payment = await createPaidPayment(order.id, order.totalAmount ?? 0)
+    await markEventOrderPaymentForReview(payload, payment.id, 'QA review case', audit())
+
+    const replay = await settleVerifiedEventOrderPayment(payload, payment.id, audit())
+    expect(replay.outcome).toBe('already_processed')
+    expect(replay.tickets).toHaveLength(0)
+
+    const tickets = await payload.find({
+      collection: 'event-tickets',
+      depth: 0,
+      limit: 10,
+      overrideAccess: true,
+      where: { order: { equals: order.id } },
+    })
+    expect(tickets.totalDocs).toBe(0)
   })
 
   it('admits a ticket once and reports repeat scans', async () => {

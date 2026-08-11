@@ -11,3 +11,8 @@ export function qrSvg(text: string): Promise<string> {
 export function qrDataUrl(text: string): Promise<string> {
   return QRCode.toDataURL(text, OPTIONS)
 }
+
+/** PNG buffer for inline email attachments. */
+export function qrPng(text: string): Promise<Buffer> {
+  return QRCode.toBuffer(text, OPTIONS)
+}

@@ -5,6 +5,7 @@ import { Loader2, Search } from 'lucide-react'
 import { lookupTripAction, type TripLookupState } from '@/app/actions/trips'
 import { Button } from '@/components/ui/button'
 import { Field, inputCls } from '@/components/forms/fields'
+import { TurnstileWidget } from '@/components/forms/turnstile-widget'
 
 const initial: TripLookupState = {}
 
@@ -25,6 +26,7 @@ export function MyTripsForm() {
       <Field label="Email">
         <input type="email" name="email" defaultValue={v.email} placeholder="you@example.com" className={inputCls()} />
       </Field>
+      <TurnstileWidget action="trip_lookup" resetKey={state} />
       <Button type="submit" disabled={pending} className="w-full">
         {pending ? (
           <>

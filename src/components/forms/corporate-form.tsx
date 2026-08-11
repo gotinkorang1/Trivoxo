@@ -9,6 +9,7 @@ import {
   ReviewGrid,
   StepHeading,
 } from '@/components/forms/guided-form'
+import { TurnstileWidget } from '@/components/forms/turnstile-widget'
 import { EVENT_TYPES, CORPORATE_SERVICES } from '@/lib/enquiry-options'
 
 const initial: EnquiryState = {}
@@ -248,6 +249,9 @@ export function CorporateForm() {
           description="Nothing is charged now. Trivoxo will review this and respond with questions or a tailored proposal."
         />
         <ReviewGrid items={review} />
+        {step === 3 && (
+          <TurnstileWidget action="corporate_enquiry" resetKey={state} className="mt-6" />
+        )}
         <FormNavigation
           onBack={() => setStep(2)}
           submitLabel="Send proposal request"

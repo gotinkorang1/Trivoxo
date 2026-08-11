@@ -27,15 +27,15 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/88 shadow-[0_8px_30px_-24px_rgba(0,0,0,.55)] backdrop-blur-xl">
       <div className="hidden border-b border-border/60 bg-brand-navy text-white sm:block">
-        <Container className="flex min-h-9 items-center justify-between gap-6 text-[0.7rem] font-semibold tracking-wide">
+        <Container className="flex min-h-11 items-center justify-between gap-6 text-[0.7rem] font-semibold tracking-wide">
           <p className="uppercase tracking-[0.18em] text-white/76">
             Ghanaian-owned <span className="mx-2 text-brand-secondary">•</span> Locally curated
           </p>
           <div className="flex items-center gap-5 text-white/76">
-            <a className="inline-flex items-center gap-1.5 hover:text-brand-secondary" href={`tel:${CONTACT.primaryPhone}`}>
+            <a className="inline-flex min-h-11 items-center gap-1.5 hover:text-brand-secondary" href={`tel:${CONTACT.primaryPhone}`}>
               <Phone className="size-3.5" aria-hidden="true" /> {CONTACT.primaryPhone}
             </a>
-            <a className="hidden items-center gap-1.5 hover:text-brand-secondary md:inline-flex" href={`mailto:${CONTACT.email}`}>
+            <a className="hidden min-h-11 items-center gap-1.5 hover:text-brand-secondary md:inline-flex" href={`mailto:${CONTACT.email}`}>
               <Mail className="size-3.5" aria-hidden="true" /> {CONTACT.email}
             </a>
           </div>
@@ -43,7 +43,7 @@ export function Header() {
       </div>
 
       <Container className="flex h-[4.5rem] items-center justify-between gap-4">
-        <Link href="/" aria-label="Trivoxo home" className="shrink-0">
+        <Link href="/" aria-label="Trivoxo home" className="inline-flex min-h-11 shrink-0 items-center">
           <Wordmark className="h-9 w-auto sm:h-10" priority />
         </Link>
 
@@ -52,7 +52,7 @@ export function Header() {
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-full px-3.5 py-2 text-[0.82rem] font-semibold text-text-secondary transition-all hover:bg-surface hover:text-brand-link"
+              className="inline-flex min-h-11 items-center rounded-full px-3.5 py-2 text-[0.82rem] font-semibold text-text-secondary transition-all hover:bg-surface hover:text-brand-link"
             >
               {item.label}
             </Link>
