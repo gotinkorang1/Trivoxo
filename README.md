@@ -89,7 +89,8 @@ Then:
 | `npm run seed`               | Load categories, destinations & the 13 tours       |
 | `npm run generate:types`     | Regenerate `src/payload-types.ts` from the config  |
 | `npm run generate:importmap` | Regenerate the admin import map (after UI changes) |
-| `npm run payload -- migrate` | Apply committed PostgreSQL migrations              |
+| `npm run migrate:deploy`     | Apply migrations as a gated release step           |
+| `npm run payload -- migrate` | Raw Payload migration CLI (local development)      |
 | `npm run typecheck`          | `tsc --noEmit`                                     |
 | `npm run lint`               | ESLint                                             |
 | `npm run test:int`           | Vitest integration tests                           |
@@ -267,3 +268,34 @@ changes against production. Production uses committed Payload migrations. Set
 `CRON_SECRET` so Vercel can authenticate stale-hold reconciliation; expired
 holds stop consuming capacity immediately from their timestamp, independent of
 that housekeeping schedule.
+
+### Migrations are a release step, not a build step
+
+`buildCommand` is `npm run build` — **the build never migrates a database.** A
+build runs on every deployment including previews, so migrating from it means a
+preview pointed at a shared `DATABASE_URI` would migrate that database.
+
+Apply schema changes deliberately, **before** promoting the code that needs them:
+
+```bash
+npm run migrate:deploy
+```
+
+Run it against one environment at a time with that environment's `DATABASE_URI`,
+having reviewed the migration diff. Because the deploy no longer migrates, order
+matters: **migrate first, then deploy.** Keep changes expand-then-contract (add
+columns in one release, remove them in a later one) so the currently-running code
+stays compatible with the new schema during the gap.
+
+`migrate:deploy` never answers a prompt for you. Payload asks exactly one
+question during `migrate` — the "you've run in dev push mode … data loss will
+occur" confirmation — and it only appears when the target database carries a
+dev-push marker (a `payload_migrations` row with `batch = -1`). The runner
+detects that marker up front and **exits non-zero instead of proceeding**, so a
+dev-pushed production database fails the release loudly rather than being
+silently migrated. It also verifies afterwards that every pending migration was
+actually recorded, since a cancelled prompt would otherwise exit zero.
+
+If it refuses, do not force it: find out how the marker got there (a dev process
+pointed at that `DATABASE_URI`?), take a backup, and reconcile the schema
+deliberately.
