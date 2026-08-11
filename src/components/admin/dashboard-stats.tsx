@@ -589,18 +589,20 @@ function SectionTitle({
   )
 }
 
+/* Payload's admin router owns this view, so these query-string changes need a
+ * browser navigation to refresh the server-rendered reporting data reliably. */
 function PeriodSwitch({ period }: { period: ReportingPeriod }) {
   return (
     <nav className="tvx-period-switch" aria-label="Reporting period">
       {REPORTING_PERIODS.map((days) => (
-        <Link
+        <a
           href={`/admin?period=${days}`}
           key={days}
           className="tvx-period-switch__link"
           aria-current={period === days ? 'page' : undefined}
         >
           {days} days
-        </Link>
+        </a>
       ))}
     </nav>
   )
