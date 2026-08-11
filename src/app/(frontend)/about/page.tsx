@@ -29,6 +29,14 @@ export const metadata: Metadata = {
   description: `${BRAND.name} is a Ghanaian-owned tours, events and ticketing company creating safe, memorable experiences across Ghana.`,
 }
 
+/** First + last initial, for a leadership card without a portrait. */
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : ''
+  return (parts[0][0] + last).toUpperCase()
+}
+
 const SERVICES: { icon: LucideIcon; title: string; body: string }[] = [
   {
     icon: MapPinned,
@@ -224,20 +232,28 @@ export default function AboutPage() {
           <p className="mt-2 max-w-2xl text-text-secondary">
             The people who plan, host and deliver your Trivoxo experience.
           </p>
-          <div className="mt-6 grid gap-6 sm:grid-cols-3">
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {MANAGEMENT.map((person) => (
               <div
                 key={person.name}
                 className="overflow-hidden rounded-card border border-border bg-surface-elevated"
               >
                 <div className="relative aspect-[3/4] bg-surface">
-                  <Image
-                    src={person.image.src}
-                    alt={person.image.alt}
-                    fill
-                    sizes="(min-width: 640px) 33vw, 100vw"
-                    className="object-cover object-top"
-                  />
+                  {person.image ? (
+                    <Image
+                      src={person.image.src}
+                      alt={person.image.alt}
+                      fill
+                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                      className="object-cover object-top"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center bg-brand-primary-soft">
+                      <span className="font-display text-4xl font-semibold text-brand-primary">
+                        {initials(person.name)}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="p-4">
                   <p className="font-semibold text-text-primary">{person.name}</p>

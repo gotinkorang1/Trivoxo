@@ -79,11 +79,13 @@ export const CORPORATE_IMAGE: PublicImage = {
   alt: 'A Trivoxo corporate retreat group',
 }
 
-/** Leadership portraits (public/Management). Roles pending confirmation. */
-export const MANAGEMENT: { name: string; role: string; image: PublicImage }[] = [
-  { name: 'Theo', role: 'Chief Executive Officer', image: { src: '/Management/theo.jpg', alt: 'Theo, Chief Executive Officer of Trivoxo' } },
-  { name: 'Daniel', role: 'Leadership', image: { src: '/Management/daniel.jpg', alt: 'Daniel, Trivoxo leadership' } },
-  { name: 'Kingdom', role: 'Nii Plants Group', image: { src: '/Management/kingdom.jpg', alt: 'Kingdom, Nii Plants Group' } },
+/** Leadership team (public/Management). `image` optional — a missing portrait
+ * falls back to an initials avatar on the About page. */
+export const MANAGEMENT: { name: string; role: string; image?: PublicImage }[] = [
+  { name: 'Theo Ayitey-Adjin', role: 'Chief Executive Officer', image: { src: '/Management/theo.jpg', alt: 'Theo Ayitey-Adjin, Chief Executive Officer of Trivoxo' } },
+  { name: 'Emmanuel Nelson', role: 'Operations Manager' },
+  { name: 'Daniel Awotwe-Pratt', role: 'Finance Manager', image: { src: '/Management/daniel.jpg', alt: 'Daniel Awotwe-Pratt, Finance Manager at Trivoxo' } },
+  { name: 'Kingdom Kededor Avisseh', role: 'Executive Assistant', image: { src: '/Management/kingdom.jpg', alt: 'Kingdom Kededor Avisseh, Executive Assistant at Trivoxo' } },
 ]
 
 export function destinationImage(slug?: string): PublicImage | undefined {
