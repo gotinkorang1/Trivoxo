@@ -36,7 +36,7 @@ const DESTINATION_IMAGE: Record<string, PublicImage> = {
   volta: { src: '/images/wli-waterfalls.jpg', alt: 'Wli Waterfalls in the Volta Region' },
   akosombo: { src: '/images/akosombo.jpg', alt: 'Lakeside calm at Akosombo on the Volta Lake' },
   'eastern-region': { src: '/images/boti-falls-umbrella-rock.jpg', alt: 'Umbrella Rock at Boti Falls, Eastern Region' },
-  // shai-hills intentionally omitted — no truthful savannah photo yet (gradient fallback).
+  'shai-hills': { src: '/images/shai-hills.jpg', alt: 'A baboon and its young at Shai Hills Resource Reserve' },
 }
 
 /** Experiences (§24). */
@@ -53,7 +53,7 @@ const EXPERIENCE_IMAGE: Record<string, PublicImage> = {
   'eco-luxury-wilderness': { src: '/images/aburi-hills.avif', alt: 'Forested Aburi hills, Eastern Region' },
   'legacy-clay-trail': { src: '/images/arts-centre-crafts.jpg', alt: 'Ghanaian craft artworks at a cultural centre' },
   'garden-gold-trail': { src: '/images/aburi-gardens.jpg', alt: 'Aburi Botanical Gardens, Eastern Region' },
-  // wild-plains-river-cruise omitted — no truthful Shai Hills photo yet.
+  'wild-plains-river-cruise': { src: '/images/shai-hills.jpg', alt: 'Wildlife at Shai Hills Resource Reserve' },
 }
 
 /** Events (§62). */
