@@ -37,6 +37,9 @@ yarn-error.log*
 # marketplace-installed local agent skills
 /.agents/
 /skills-lock.json
+# symlinks the skills installer creates into the Claude Code skill directory;
+# they point into the ignored /.agents/ tree and do not survive a clone
+/.claude/skills/
 
 # typescript
 *.tsbuildinfo
