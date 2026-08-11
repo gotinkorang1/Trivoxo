@@ -4,6 +4,7 @@ import * as migration_20260810_172913_booking_fulfilment from './20260810_172913
 import * as migration_20260811_012834_event_ticketing from './20260811_012834_event_ticketing'
 import * as migration_20260811_050125_cloudinary_media_storage from './20260811_050125_cloudinary_media_storage'
 import * as migration_20260811_094425_event_ticket_notifications from './20260811_094425_event_ticket_notifications'
+import * as migration_20260811_200530_revoke_public_api_grants from './20260811_200530_revoke_public_api_grants'
 
 export const migrations = [
   {
@@ -35,5 +36,10 @@ export const migrations = [
     up: migration_20260811_094425_event_ticket_notifications.up,
     down: migration_20260811_094425_event_ticket_notifications.down,
     name: '20260811_094425_event_ticket_notifications',
+  },
+  {
+    up: migration_20260811_200530_revoke_public_api_grants.up,
+    down: migration_20260811_200530_revoke_public_api_grants.down,
+    name: '20260811_200530_revoke_public_api_grants',
   },
 ]
