@@ -110,6 +110,30 @@ const nextConfig: NextConfig = {
 
 const payloadConfig = withPayload(nextConfig, { devBundleServerPackages: false })
 
+// Payload uses the color-scheme client hint to render the admin theme correctly.
+// Keep its critical retry behavior in the admin, but avoid forcing every public
+// page navigation to restart before the first render.
+const payloadHeaders = payloadConfig.headers
+payloadConfig.headers = async () => {
+  const headerRules = payloadHeaders ? await payloadHeaders() : []
+
+  return [
+    ...headerRules.map((rule) => ({
+      ...rule,
+      headers: rule.headers.filter((header) => header.key.toLowerCase() !== 'critical-ch'),
+    })),
+    {
+      source: '/admin/:path*',
+      headers: [
+        {
+          key: 'Critical-CH',
+          value: 'Sec-CH-Prefers-Color-Scheme',
+        },
+      ],
+    },
+  ]
+}
+
 export default withSentryConfig(payloadConfig, {
   applicationKey: 'trivoxo-web',
   silent: !process.env.CI,

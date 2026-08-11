@@ -11,6 +11,10 @@ test.describe('Trivoxo frontend', () => {
     expect(csp).toContain('https://challenges.cloudflare.com')
     expect(response?.headers()['x-content-type-options']).toBe('nosniff')
     expect(response?.headers()['cross-origin-opener-policy']).toBe('same-origin-allow-popups')
+    expect(response?.headers()['critical-ch']).toBeUndefined()
+
+    const adminResponse = await request.get('http://localhost:3000/admin/login')
+    expect(adminResponse.headers()['critical-ch']).toBe('Sec-CH-Prefers-Color-Scheme')
 
     const canonical = await page.locator('link[rel="canonical"]').getAttribute('href')
     expect(canonical).toBe('http://localhost:3000')
