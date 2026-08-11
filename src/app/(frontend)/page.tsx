@@ -162,7 +162,10 @@ function Categories() {
                   href={`/experiences?category=${category.slug}`}
                   className="card-lift group relative flex min-h-48 flex-col overflow-hidden rounded-card border border-border bg-surface-elevated p-5 shadow-soft sm:min-h-52 sm:p-6"
                 >
-                  <span className="absolute right-4 top-3 font-display text-5xl font-semibold text-text-primary/[0.045] transition group-hover:text-brand-primary/10">
+                  <span
+                    className="absolute right-4 top-3 font-display text-5xl font-semibold text-text-primary/[0.045] transition group-hover:text-brand-primary/10"
+                    aria-hidden="true"
+                  >
                     {String(index + 1).padStart(2, '0')}
                   </span>
                   <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-brand-primary-soft text-brand-link transition duration-300 group-hover:rotate-3 group-hover:scale-110 group-hover:bg-brand-primary group-hover:text-brand-navy">
