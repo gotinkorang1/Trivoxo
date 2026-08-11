@@ -37,9 +37,15 @@ function isProduction(): boolean {
   return process.env.VERCEL_ENV === 'production' || process.env.NODE_ENV === 'production'
 }
 
+function isNonProductionDeployment(): boolean {
+  return process.env.VERCEL_ENV
+    ? process.env.VERCEL_ENV !== 'production'
+    : process.env.NODE_ENV !== 'production'
+}
+
 function usesOfficialTestKeys(secret: string, siteKey: string): boolean {
   return (
-    !isProduction() &&
+    isNonProductionDeployment() &&
     siteKey === CLOUDFLARE_ALWAYS_PASS_TEST_SITE_KEY &&
     secret === CLOUDFLARE_ALWAYS_PASS_TEST_SECRET_KEY
   )

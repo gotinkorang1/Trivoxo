@@ -70,6 +70,7 @@ describe('Cloudflare Turnstile verification', () => {
   it('accepts Cloudflare official always-pass keys only outside production', async () => {
     process.env.TURNSTILE_SECRET_KEY = '1x0000000000000000000000000000000AA'
     process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY = '1x00000000000000000000AA'
+    process.env.VERCEL_ENV = 'preview'
 
     const stagingResult = await verifyTurnstile(form(), 'booking_create', requestHeaders, {
       fetch: async () => Response.json({ success: true }),
