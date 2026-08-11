@@ -1,8 +1,12 @@
 'use client'
 
-import { GoogleAnalytics } from '@next/third-parties/google'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useSyncExternalStore } from 'react'
+
+const GoogleAnalytics = dynamic(() =>
+  import('@next/third-parties/google').then((module) => module.GoogleAnalytics),
+)
 
 const ANALYTICS_CONSENT_KEY = 'trivoxo-analytics-consent'
 const ANALYTICS_CONSENT_EVENT = 'trivoxo:analytics-consent'
