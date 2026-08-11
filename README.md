@@ -26,10 +26,12 @@ protected transactionally. See [Roadmap](#roadmap) for what is still ahead.
 | Animation     | Motion                                           |
 | Rich text     | Lexical (`@payloadcms/richtext-lexical`)         |
 | Images        | sharp processing + persistent Cloudinary storage |
+| Rate limiting | Upstash Redis (distributed across Vercel)        |
 
-Planned integrations (env placeholders already in `.env.example`): Paystack
-(payments), Resend (email), Cloudflare Turnstile (bot protection), PostHog / GA4
-(analytics), Sentry (monitoring), Mapbox/Google Maps.
+Production integrations include Cloudflare Turnstile, Upstash rate limiting,
+Cloudinary, Resend and Sentry. PostHog and GA4 are consent-gated and activate only
+when their public project identifiers are configured. See `.env.example` for the
+environment and secret checklist.
 
 ---
 
@@ -109,6 +111,20 @@ Files committed under `public/` are not moved or changed by this integration.
 
 Apply `npm run payload -- migrate` before enabling the Cloudinary credentials
 against an existing database.
+
+---
+
+## Distributed rate limiting
+
+Public booking, event-order, checkout, enquiry, trip-lookup, newsletter,
+availability and private-download entry points are protected with endpoint-specific
+sliding-window limits in Upstash Redis. Vercel Marketplace supplies
+`KV_REST_API_URL` and `KV_REST_API_TOKEN` to Production and Preview.
+
+Only a salted hash of the client address is used as the Redis identifier. Raw IP
+addresses and customer emails are not stored in rate-limit keys. If Redis is not
+configured locally, or it has a temporary outage, requests fail open and the server
+logs the configuration/runtime problem so booking availability is preserved.
 
 ---
 
@@ -205,12 +221,14 @@ row lock; remaining seats are derived rather than stored as a drift-prone counte
 - **Photography & reviews:** real Ghana photos across destinations, experiences,
   events, guide and services + the leadership team; verified reviews on the
   homepage and experience pages (with star ratings)
+- **Abuse protection:** distributed Upstash Redis limits for public reads and
+  mutations, with privacy-safe identifiers and retry guidance
 
 **Next (needs credentials or business inputs — see [.env.example](.env.example) and [docs/OPEN_DECISIONS.md](docs/OPEN_DECISIONS.md))**
 
 - **Go-live config:** Paystack **live** keys (and rotate the exposed test
   secret), Resend sending-domain verification, Cloudinary credentials and an
-  upload/delete smoke test, Cloudflare Turnstile + rate limiting, Supabase
+  upload/delete smoke test, Cloudflare Turnstile, Supabase
   prod/staging DB, Cloudflare DNS/WAF + production secrets, Sentry / PostHog / GA4
 - **Payment ops:** assisted/automatic Paystack refunds + partial-refund records
   and a Finance refund UI; full staging webhook test matrix; a controlled

@@ -399,28 +399,12 @@ export interface Media {
         | 'other'
       )
     | null;
-  cloudinaryPublicId?: string | null;
-  cloudinaryUrl?: string | null;
-  cloudinaryResourceType?: string | null;
-  cloudinaryFormat?: string | null;
-  cloudinaryVersion?: number | null;
-  /**
-   * Direct URL to the original file without transformations
-   */
-  originalUrl?: string | null;
-  /**
-   * URL with applied transformations
-   */
-  transformedUrl?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
   mimeType?: string | null;
-  /**
-   * File size in bytes
-   */
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
@@ -428,74 +412,26 @@ export interface Media {
   focalY?: number | null;
   sizes?: {
     thumbnail?: {
-      cloudinaryPublicId?: string | null;
-      cloudinaryUrl?: string | null;
-      cloudinaryResourceType?: string | null;
-      cloudinaryFormat?: string | null;
-      cloudinaryVersion?: number | null;
-      /**
-       * Direct URL to the original file without transformations
-       */
-      originalUrl?: string | null;
-      /**
-       * URL with applied transformations
-       */
-      transformedUrl?: string | null;
       url?: string | null;
       width?: number | null;
       height?: number | null;
       mimeType?: string | null;
-      /**
-       * File size in bytes
-       */
       filesize?: number | null;
       filename?: string | null;
     };
     card?: {
-      cloudinaryPublicId?: string | null;
-      cloudinaryUrl?: string | null;
-      cloudinaryResourceType?: string | null;
-      cloudinaryFormat?: string | null;
-      cloudinaryVersion?: number | null;
-      /**
-       * Direct URL to the original file without transformations
-       */
-      originalUrl?: string | null;
-      /**
-       * URL with applied transformations
-       */
-      transformedUrl?: string | null;
       url?: string | null;
       width?: number | null;
       height?: number | null;
       mimeType?: string | null;
-      /**
-       * File size in bytes
-       */
       filesize?: number | null;
       filename?: string | null;
     };
     hero?: {
-      cloudinaryPublicId?: string | null;
-      cloudinaryUrl?: string | null;
-      cloudinaryResourceType?: string | null;
-      cloudinaryFormat?: string | null;
-      cloudinaryVersion?: number | null;
-      /**
-       * Direct URL to the original file without transformations
-       */
-      originalUrl?: string | null;
-      /**
-       * URL with applied transformations
-       */
-      transformedUrl?: string | null;
       url?: string | null;
       width?: number | null;
       height?: number | null;
       mimeType?: string | null;
-      /**
-       * File size in bytes
-       */
       filesize?: number | null;
       filename?: string | null;
     };
@@ -2054,13 +1990,6 @@ export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   credit?: T;
   category?: T;
-  cloudinaryPublicId?: T;
-  cloudinaryUrl?: T;
-  cloudinaryResourceType?: T;
-  cloudinaryFormat?: T;
-  cloudinaryVersion?: T;
-  originalUrl?: T;
-  transformedUrl?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2078,13 +2007,6 @@ export interface MediaSelect<T extends boolean = true> {
         thumbnail?:
           | T
           | {
-              cloudinaryPublicId?: T;
-              cloudinaryUrl?: T;
-              cloudinaryResourceType?: T;
-              cloudinaryFormat?: T;
-              cloudinaryVersion?: T;
-              originalUrl?: T;
-              transformedUrl?: T;
               url?: T;
               width?: T;
               height?: T;
@@ -2095,13 +2017,6 @@ export interface MediaSelect<T extends boolean = true> {
         card?:
           | T
           | {
-              cloudinaryPublicId?: T;
-              cloudinaryUrl?: T;
-              cloudinaryResourceType?: T;
-              cloudinaryFormat?: T;
-              cloudinaryVersion?: T;
-              originalUrl?: T;
-              transformedUrl?: T;
               url?: T;
               width?: T;
               height?: T;
@@ -2112,13 +2027,6 @@ export interface MediaSelect<T extends boolean = true> {
         hero?:
           | T
           | {
-              cloudinaryPublicId?: T;
-              cloudinaryUrl?: T;
-              cloudinaryResourceType?: T;
-              cloudinaryFormat?: T;
-              cloudinaryVersion?: T;
-              originalUrl?: T;
-              transformedUrl?: T;
               url?: T;
               width?: T;
               height?: T;

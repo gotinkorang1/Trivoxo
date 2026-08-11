@@ -1,12 +1,14 @@
 'use server'
 
 import { getPayload } from 'payload'
+import { headers as nextHeaders } from 'next/headers'
 import config from '@payload-config'
 import {
   EVENT_TYPE_VALUES,
   CORPORATE_SERVICE_VALUES,
   TRIP_INTEREST_VALUES,
 } from '@/lib/enquiry-options'
+import { checkRateLimit, rateLimitMessage } from '@/lib/rate-limit'
 
 export type EnquiryState = {
   success?: boolean
@@ -52,6 +54,9 @@ export async function createCorporateEnquiryAction(
   if (!phone) fieldErrors.phone = 'Required'
   if (Object.keys(fieldErrors).length)
     return { error: 'Please correct the highlighted fields.', fieldErrors, values }
+
+  const rateLimit = await checkRateLimit('enquiryCreate', await nextHeaders())
+  if (!rateLimit.allowed) return { error: rateLimitMessage(rateLimit), values }
 
   const services = formData
     .getAll('services')
@@ -107,6 +112,9 @@ export async function createCustomTripAction(
   else if (!EMAIL_RE.test(email)) fieldErrors.email = 'Enter a valid email'
   if (Object.keys(fieldErrors).length)
     return { error: 'Please correct the highlighted fields.', fieldErrors, values }
+
+  const rateLimit = await checkRateLimit('enquiryCreate', await nextHeaders())
+  if (!rateLimit.allowed) return { error: rateLimitMessage(rateLimit), values }
 
   const interests = formData
     .getAll('interests')
@@ -191,6 +199,9 @@ export async function createServiceRequestAction(
   if (serviceType === 'car-rental') invalidDateOrder('startDate', 'endDate')
   if (Object.keys(fieldErrors).length)
     return { error: 'Please correct the highlighted fields.', fieldErrors, values }
+
+  const rateLimit = await checkRateLimit('enquiryCreate', await nextHeaders())
+  if (!rateLimit.allowed) return { error: rateLimitMessage(rateLimit), values }
 
   const known = new Set(['serviceType', 'name', 'email', 'phone'])
   const details: Record<string, string> = {}

@@ -2,11 +2,13 @@
 
 import { getPayload } from 'payload'
 import { redirect } from 'next/navigation'
+import { headers as nextHeaders } from 'next/headers'
 import config from '@payload-config'
 import { evaluateDateAvailability, getBookingWindow, isIsoDate } from '@/lib/availability'
 import { createBookingHold, InventoryError } from '@/lib/booking-inventory'
 import { CAPACITY, quoteBooking } from '@/lib/policies'
 import { createBookingAccessToken } from '@/lib/booking-access'
+import { checkRateLimit, rateLimitMessage } from '@/lib/rate-limit'
 
 export type BookingFormState = {
   error?: string
@@ -76,6 +78,9 @@ export async function createBookingAction(
   if (Object.keys(fieldErrors).length > 0) {
     return { error: 'Please correct the highlighted fields.', fieldErrors, values }
   }
+
+  const rateLimit = await checkRateLimit('bookingCreate', await nextHeaders())
+  if (!rateLimit.allowed) return { error: rateLimitMessage(rateLimit), values }
 
   let reference: string | undefined
   try {

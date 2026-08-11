@@ -3,6 +3,11 @@ import { getPayload } from 'payload'
 import { evaluateDateAvailability, getBookingWindow, isIsoDate } from '@/lib/availability'
 import { getDateInventory } from '@/lib/booking-inventory'
 import { CAPACITY } from '@/lib/policies'
+import {
+  checkRateLimit,
+  rateLimitMessage,
+  rateLimitResponseHeaders,
+} from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,6 +21,15 @@ export async function GET(request: Request) {
     return Response.json({ error: 'Invalid availability request.' }, { status: 400 })
   }
 
+  const rateLimit = await checkRateLimit('availability', request.headers)
+  const limitHeaders = rateLimitResponseHeaders(rateLimit)
+  if (!rateLimit.allowed) {
+    return Response.json(
+      { error: rateLimitMessage(rateLimit) },
+      { status: 429, headers: limitHeaders },
+    )
+  }
+
   const payload = await getPayload({ config })
   const found = await payload.find({
     collection: 'experiences',
@@ -25,7 +39,8 @@ export async function GET(request: Request) {
     where: { slug: { equals: slug } },
   })
   const experience = found.docs[0]
-  if (!experience) return Response.json({ error: 'Experience not found.' }, { status: 404 })
+  if (!experience)
+    return Response.json({ error: 'Experience not found.' }, { status: 404, headers: limitHeaders })
 
   const rules = {
     availabilityType: experience.availabilityType,
@@ -36,12 +51,15 @@ export async function GET(request: Request) {
   }
   const dateRule = evaluateDateAvailability(date, rules, getBookingWindow(rules))
   if (!dateRule.requestable) {
-    return Response.json({
-      available: false,
-      maxRemainingSeats: 0,
-      message: dateRule.reason ?? 'Choose another date.',
-      status: 'closed',
-    })
+    return Response.json(
+      {
+        available: false,
+        maxRemainingSeats: 0,
+        message: dateRule.reason ?? 'Choose another date.',
+        status: 'closed',
+      },
+      { headers: { ...limitHeaders, 'Cache-Control': 'no-store' } },
+    )
   }
 
   const inventory = await getDateInventory(payload, experience, date, { partySize })
@@ -60,6 +78,6 @@ export async function GET(request: Request) {
 
   return Response.json(
     { ...inventory, message, maxOnlineGuests: experience.maxGuests ?? CAPACITY.maxGuests },
-    { headers: { 'Cache-Control': 'no-store' } },
+    { headers: { ...limitHeaders, 'Cache-Control': 'no-store' } },
   )
 }

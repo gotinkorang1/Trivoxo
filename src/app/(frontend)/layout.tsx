@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter, Fraunces } from 'next/font/google'
 import Script from 'next/script'
 import React from 'react'
+import { AnalyticsConsent } from '@/components/analytics/analytics-consent'
 import { Header } from '@/components/site/header'
 import { Footer } from '@/components/site/footer'
 import { JsonLd, organizationSchema } from '@/components/seo/structured-data'
@@ -66,6 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <main id="main-content">{children}</main>
         <Footer />
+        <AnalyticsConsent />
       </body>
     </html>
   )

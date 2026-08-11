@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import {
+  checkRateLimit,
+  rateLimitResponseHeaders,
+} from '@/lib/rate-limit'
 
 /**
  * Newsletter subscription (§23). Accepts the homepage footer/hero form post,
@@ -23,6 +27,15 @@ export async function POST(request: Request) {
     return NextResponse.redirect(home, { status: 303 })
   }
 
+  const rateLimit = await checkRateLimit('newsletterSubscribe', request.headers)
+  if (!rateLimit.allowed) {
+    home.searchParams.set('newsletter', 'limited')
+    return NextResponse.redirect(home, {
+      status: 303,
+      headers: rateLimitResponseHeaders(rateLimit),
+    })
+  }
+
   try {
     const payload = await getPayload({ config })
     const existing = await payload.find({
@@ -42,5 +55,8 @@ export async function POST(request: Request) {
     home.searchParams.set('newsletter', 'error')
   }
 
-  return NextResponse.redirect(home, { status: 303 })
+  return NextResponse.redirect(home, {
+    status: 303,
+    headers: rateLimitResponseHeaders(rateLimit),
+  })
 }

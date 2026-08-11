@@ -2,6 +2,7 @@
 
 import { getPayload } from 'payload'
 import { redirect } from 'next/navigation'
+import { headers as nextHeaders } from 'next/headers'
 import config from '@payload-config'
 import { createEventOrderHold, EventInventoryError, type TicketSelection } from '@/lib/event-inventory'
 import {
@@ -9,6 +10,7 @@ import {
   freshEventOrderAccess,
   startEventCheckout,
 } from '@/lib/event-payment-service'
+import { checkRateLimit, rateLimitMessage } from '@/lib/rate-limit'
 
 export type EventOrderFormState = {
   error?: string
@@ -60,6 +62,9 @@ export async function createEventOrderAction(
     return { error: 'Choose at least one ticket to continue.', values }
   }
 
+  const rateLimit = await checkRateLimit('eventOrderCreate', await nextHeaders())
+  if (!rateLimit.allowed) return { error: rateLimitMessage(rateLimit), values }
+
   let orderReference: string | undefined
   let accessToken: string | undefined
   try {
@@ -105,13 +110,18 @@ export async function startEventCheckoutAction(formData: FormData): Promise<neve
   let checkoutURL: string | undefined
   let failureCode = 'checkout_error'
 
-  try {
-    const payload = await getPayload({ config })
-    const checkout = await startEventCheckout(payload, reference, access)
-    checkoutURL = checkout.authorizationURL
-  } catch (error) {
-    if (error instanceof EventPaymentError) failureCode = error.code.toLowerCase()
-    else console.error('Event Paystack checkout failed', error)
+  const rateLimit = await checkRateLimit('checkoutStart', await nextHeaders())
+  if (!rateLimit.allowed) {
+    failureCode = 'rate_limited'
+  } else {
+    try {
+      const payload = await getPayload({ config })
+      const checkout = await startEventCheckout(payload, reference, access)
+      checkoutURL = checkout.authorizationURL
+    } catch (error) {
+      if (error instanceof EventPaymentError) failureCode = error.code.toLowerCase()
+      else console.error('Event Paystack checkout failed', error)
+    }
   }
 
   if (checkoutURL) redirect(checkoutURL)
