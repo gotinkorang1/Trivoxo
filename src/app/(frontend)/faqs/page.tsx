@@ -14,8 +14,8 @@ const FAQS: { q: string; a: string }[] = [
     a: 'Choose an experience, click “Book this experience”, and tell us your date, group size and contact details. We confirm availability and send you the next steps — you’re not charged at that point.',
   },
   {
-    q: 'Do I pay online right now?',
-    a: 'Online payment (Mobile Money and cards) is coming soon. For now, after you submit a booking request our team reaches out to confirm and arrange payment.',
+    q: 'How do I pay?',
+    a: 'You pay securely online with Mobile Money, cards or bank transfer through Paystack. We hold your place while you complete checkout, and your booking is confirmed as soon as the payment is verified — you’re never charged before your seats are held.',
   },
   {
     q: 'Is there a discount for groups?',

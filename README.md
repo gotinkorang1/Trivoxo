@@ -171,16 +171,41 @@ row lock; remaining seats are derived rather than stored as a drift-prone counte
   rebuild. The `src/lib/data/*` catalogue modules remain the seed's source.
 - **SEO:** JSON-LD (Organization + Experience/Event/Article), sitemap.xml,
   robots.txt
-- **Admin:** custom dashboard summary widget (today's departures, bookings,
-  pending enquiries, published experiences)
+- **Admin:** custom analytics dashboard (today's departures, bookings,
+  revenue, pending enquiries, source breakdown, reporting periods) + a
+  check-in scanner view
+- **Payments:** Paystack checkout + verified idempotent webhook and callback,
+  converting the hold to confirmed inventory, with a Finance-review path for
+  mismatches (§45–46). Runs in test mode until live keys are set.
+- **Event ticketing (§64–66):** event orders + attendee details, Paystack
+  ticket checkout, transactional per-ticket-type stock, **signed QR tickets**,
+  and an admin **check-in scanner** with one-time (duplicate-scan-proof) admit
+- **Transactional email & documents:** Resend confirmations (gated on
+  `RESEND_API_KEY`), PDF voucher and calendar (ICS) downloads
+- **Photography & reviews:** real Ghana photos across destinations, experiences,
+  events, guide and services + the leadership team; verified reviews on the
+  homepage and experience pages (with star ratings)
 
-**Next (not yet built)**
+**Next (needs credentials or business inputs — see [.env.example](.env.example) and [docs/OPEN_DECISIONS.md](docs/OPEN_DECISIONS.md))**
 
-- **Payments:** Paystack checkout + verified idempotent webhook, converting the
-  existing hold to confirmed inventory (§46) — needs Paystack test keys
-- **Event ticketing:** orders model, purchase, QR tickets + check-in (§65–66)
-- Confirmation emails / vouchers (Resend)
-- Cloudinary storage adapter + real photography; redirects from the old site
+- **Go-live config:** Paystack **live** keys (and rotate the exposed test
+  secret), Resend sending-domain verification, Cloudinary media storage,
+  Cloudflare Turnstile + rate limiting, Supabase prod/staging DB, Cloudflare
+  DNS/WAF + production secrets, Sentry / PostHog / GA4
+- **Payment ops:** assisted/automatic Paystack refunds + partial-refund records
+  + a Finance refund UI; full staging webhook test matrix; a controlled
+  low-value live payment
+- **Pricing:** connect coupons to checkout; enforce seasonal / public-holiday
+  pricing; activate resident & private pricing; deposit + balance workflows
+- **Customer lifecycle:** verified-review invitation emails; departure reminders
+  and itinerary-update emails; optional customer accounts / magic links;
+  abandoned-booking reminders
+- **Content & launch:** final photography swaps; Ghanaian legal review of
+  policies; export old WordPress URLs + 301 redirects; content/spelling audit;
+  real-device accessibility + performance audit
+- **Business inputs:** resident prices, confirmed international prices, exact
+  durations & departure times, pickup zones, private-tour prices, the Capital
+  Pulse "Osu" decision
 
 See the redesign plan in `docs/` for the full Phase 1–3 breakdown.
 
