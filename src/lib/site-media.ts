@@ -83,7 +83,7 @@ export const CORPORATE_IMAGE: PublicImage = {
  * falls back to an initials avatar on the About page. */
 export const MANAGEMENT: { name: string; role: string; image?: PublicImage }[] = [
   { name: 'Theo Ayitey-Adjin', role: 'Chief Executive Officer', image: { src: '/Management/theo.jpg', alt: 'Theo Ayitey-Adjin, Chief Executive Officer of Trivoxo' } },
-  { name: 'Emmanuel Nelson', role: 'Operations Manager' },
+  { name: 'Emmanuel Nelson', role: 'Operations Manager', image: { src: '/Management/emmanuel-nelson.avif', alt: 'Emmanuel Nelson, Operations Manager at Trivoxo' } },
   { name: 'Daniel Awotwe-Pratt', role: 'Finance Manager', image: { src: '/Management/daniel.jpg', alt: 'Daniel Awotwe-Pratt, Finance Manager at Trivoxo' } },
   { name: 'Kingdom Kededor Avisseh', role: 'Executive Assistant', image: { src: '/Management/kingdom.jpg', alt: 'Kingdom Kededor Avisseh, Executive Assistant at Trivoxo' } },
 ]
