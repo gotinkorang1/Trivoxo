@@ -7,6 +7,7 @@
   "type": "module",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
+    "check:production": "node scripts/check-production.mjs",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rimraf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
@@ -16,10 +17,10 @@
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "seed": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx src/seed/index.ts",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
-    "typecheck": "cross-env NODE_OPTIONS=--no-deprecation tsc --noEmit",
     "test": "npm run test:int && npm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.config.ts",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
+    "typecheck": "cross-env NODE_OPTIONS=--no-deprecation tsc --noEmit"
   },
   "dependencies": {
     "@next/third-parties": "16.3.0",
