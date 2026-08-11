@@ -17,6 +17,7 @@ import { DESTINATIONS, EXPERIENCE_TO_DESTINATION } from '../lib/data/destination
 import { EVENTS } from '../lib/data/events'
 import { GUIDE_ARTICLES } from '../lib/data/guide'
 import { CONTENT_PAGE_STUBS } from '../lib/data/legal'
+import { REVIEWS } from '../lib/data/reviews'
 import { GROUP_DISCOUNT_TIERS, perPersonPrice, CAPACITY } from '../lib/policies'
 
 const strings = (values?: string[]) => (values ?? []).map((text) => ({ text }))
@@ -246,6 +247,43 @@ async function run() {
     pageCount++
   }
   payload.logger.info(`Seeded ${pageCount} content pages`)
+
+  // ── Reviews (§77) — approved + verified so they surface publicly ──
+  let reviewCount = 0
+  for (const r of REVIEWS) {
+    const experienceID = r.experienceSlug
+      ? (
+          await payload.find({
+            collection: 'experiences',
+            where: { slug: { equals: r.experienceSlug } },
+            limit: 1,
+            depth: 0,
+          })
+        ).docs[0]?.id
+      : undefined
+    const found = await payload.find({
+      collection: 'reviews',
+      where: { and: [{ authorName: { equals: r.authorName } }, { title: { equals: r.title } }] },
+      limit: 1,
+    })
+    const data = {
+      title: r.title,
+      body: r.body,
+      rating: r.rating,
+      authorName: r.authorName,
+      travellerType: r.travellerType as never,
+      experience: experienceID,
+      status: 'approved' as const,
+      verified: true,
+    }
+    if (found.docs[0]) {
+      await payload.update({ collection: 'reviews', id: found.docs[0].id, data })
+    } else {
+      await payload.create({ collection: 'reviews', data })
+    }
+    reviewCount++
+  }
+  payload.logger.info(`Seeded ${reviewCount} reviews`)
 
   payload.logger.info('✅ Seed complete')
   process.exit(0)

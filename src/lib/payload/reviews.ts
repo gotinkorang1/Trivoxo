@@ -54,6 +54,30 @@ export async function getVerifiedReviews(limit = 3): Promise<PublicReview[]> {
   })
 }
 
+export async function getReviewsForExperienceSlug(
+  slug: string,
+  limit = 6,
+): Promise<PublicReview[]> {
+  const docs = await getVerifiedReviewDocs()
+  return docs
+    .filter((review) => typeof review.experience === 'object' && review.experience?.slug === slug)
+    .slice(0, limit)
+    .map((review) => {
+      const experience =
+        typeof review.experience === 'object' && review.experience ? review.experience : undefined
+      return {
+        id: review.id,
+        title: review.title,
+        body: review.body,
+        rating: review.rating,
+        authorName: review.authorName,
+        travellerType: review.travellerType ?? undefined,
+        experienceName: experience?.title,
+        experienceSlug: experience?.slug ?? undefined,
+      }
+    })
+}
+
 export async function getVerifiedReviewStats(): Promise<Map<number, ReviewStats>> {
   const docs = await getVerifiedReviewDocs()
   const totals = new Map<number, { total: number; count: number }>()

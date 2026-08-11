@@ -33,6 +33,7 @@ import { getBookingWindow } from '@/lib/availability'
 import { whatsappLink } from '@/lib/constants'
 import { formatPrice } from '@/lib/format'
 import { getAllExperiences, getExperienceBySlug } from '@/lib/payload/experiences'
+import { getReviewsForExperienceSlug } from '@/lib/payload/reviews'
 import { CANCELLATION, GUIDE_LANGUAGES } from '@/lib/policies'
 import { gradientFor } from '@/lib/visuals'
 
@@ -61,7 +62,10 @@ export default async function ExperienceDetailPage({ params }: PageProps<'/exper
   const experience = await getExperienceBySlug(slug)
   if (!experience) notFound()
 
-  const all = await getAllExperiences()
+  const [all, reviews] = await Promise.all([
+    getAllExperiences(),
+    getReviewsForExperienceSlug(slug),
+  ])
   const related = all
     .filter(
       (item) => item.categorySlug === experience.categorySlug && item.slug !== experience.slug,
@@ -331,6 +335,40 @@ export default async function ExperienceDetailPage({ params }: PageProps<'/exper
                         {faq.answer}
                       </p>
                     </details>
+                  ))}
+                </div>
+              </ContentSection>
+            )}
+
+            {reviews.length > 0 && (
+              <ContentSection id="reviews" eyebrow="Verified travellers" title="What guests say">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {reviews.map((review) => (
+                    <figure
+                      key={review.id}
+                      className="flex flex-col rounded-card border border-border bg-surface-elevated p-5"
+                    >
+                      <div className="flex gap-0.5 text-brand-secondary" aria-label={`${review.rating} out of 5`}>
+                        {Array.from({ length: review.rating }).map((_, i) => (
+                          <Star key={i} className="size-4 fill-brand-secondary" />
+                        ))}
+                      </div>
+                      {review.title && (
+                        <p className="mt-3 font-semibold text-text-primary">{review.title}</p>
+                      )}
+                      <blockquote className="mt-1 flex-1 text-sm leading-6 text-text-secondary">
+                        “{review.body}”
+                      </blockquote>
+                      <figcaption className="mt-4 text-sm font-semibold text-text-primary">
+                        {review.authorName}
+                        {review.travellerType && (
+                          <span className="font-normal capitalize text-text-muted">
+                            {' '}
+                            · {review.travellerType}
+                          </span>
+                        )}
+                      </figcaption>
+                    </figure>
                   ))}
                 </div>
               </ContentSection>
