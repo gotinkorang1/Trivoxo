@@ -5,8 +5,9 @@
  *
  * Requires a reachable Postgres (DATABASE_URI) and PAYLOAD_SECRET. Safe to
  * re-run: it upserts by slug/email rather than blindly inserting. It creates a
- * first Super Admin if none exists (credentials from SEED_ADMIN_EMAIL /
- * SEED_ADMIN_PASSWORD, defaulting to admin@trivoxogh.com / changeme123).
+ * first Super Admin only when both SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD
+ * are explicitly provided. Otherwise, create the first user securely from
+ * /admin/create-first-user after deployment.
  */
 import 'dotenv/config'
 import { getPayload } from 'payload'
@@ -26,19 +27,30 @@ async function run() {
   const payload = await getPayload({ config })
 
   // ── First admin ────────────────────────────────────────────
-  const email = process.env.SEED_ADMIN_EMAIL || 'admin@trivoxogh.com'
+  const email = process.env.SEED_ADMIN_EMAIL
+  const password = process.env.SEED_ADMIN_PASSWORD
   const existingAdmins = await payload.find({ collection: 'users', limit: 1 })
   if (existingAdmins.totalDocs === 0) {
-    await payload.create({
-      collection: 'users',
-      data: {
-        name: 'Trivoxo Admin',
-        email,
-        password: process.env.SEED_ADMIN_PASSWORD || 'changeme123',
-        roles: ['super-admin'],
-      },
-    })
-    payload.logger.info(`Created admin user: ${email}`)
+    if (Boolean(email) !== Boolean(password)) {
+      throw new Error(
+        'Set both SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD, or leave both unset to use /admin/create-first-user.',
+      )
+    }
+
+    if (email && password) {
+      await payload.create({
+        collection: 'users',
+        data: {
+          name: 'Trivoxo Admin',
+          email,
+          password,
+          roles: ['super-admin'],
+        },
+      })
+      payload.logger.info(`Created admin user: ${email}`)
+    } else {
+      payload.logger.info('No seed admin created. Complete setup at /admin/create-first-user.')
+    }
   }
 
   // ── Categories ─────────────────────────────────────────────
