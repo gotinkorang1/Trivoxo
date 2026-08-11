@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { CalendarDays, Check, ChevronRight, MapPin } from 'lucide-react'
 import { Container } from '@/components/ui/container'
-import { TicketReservationCard } from '@/components/events/ticket-reservation-card'
+import { TicketCheckoutCard } from '@/components/events/ticket-checkout-card'
 import { getAllEvents, getEventBySlug } from '@/lib/payload/events'
 import { formatDateTime } from '@/lib/format'
 import { JsonLd, eventSchema } from '@/components/seo/structured-data'
@@ -140,7 +140,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           </div>
 
           <aside className="lg:sticky lg:top-24 lg:self-start">
-            <TicketReservationCard
+            <TicketCheckoutCard
+              eventSlug={slug}
               eventTitle={event.title}
               eventDate={formatDateTime(event.startsAt)}
               eventStatus={eventStatus}

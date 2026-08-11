@@ -72,7 +72,7 @@ export const EVENTS: EventItem[] = [
       'Drinks',
       'Photography',
     ],
-    ticketTypes: [{ name: 'Per person', price: 3900 }],
+    ticketTypes: [{ name: 'Per person', price: 3900, quantity: 24, perOrderLimit: 6 }],
   },
   {
     slug: 'hike-and-chill',
@@ -94,6 +94,6 @@ export const EVENTS: EventItem[] = [
       'Stunning photo moments',
     ],
     included: ['Transportation', 'Food and drinks', 'Water', 'Unlimited photography'],
-    ticketTypes: [{ name: 'Full package', price: 650 }],
+    ticketTypes: [{ name: 'Full package', price: 650, quantity: 40, perOrderLimit: 8 }],
   },
 ]

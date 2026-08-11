@@ -1,6 +1,7 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import { expireStaleBookingHolds } from '@/lib/booking-inventory'
+import { expireStaleEventOrderHolds } from '@/lib/event-inventory'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -12,6 +13,9 @@ export async function GET(request: Request) {
   }
 
   const payload = await getPayload({ config })
-  const result = await expireStaleBookingHolds(payload)
-  return Response.json({ ok: true, ...result })
+  const [bookings, eventOrders] = await Promise.all([
+    expireStaleBookingHolds(payload),
+    expireStaleEventOrderHolds(payload),
+  ])
+  return Response.json({ ok: true, bookings, eventOrders })
 }

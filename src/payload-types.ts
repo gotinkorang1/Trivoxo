@@ -81,6 +81,8 @@ export interface Config {
     'experience-categories': ExperienceCategory;
     reviews: Review;
     events: Event;
+    'event-orders': EventOrder;
+    'event-tickets': EventTicket;
     media: Media;
     posts: Post;
     pages: Page;
@@ -108,6 +110,8 @@ export interface Config {
     'experience-categories': ExperienceCategoriesSelect<false> | ExperienceCategoriesSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
+    'event-orders': EventOrdersSelect<false> | EventOrdersSelect<true>;
+    'event-tickets': EventTicketsSelect<false> | EventTicketsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -642,7 +646,14 @@ export interface Customer {
 export interface Payment {
   id: number;
   reference: string;
-  booking: number | Booking;
+  /**
+   * Set for experience bookings. Event-ticket payments use Event Order instead.
+   */
+  booking?: (number | null) | Booking;
+  /**
+   * Set for event ticket orders.
+   */
+  eventOrder?: (number | null) | EventOrder;
   gateway: 'paystack';
   status: 'initializing' | 'initialized' | 'pending' | 'succeeded' | 'failed' | 'abandoned' | 'review' | 'refunded';
   amountMinor: number;
@@ -674,61 +685,52 @@ export interface Payment {
   createdAt: string;
 }
 /**
- * Booking emails awaiting delivery, sent messages, and items that need attention.
- *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "notifications".
+ * via the `definition` "event-orders".
  */
-export interface Notification {
+export interface EventOrder {
   id: number;
-  notificationKey: string;
-  type: 'booking_confirmed';
-  status: 'queued' | 'processing' | 'sent' | 'failed' | 'dead_letter';
   /**
-   * Set automatically. Kept nullable so deleting a booking does not corrupt the outbox audit.
+   * Auto-generated, e.g. TVXO-26-A8F41.
    */
-  booking?: (number | null) | Booking;
-  recipient: string;
-  accessExpiresAt: string;
+  reference?: string | null;
+  status: 'held' | 'pending_payment' | 'paid' | 'cancelled' | 'payment_review' | 'refunded' | 'expired';
+  inventoryState?: ('none' | 'held' | 'confirmed' | 'released') | null;
+  holdExpiresAt?: string | null;
+  source:
+    | 'website'
+    | 'whatsapp'
+    | 'instagram'
+    | 'tiktok'
+    | 'facebook'
+    | 'phone'
+    | 'walk-in'
+    | 'corporate'
+    | 'referral'
+    | 'partner'
+    | 'other';
+  event: number | Event;
+  buyer: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string | null;
+  };
   /**
-   * Immutable customer-facing data used to make provider retries byte-stable.
+   * Ticket types and quantities at the price captured when the order was placed.
    */
-  payloadSnapshot:
+  items?:
     | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
+        ticketTypeName: string;
+        unitPrice: number;
+        quantity: number;
+        id?: string | null;
+      }[]
     | null;
-  attempts: number;
-  nextAttemptAt?: string | null;
-  lockedAt?: string | null;
-  sentAt?: string | null;
-  providerMessageId?: string | null;
-  lastError?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "coupons".
- */
-export interface Coupon {
-  id: number;
-  code: string;
-  type: 'percentage' | 'fixed';
-  value: number;
-  appliesTo?: ('all' | 'experiences' | 'events') | null;
-  experiences?: (number | Experience)[] | null;
-  events?: (number | Event)[] | null;
-  minOrder?: number | null;
-  validFrom?: string | null;
-  validTo?: string | null;
-  maxUses?: number | null;
-  usedCount?: number | null;
-  active?: boolean | null;
+  quantityTotal?: number | null;
+  totalAmount?: number | null;
+  paymentState?: ('paid' | 'outstanding' | 'refunded') | null;
+  internalNotes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -835,6 +837,65 @@ export interface Event {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Booking emails awaiting delivery, sent messages, and items that need attention.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications".
+ */
+export interface Notification {
+  id: number;
+  notificationKey: string;
+  type: 'booking_confirmed';
+  status: 'queued' | 'processing' | 'sent' | 'failed' | 'dead_letter';
+  /**
+   * Set automatically. Kept nullable so deleting a booking does not corrupt the outbox audit.
+   */
+  booking?: (number | null) | Booking;
+  recipient: string;
+  accessExpiresAt: string;
+  /**
+   * Immutable customer-facing data used to make provider retries byte-stable.
+   */
+  payloadSnapshot:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  attempts: number;
+  nextAttemptAt?: string | null;
+  lockedAt?: string | null;
+  sentAt?: string | null;
+  providerMessageId?: string | null;
+  lastError?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "coupons".
+ */
+export interface Coupon {
+  id: number;
+  code: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+  appliesTo?: ('all' | 'experiences' | 'events') | null;
+  experiences?: (number | Experience)[] | null;
+  events?: (number | Event)[] | null;
+  minOrder?: number | null;
+  validFrom?: string | null;
+  validTo?: string | null;
+  maxUses?: number | null;
+  usedCount?: number | null;
+  active?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -988,6 +1049,57 @@ export interface Review {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-tickets".
+ */
+export interface EventTicket {
+  id: number;
+  /**
+   * Auto-generated, e.g. TVXE-49C82.
+   */
+  reference?: string | null;
+  order: number | EventOrder;
+  event: number | Event;
+  ticketTypeName: string;
+  attendeeName?: string | null;
+  status: 'valid' | 'checked_in' | 'void';
+  checkedInAt?: string | null;
+  checkedInBy?: (number | null) | User;
+  checkedInGate?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  name: string;
+  /**
+   * Determines what this staff member can access across the admin.
+   */
+  roles: ('super-admin' | 'operations' | 'content-editor' | 'event-manager' | 'finance' | 'checkin')[];
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
@@ -1130,36 +1242,6 @@ export interface NewsletterSubscriber {
   active?: boolean | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  name: string;
-  /**
-   * Determines what this staff member can access across the admin.
-   */
-  roles: ('super-admin' | 'operations' | 'content-editor' | 'event-manager' | 'finance' | 'checkin')[];
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1334,6 +1416,14 @@ export interface PayloadLockedDocument {
         value: number | Event;
       } | null)
     | ({
+        relationTo: 'event-orders';
+        value: number | EventOrder;
+      } | null)
+    | ({
+        relationTo: 'event-tickets';
+        value: number | EventTicket;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -1463,6 +1553,7 @@ export interface BookingsSelect<T extends boolean = true> {
 export interface PaymentsSelect<T extends boolean = true> {
   reference?: T;
   booking?: T;
+  eventOrder?: T;
   gateway?: T;
   status?: T;
   amountMinor?: T;
@@ -1839,6 +1930,57 @@ export interface EventsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-orders_select".
+ */
+export interface EventOrdersSelect<T extends boolean = true> {
+  reference?: T;
+  status?: T;
+  inventoryState?: T;
+  holdExpiresAt?: T;
+  source?: T;
+  event?: T;
+  buyer?:
+    | T
+    | {
+        firstName?: T;
+        lastName?: T;
+        email?: T;
+        phone?: T;
+      };
+  items?:
+    | T
+    | {
+        ticketTypeName?: T;
+        unitPrice?: T;
+        quantity?: T;
+        id?: T;
+      };
+  quantityTotal?: T;
+  totalAmount?: T;
+  paymentState?: T;
+  internalNotes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-tickets_select".
+ */
+export interface EventTicketsSelect<T extends boolean = true> {
+  reference?: T;
+  order?: T;
+  event?: T;
+  ticketTypeName?: T;
+  attendeeName?: T;
+  status?: T;
+  checkedInAt?: T;
+  checkedInBy?: T;
+  checkedInGate?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

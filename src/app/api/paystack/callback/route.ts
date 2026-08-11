@@ -2,7 +2,7 @@ import { getPayload } from 'payload'
 import { after } from 'next/server'
 import config from '@payload-config'
 import { verifyBookingAccessToken } from '@/lib/booking-access'
-import { reconcilePaystackPayment } from '@/lib/payment-service'
+import { reconcilePaymentByReference } from '@/lib/payment-dispatch'
 import { processBookingNotifications } from '@/lib/notifications'
 
 export const runtime = 'nodejs'
@@ -17,9 +17,21 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   const payload = await getPayload({ config })
-  const result = await reconcilePaystackPayment(payload, reference)
-  const bookingReference = result.booking?.reference
-  if (result.booking?.id && result.outcome === 'confirmed') {
+  const result = await reconcilePaymentByReference(payload, reference)
+
+  if (result.kind === 'event') {
+    const orderReference = result.order?.reference
+    if (!orderReference || !verifyBookingAccessToken(orderReference, access)) {
+      return Response.redirect(new URL('/events?payment=verification-complete', requestURL), 303)
+    }
+    const destination = new URL(`/events/order/${encodeURIComponent(orderReference)}`, requestURL)
+    destination.searchParams.set('access', access || '')
+    destination.searchParams.set('payment', result.outcome)
+    return Response.redirect(destination, 303)
+  }
+
+  const bookingReference = result.kind === 'booking' ? result.booking?.reference : undefined
+  if (result.kind === 'booking' && result.booking?.id && result.outcome === 'confirmed') {
     const bookingID = result.booking.id
     after(async () => {
       try {

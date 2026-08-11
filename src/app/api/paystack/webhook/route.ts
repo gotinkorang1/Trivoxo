@@ -2,7 +2,7 @@ import { getPayload } from 'payload'
 import { after } from 'next/server'
 import config from '@payload-config'
 import { verifyPaystackWebhookSignature } from '@/lib/paystack'
-import { reconcilePaystackPayment } from '@/lib/payment-service'
+import { reconcilePaymentByReference } from '@/lib/payment-dispatch'
 import { processBookingNotifications } from '@/lib/notifications'
 
 export const runtime = 'nodejs'
@@ -35,8 +35,8 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const payload = await getPayload({ config })
-    const result = await reconcilePaystackPayment(payload, reference)
-    if (result.booking?.id && result.outcome === 'confirmed') {
+    const result = await reconcilePaymentByReference(payload, reference)
+    if (result.kind === 'booking' && result.booking?.id && result.outcome === 'confirmed') {
       const bookingID = result.booking.id
       after(async () => {
         try {

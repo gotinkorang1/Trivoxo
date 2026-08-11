@@ -19,9 +19,15 @@ export function bookingReference(date = new Date()): string {
   return `TVX-${yy}-${randomCode(5)}`
 }
 
-/** e.g. TVXE-49C82 */
+/** Individual event ticket, e.g. TVXE-49C82 */
 export function ticketReference(): string {
   return `TVXE-${randomCode(5)}`
+}
+
+/** Event ticket order, e.g. TVXO-26-A8F41 */
+export function eventOrderReference(date = new Date()): string {
+  const yy = String(date.getFullYear()).slice(-2)
+  return `TVXO-${yy}-${randomCode(5)}`
 }
 
 /** Unique gateway attempt reference accepted by Paystack. */

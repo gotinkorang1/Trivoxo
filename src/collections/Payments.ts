@@ -15,12 +15,16 @@ export const PAYMENT_STATUSES = [
 /**
  * Gateway payment attempts. Amounts are stored in the currency's minor unit
  * (pesewas for GHS) so equality checks never depend on floating-point maths.
+ *
+ * A payment settles exactly one of two revenue paths: a `booking` (experience)
+ * or an `eventOrder` (event tickets). The checkout services set exactly one;
+ * `beforeValidate` enforces it.
  */
 export const Payments: CollectionConfig = {
   slug: 'payments',
   admin: {
     useAsTitle: 'reference',
-    defaultColumns: ['reference', 'booking', 'status', 'amountMinor', 'channel', 'paidAt'],
+    defaultColumns: ['reference', 'booking', 'eventOrder', 'status', 'amountMinor', 'paidAt'],
     group: 'Operations',
     description: 'Paystack attempts, verification results, and Finance review items.',
   },
@@ -29,6 +33,19 @@ export const Payments: CollectionConfig = {
     create: hasRole('finance'),
     update: hasRole('finance'),
     delete: hasRole('finance'),
+  },
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        if (!data) return data
+        const hasBooking = Boolean(data.booking)
+        const hasEventOrder = Boolean(data.eventOrder)
+        if (hasBooking === hasEventOrder) {
+          throw new Error('A payment must reference exactly one of a booking or an event order.')
+        }
+        return data
+      },
+    ],
   },
   fields: [
     {
@@ -43,8 +60,15 @@ export const Payments: CollectionConfig = {
       name: 'booking',
       type: 'relationship',
       relationTo: 'bookings',
-      required: true,
       index: true,
+      admin: { description: 'Set for experience bookings. Event-ticket payments use Event Order instead.' },
+    },
+    {
+      name: 'eventOrder',
+      type: 'relationship',
+      relationTo: 'event-orders',
+      index: true,
+      admin: { description: 'Set for event ticket orders.' },
     },
     {
       name: 'gateway',

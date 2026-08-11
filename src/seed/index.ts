@@ -167,6 +167,8 @@ async function run() {
       ticketTypes: ev.ticketTypes.map((t) => ({
         name: t.name,
         price: t.price,
+        quantity: t.quantity,
+        perOrderLimit: t.perOrderLimit,
         soldOut: Boolean(t.soldOut),
       })),
       _status: 'published' as const,

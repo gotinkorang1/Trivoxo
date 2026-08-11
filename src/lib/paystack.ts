@@ -19,7 +19,10 @@ export type InitializePaystackInput = {
   currency: 'GHS'
   reference: string
   callbackURL: string
-  bookingReference: string
+  /** Convenience for the booking path — sets metadata.booking_reference. */
+  bookingReference?: string
+  /** Overrides metadata entirely (e.g. { order_reference } for event orders). */
+  metadata?: Record<string, unknown>
 }
 
 export type InitializedPaystackTransaction = {
@@ -132,7 +135,7 @@ export async function initializePaystackTransaction(
         reference: input.reference,
         callback_url: input.callbackURL,
         channels: ['card', 'mobile_money', 'bank_transfer'],
-        metadata: JSON.stringify({ booking_reference: input.bookingReference }),
+        metadata: JSON.stringify(input.metadata ?? { booking_reference: input.bookingReference ?? '' }),
       }),
     },
     fetcher,

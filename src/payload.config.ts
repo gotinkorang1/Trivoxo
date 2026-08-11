@@ -22,6 +22,8 @@ import { Payments } from './collections/Payments'
 import { Notifications } from './collections/Notifications'
 // Events
 import { Events } from './collections/Events'
+import { EventOrders } from './collections/EventOrders'
+import { EventTickets } from './collections/EventTickets'
 // Content
 import { Posts } from './collections/Posts'
 import { Pages } from './collections/Pages'
@@ -52,7 +54,12 @@ export default buildConfig({
         dashboard: {
           Component: '/components/admin/dashboard-stats#AdminDashboard',
         },
+        checkIn: {
+          Component: '/components/admin/check-in-view#CheckInView',
+          path: '/check-in',
+        },
       },
+      afterNavLinks: ['/components/admin/check-in-nav#CheckInNavLink'],
     },
   },
   collections: [
@@ -74,6 +81,8 @@ export default buildConfig({
     Reviews,
     // Events
     Events,
+    EventOrders,
+    EventTickets,
     // Content
     Media,
     Posts,
