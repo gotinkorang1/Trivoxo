@@ -11,6 +11,7 @@ import type { Post as PostDoc } from '@/payload-types'
 import { GUIDE_CATEGORIES } from '@/collections/Posts'
 import { gradientForSlug } from '@/lib/visuals'
 import { mediaToPublicImage } from '@/lib/media'
+import { guideImageFor } from '@/lib/site-media'
 
 const CATEGORY_LABEL = new Map(GUIDE_CATEGORIES.map((c) => [c.value, c.label]))
 
@@ -43,7 +44,7 @@ function toArticle(doc: PostDoc): GuideArticle | null {
     readMins: readMinsFor(body, doc.excerpt ?? ''),
     publishedAt: doc.publishedAt ?? doc.createdAt,
     gradient: gradientForSlug(doc.slug),
-    image: mediaToPublicImage(doc.coverImage),
+    image: mediaToPublicImage(doc.coverImage) ?? guideImageFor(doc.slug),
     featured: Boolean(doc.featured),
     body,
   }

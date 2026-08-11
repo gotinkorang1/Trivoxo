@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import {
   Gem,
   HeartHandshake,
@@ -21,6 +22,7 @@ import {
 import { Container } from '@/components/ui/container'
 import { ButtonLink } from '@/components/ui/button'
 import { BRAND } from '@/lib/constants'
+import { MANAGEMENT } from '@/lib/site-media'
 
 export const metadata: Metadata = {
   title: 'About',
@@ -211,6 +213,36 @@ export default function AboutPage() {
                 </span>
                 <p className="mt-3 font-semibold text-text-primary">{v.title}</p>
                 <p className="mt-1 text-sm text-text-secondary">{v.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Leadership */}
+        <div className="mt-16">
+          <h2 className="text-2xl font-semibold">Leadership</h2>
+          <p className="mt-2 max-w-2xl text-text-secondary">
+            The people who plan, host and deliver your Trivoxo experience.
+          </p>
+          <div className="mt-6 grid gap-6 sm:grid-cols-3">
+            {MANAGEMENT.map((person) => (
+              <div
+                key={person.name}
+                className="overflow-hidden rounded-card border border-border bg-surface-elevated"
+              >
+                <div className="relative aspect-[3/4] bg-surface">
+                  <Image
+                    src={person.image.src}
+                    alt={person.image.alt}
+                    fill
+                    sizes="(min-width: 640px) 33vw, 100vw"
+                    className="object-cover object-top"
+                  />
+                </div>
+                <div className="p-4">
+                  <p className="font-semibold text-text-primary">{person.name}</p>
+                  <p className="text-sm text-brand-primary">{person.role}</p>
+                </div>
               </div>
             ))}
           </div>

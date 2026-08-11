@@ -44,7 +44,7 @@ import {
   type PublicReview,
   type ReviewStats,
 } from '@/lib/payload/reviews'
-import { SITE_MEDIA } from '@/lib/site-media'
+import { SITE_MEDIA, CORPORATE_IMAGE } from '@/lib/site-media'
 import { cn } from '@/lib/utils'
 import { EventCard } from '@/components/events/event-card'
 
@@ -365,7 +365,7 @@ function CorporateBand() {
       <Reveal>
         <div className="relative isolate overflow-hidden rounded-[2rem] px-6 py-16 text-white shadow-lift sm:px-12 lg:px-16 lg:py-20">
           <Image
-            src={SITE_MEDIA.groupTravel.src}
+            src={CORPORATE_IMAGE.src}
             alt=""
             fill
             sizes="(min-width: 1280px) 1200px, 100vw"

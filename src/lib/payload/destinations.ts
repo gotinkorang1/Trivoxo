@@ -13,6 +13,7 @@ import type { Destination as DestinationDoc } from '@/payload-types'
 import { gradientForDestination } from '@/lib/visuals'
 import { getExperiencesForDestinationId } from './experiences'
 import { mediaToPublicImage } from '@/lib/media'
+import { destinationImage } from '@/lib/site-media'
 
 function toDestination(doc: DestinationDoc, experienceSlugs: string[] = []): Destination {
   return {
@@ -21,7 +22,7 @@ function toDestination(doc: DestinationDoc, experienceSlugs: string[] = []): Des
     region: doc.region,
     blurb: doc.shortDescription ?? '',
     gradient: gradientForDestination(doc.slug ?? ''),
-    image: mediaToPublicImage(doc.heroImage),
+    image: mediaToPublicImage(doc.heroImage) ?? destinationImage(doc.slug ?? undefined),
     featured: Boolean(doc.featured),
     experienceSlugs,
   }

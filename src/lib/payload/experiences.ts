@@ -15,6 +15,7 @@ import config from '@payload-config'
 import type { Experience, ItineraryStop, Difficulty } from '@/lib/data/experiences'
 import type { Experience as ExperienceDoc } from '@/payload-types'
 import { mediaToPublicImage } from '@/lib/media'
+import { experienceImageFor } from '@/lib/site-media'
 import { getVerifiedReviewStats, type ReviewStats } from '@/lib/payload/reviews'
 
 const BADGE_LABEL: Record<string, NonNullable<Experience['badge']>> = {
@@ -83,7 +84,7 @@ function toExperience(doc: ExperienceDoc, reviewStats?: ReviewStats): Experience
         }
       : undefined,
     faqs: doc.faqs?.map((faq) => ({ question: faq.question, answer: faq.answer })),
-    heroImage: mediaToPublicImage(doc.heroImage),
+    heroImage: mediaToPublicImage(doc.heroImage) ?? experienceImageFor(doc.slug),
     gallery: doc.gallery
       ?.map((item) => mediaToPublicImage(item.image))
       .filter((image): image is NonNullable<Experience['heroImage']> => Boolean(image)),

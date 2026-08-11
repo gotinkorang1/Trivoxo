@@ -8,6 +8,7 @@ import type { EventItem } from '@/lib/data/events'
 import type { Event as EventDoc } from '@/payload-types'
 import { gradientForSlug } from '@/lib/visuals'
 import { mediaToPublicImage } from '@/lib/media'
+import { eventImageFor } from '@/lib/site-media'
 import { isCurrentEvent } from '@/lib/event-status'
 
 function toEvent(doc: EventDoc): EventItem | null {
@@ -25,7 +26,7 @@ function toEvent(doc: EventDoc): EventItem | null {
     location: doc.location ?? destination?.title ?? '',
     region: destination?.region ?? '',
     gradient: gradientForSlug(doc.slug),
-    image: mediaToPublicImage(doc.coverImage),
+    image: mediaToPublicImage(doc.coverImage) ?? eventImageFor(doc.slug),
     featured: Boolean(doc.featured),
     about: doc.about ?? doc.shortDescription ?? '',
     whatToExpect: doc.highlights?.map((h) => h.text) ?? [],
