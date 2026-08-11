@@ -228,6 +228,12 @@
     animation: ken-burns 9s ease-out both;
   }
 
+  /* Progressive scroll reveals without a client-side animation boundary. */
+  .reveal-on-scroll {
+    opacity: 1;
+    transform: none;
+  }
+
   .animate-float {
     animation: float 5s ease-in-out infinite;
   }
@@ -246,12 +252,31 @@
   }
 }
 
+@supports (animation-timeline: view()) {
+  .reveal-on-scroll {
+    animation: reveal-in linear both;
+    animation-range: entry var(--reveal-start, 0%) cover 28%;
+    animation-timeline: view();
+  }
+}
+
 @keyframes ken-burns {
   from {
     transform: scale(1.01);
   }
   to {
     transform: scale(1.08);
+  }
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
