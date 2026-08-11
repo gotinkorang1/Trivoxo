@@ -163,7 +163,7 @@ function Categories() {
                   className="card-lift group relative flex min-h-48 flex-col overflow-hidden rounded-card border border-border bg-surface-elevated p-5 shadow-soft sm:min-h-52 sm:p-6"
                 >
                   <span
-                    className="absolute right-4 top-3 font-display text-5xl font-semibold text-text-primary/[0.045] transition group-hover:text-brand-primary/10"
+                    className="absolute right-4 top-3 font-display text-5xl font-semibold text-text-muted/80 transition group-hover:text-brand-primary"
                     aria-hidden="true"
                   >
                     {String(index + 1).padStart(2, '0')}
