@@ -17,9 +17,23 @@ const results = []
 const pass = (label, detail) => results.push({ level: 'pass', label, detail })
 const warn = (label, detail, fix) => results.push({ level: 'warn', label, detail, fix })
 const fail = (label, detail, fix) => results.push({ level: 'fail', label, detail, fix })
+const unknown = (label, detail) => results.push({ level: 'unknown', label, detail })
 
 const env = process.env
 const has = (key) => typeof env[key] === 'string' && env[key].trim().length > 0
+
+/**
+ * `vercel env pull` returns the literal string "[SENSITIVE]" instead of the real
+ * value for any variable marked Sensitive. Treating that as the value produces
+ * confident, completely wrong verdicts ("your live keys are test keys"), so any
+ * check that depends on the CONTENT of a redacted value must report "cannot
+ * verify" rather than pass or fail. Presence checks stay valid - the variable
+ * really is set.
+ */
+const REDACTED = '[SENSITIVE]'
+const isRedacted = (key) => env[key] === REDACTED
+const redactedCount = Object.keys(env).filter((k) => env[k] === REDACTED).length
+const CANNOT_VERIFY = 'Value is hidden by Vercel, so it cannot be checked from here.'
 
 /* ── Core identity ──────────────────────────────────────────────────────── */
 
@@ -36,6 +50,8 @@ if (!serverUrl) {
 
 if (!has('PAYLOAD_SECRET')) {
   fail('Login security key', 'PAYLOAD_SECRET is not set.', 'Generate one: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"')
+} else if (isRedacted('PAYLOAD_SECRET')) {
+  unknown('Login security key', `Set. ${CANNOT_VERIFY}`)
 } else if (env.PAYLOAD_SECRET.length < 32) {
   fail('Login security key', 'PAYLOAD_SECRET is too short to be safe.', 'Use a 64-character random value.')
 } else {
@@ -48,6 +64,8 @@ if (!has('CRON_SECRET')) {
     'CRON_SECRET is not set, so automatic seat-release and email sending are unprotected.',
     'Set a random 16+ character value in Vercel.',
   )
+} else if (isRedacted('CRON_SECRET')) {
+  unknown('Scheduled-jobs password', `Set. ${CANNOT_VERIFY}`)
 } else if (env.CRON_SECRET.length < 16) {
   warn('Scheduled-jobs password', 'CRON_SECRET is shorter than 16 characters.', 'Use a longer random value.')
 } else {
@@ -63,6 +81,12 @@ const browserKey = env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ?? ''
 
 if (!secretKey || !publicKey) {
   fail('Paystack payments', 'Paystack keys are missing - customers cannot pay.', 'Add PAYSTACK_SECRET_KEY and PAYSTACK_PUBLIC_KEY.')
+} else if (isRedacted('PAYSTACK_SECRET_KEY') || isRedacted('PAYSTACK_PUBLIC_KEY')) {
+  unknown(
+    'Paystack payments',
+    `Keys are set and PAYSTACK_MODE is "${mode}", but the key values are hidden by Vercel. ` +
+      `Whether they are ${mode} keys cannot be checked from here - the app enforces this at runtime.`,
+  )
 } else if (mode === 'test') {
   const consistent = secretKey.startsWith('sk_test_') && publicKey.startsWith('pk_test_')
   if (!consistent) {
@@ -141,6 +165,8 @@ function sslOptionFor(uri) {
 const uri = env.DATABASE_URI
 if (!uri) {
   fail('Database', 'DATABASE_URI is not set.', 'Add your Supabase connection pooler URI.')
+} else if (isRedacted('DATABASE_URI')) {
+  unknown('Database', `Set. ${CANNOT_VERIFY} Schema state cannot be checked from here either.`)
 } else {
   const isLocal = uri.includes('localhost') || uri.includes('127.0.0.1')
   if (isLocal) {
@@ -191,11 +217,20 @@ if (!uri) {
 
 /* ── Report ─────────────────────────────────────────────────────────────── */
 
-const icon = { pass: 'OK  ', warn: 'WARN', fail: 'STOP' }
-const order = { fail: 0, warn: 1, pass: 2 }
+const icon = { pass: 'OK  ', warn: 'WARN', fail: 'STOP', unknown: '????' }
+const order = { fail: 0, warn: 1, unknown: 2, pass: 3 }
 results.sort((a, b) => order[a.level] - order[b.level])
 
 console.log('\nTrivoxo production readiness\n' + '='.repeat(60))
+
+if (redactedCount > 0) {
+  console.log(
+    `\nNOTE: ${redactedCount} value(s) are hidden because Vercel does not release\n` +
+      'variables marked "Sensitive". Those are reported as ???? (cannot verify),\n' +
+      'never as pass or fail. Presence is still confirmed.',
+  )
+}
+
 for (const r of results) {
   console.log(`\n[${icon[r.level]}] ${r.label}`)
   console.log(`       ${r.detail}`)
@@ -204,12 +239,17 @@ for (const r of results) {
 
 const fails = results.filter((r) => r.level === 'fail').length
 const warns = results.filter((r) => r.level === 'warn').length
+const unknowns = results.filter((r) => r.level === 'unknown').length
 
 console.log('\n' + '='.repeat(60))
 if (fails > 0) {
-  console.log(`${fails} blocking problem(s) and ${warns} warning(s).`)
+  console.log(`${fails} blocking problem(s), ${warns} warning(s), ${unknowns} unverifiable.`)
   console.log('NOT ready to take real customer payments yet.\n')
   process.exit(1)
 }
-console.log(`No blocking problems. ${warns} warning(s) to review.`)
-console.log('Ready to take real customer payments.\n')
+console.log(`No blocking problems. ${warns} warning(s), ${unknowns} unverifiable.`)
+if (unknowns > 0) {
+  console.log('Some settings could not be checked from here - see ???? items above.\n')
+} else {
+  console.log('Ready to take real customer payments.\n')
+}
