@@ -15,17 +15,17 @@ protected transactionally. See [Roadmap](#roadmap) for what is still ahead.
 
 ## Tech stack
 
-| Area          | Choice                                             |
-| ------------- | -------------------------------------------------- |
-| Framework     | Next.js 16 (App Router, Turbopack)                 |
-| Language      | TypeScript                                         |
-| Admin / CMS   | Payload CMS 3 (same Next.js app, `/admin`)         |
-| Database      | PostgreSQL (Supabase in prod, Docker locally)      |
-| Styling       | Tailwind CSS 4 (design tokens in `globals.css`)    |
-| UI foundation | shadcn-style primitives + Radix + lucide-react     |
-| Animation     | Motion                                             |
-| Rich text     | Lexical (`@payloadcms/richtext-lexical`)           |
-| Images        | sharp locally · Cloudinary intended for production |
+| Area          | Choice                                           |
+| ------------- | ------------------------------------------------ |
+| Framework     | Next.js 16 (App Router, Turbopack)               |
+| Language      | TypeScript                                       |
+| Admin / CMS   | Payload CMS 3 (same Next.js app, `/admin`)       |
+| Database      | PostgreSQL (Supabase in prod, Docker locally)    |
+| Styling       | Tailwind CSS 4 (design tokens in `globals.css`)  |
+| UI foundation | shadcn-style primitives + Radix + lucide-react   |
+| Animation     | Motion                                           |
+| Rich text     | Lexical (`@payloadcms/richtext-lexical`)         |
+| Images        | sharp processing + persistent Cloudinary storage |
 
 Planned integrations (env placeholders already in `.env.example`): Paystack
 (payments), Resend (email), Cloudflare Turnstile (bot protection), PostHog / GA4
@@ -54,10 +54,13 @@ cp .env.example .env
 # 3. Start Postgres (Docker). Matches the default DATABASE_URI in .env.example.
 docker compose up -d
 
-# 4. Seed the catalogue (admin, 13 tours, and initial dated departures)
+# 4. Apply the committed database schema
+npm run payload -- migrate
+
+# 5. Seed the catalogue (13 tours and initial dated departures)
 npm run seed
 
-# 5. Run the app
+# 6. Run the app
 npm run dev
 ```
 
@@ -65,12 +68,12 @@ Then:
 
 - Marketing site → <http://localhost:3000>
 - Admin panel → <http://localhost:3000/admin>
-  (first login: `admin@trivoxogh.com` / `changeme123` — change immediately;
-  override with `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` before seeding)
+  (create the first Super Admin at `/admin/create-first-user`, or set both
+  `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` before the first seed)
 
-> The **homepage renders without a database** (it reads a static catalogue module),
-> so `npm run dev` and `npm run build` work before Postgres is wired up. The admin,
-> API and seed require a reachable `DATABASE_URI`.
+> Public catalogue pages, the admin, APIs and seed require a reachable
+> `DATABASE_URI`. Database auto-push is disabled; use committed migrations so
+> development, preview and production always share the same schema.
 
 ---
 
@@ -89,6 +92,23 @@ Then:
 | `npm run lint`               | ESLint                                             |
 | `npm run test:int`           | Vitest integration tests                           |
 | `npm run test:e2e`           | Playwright e2e tests                               |
+
+---
+
+## Cloudinary media storage
+
+Payload enables persistent Cloudinary storage when all three server-only
+credentials are present: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` and
+`CLOUDINARY_API_SECRET`. Set `CLOUDINARY_FOLDER` per environment, for example
+`trivoxo/development`, `trivoxo/preview` and `trivoxo/production`.
+
+Admin uploads keep their originals and receive automatic-format and
+automatic-quality delivery URLs. Deleting a Media document also deletes its
+Cloudinary asset. Without the credentials, local file storage remains active.
+Files committed under `public/` are not moved or changed by this integration.
+
+Apply `npm run payload -- migrate` before enabling the Cloudinary credentials
+against an existing database.
 
 ---
 
@@ -189,11 +209,11 @@ row lock; remaining seats are derived rather than stored as a drift-prone counte
 **Next (needs credentials or business inputs — see [.env.example](.env.example) and [docs/OPEN_DECISIONS.md](docs/OPEN_DECISIONS.md))**
 
 - **Go-live config:** Paystack **live** keys (and rotate the exposed test
-  secret), Resend sending-domain verification, Cloudinary media storage,
-  Cloudflare Turnstile + rate limiting, Supabase prod/staging DB, Cloudflare
-  DNS/WAF + production secrets, Sentry / PostHog / GA4
+  secret), Resend sending-domain verification, Cloudinary credentials and an
+  upload/delete smoke test, Cloudflare Turnstile + rate limiting, Supabase
+  prod/staging DB, Cloudflare DNS/WAF + production secrets, Sentry / PostHog / GA4
 - **Payment ops:** assisted/automatic Paystack refunds + partial-refund records
-  + a Finance refund UI; full staging webhook test matrix; a controlled
+  and a Finance refund UI; full staging webhook test matrix; a controlled
   low-value live payment
 - **Pricing:** connect coupons to checkout; enforce seasonal / public-holiday
   pricing; activate resident & private pricing; deposit + balance workflows

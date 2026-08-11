@@ -2,6 +2,7 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
+import { cloudinaryStorage } from 'payload-storage-cloudinary'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
@@ -37,6 +38,12 @@ import { SiteSettings } from './globals/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+const cloudinaryEnabled = Boolean(
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_SECRET,
+)
 
 export default buildConfig({
   admin: {
@@ -92,6 +99,34 @@ export default buildConfig({
     Users,
   ],
   globals: [SiteSettings],
+  plugins: cloudinaryEnabled
+    ? [
+        cloudinaryStorage({
+          cloudConfig: {
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+            api_key: process.env.CLOUDINARY_API_KEY!,
+            api_secret: process.env.CLOUDINARY_API_SECRET!,
+            secure: true,
+          },
+          collections: {
+            media: {
+              deleteFromCloudinary: true,
+              folder: process.env.CLOUDINARY_FOLDER || 'trivoxo/media',
+              resourceType: 'image',
+              transformations: {
+                default: {
+                  fetch_format: 'auto',
+                  quality: 'auto',
+                },
+                preserveOriginal: true,
+              },
+              uniqueFilename: true,
+              useFilename: true,
+            },
+          },
+        }),
+      ]
+    : [],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
@@ -102,6 +137,9 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || '',
     },
+    // Keep every environment aligned with the checked-in migration history.
+    // Conditional integrations must never add or remove columns via dev auto-push.
+    push: false,
   }),
   sharp,
   localization: {

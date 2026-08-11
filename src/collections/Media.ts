@@ -1,6 +1,12 @@
 import type { CollectionConfig } from 'payload'
 import { anyone, hasRole } from '../access/roles'
 
+const cloudinaryEnabled = Boolean(
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_SECRET,
+)
+
 /**
  * Media library (§59). Photography is Trivoxo's biggest visual asset, so we
  * pre-define responsive sizes and keep alt text required for accessibility.
@@ -48,6 +54,7 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: {
+    disableLocalStorage: cloudinaryEnabled,
     focalPoint: true,
     imageSizes: [
       { name: 'thumbnail', width: 400, height: 300, position: 'centre' },

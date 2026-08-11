@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
+const cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME
 
 const nextConfig: NextConfig = {
   images: {
@@ -22,6 +23,15 @@ const nextConfig: NextConfig = {
         pathname: '/Management/**',
       },
     ],
+    remotePatterns: cloudinaryCloudName
+      ? [
+          {
+            protocol: 'https',
+            hostname: 'res.cloudinary.com',
+            pathname: `/${cloudinaryCloudName}/**`,
+          },
+        ]
+      : [],
   },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
