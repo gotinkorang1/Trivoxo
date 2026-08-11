@@ -106,6 +106,7 @@ export function TurnstileWidget({
       <div
         ref={containerRef}
         className="min-h-[65px] max-w-full overflow-hidden"
+        role="group"
         aria-label="Security verification"
       />
       <input type="hidden" name="cf-turnstile-response" value={token} />

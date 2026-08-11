@@ -42,6 +42,10 @@ export const metadata: Metadata = {
     template: `%s — ${BRAND.name}`,
   },
   description: BRAND.description,
+  icons: {
+    icon: [{ url: '/logo/colored.webp', type: 'image/webp' }],
+    shortcut: '/logo/colored.webp',
+  },
   alternates: { canonical: './' },
   openGraph: {
     title: `${BRAND.name} — ${BRAND.headline}`,

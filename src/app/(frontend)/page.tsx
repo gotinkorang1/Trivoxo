@@ -528,6 +528,7 @@ function Reviews({ reviews }: { reviews: PublicReview[] }) {
                 />
                 <div
                   className="flex gap-0.5 text-brand-secondary"
+                  role="img"
                   aria-label={`${review.rating} out of 5 stars`}
                 >
                   {Array.from({ length: review.rating }).map((_, starIndex) => (
