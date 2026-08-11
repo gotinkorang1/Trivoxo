@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import {
   ArrowLeft,
   ArrowRight,
@@ -21,7 +20,7 @@ import { ButtonLink } from '@/components/ui/button'
 import { SITE_MEDIA } from '@/lib/site-media'
 import { cn } from '@/lib/utils'
 
-const SLIDE_INTERVAL = 7500
+const SLIDE_INTERVAL = 12000
 
 const SLIDES = [
   {
@@ -59,7 +58,7 @@ const SLIDES = [
 export function HeroCarousel({ experienceCount }: { experienceCount: number }) {
   const [active, setActive] = useState(0)
   const [paused, setPaused] = useState(false)
-  const reduceMotion = useReducedMotion()
+  const reduceMotion = useReducedMotionPreference()
   const slide = SLIDES[active]
 
   useEffect(() => {
@@ -88,26 +87,17 @@ export function HeroCarousel({ experienceCount }: { experienceCount: number }) {
         if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false)
       }}
     >
-      <AnimatePresence initial={false} mode="sync">
-        <motion.div
-          key={slide.image.src}
-          className="absolute inset-0"
-          initial={reduceMotion ? false : { opacity: 0, scale: 1.035 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={reduceMotion ? undefined : { opacity: 0 }}
-          transition={{ duration: reduceMotion ? 0 : 1.05, ease: 'easeOut' }}
-        >
-          <Image
-            src={slide.image.src}
-            alt={slide.image.alt}
-            fill
-            fetchPriority={active === 0 ? 'high' : 'auto'}
-            loading={active === 0 ? 'eager' : 'lazy'}
-            sizes="100vw"
-            className={cn('hero-ken-burns object-cover', slide.imagePosition)}
-          />
-        </motion.div>
-      </AnimatePresence>
+      <div key={slide.image.src} className="absolute inset-0">
+        <Image
+          src={slide.image.src}
+          alt={slide.image.alt}
+          fill
+          fetchPriority={active === 0 ? 'high' : 'auto'}
+          loading={active === 0 ? 'eager' : 'lazy'}
+          sizes="100vw"
+          className={cn('hero-ken-burns object-cover', slide.imagePosition)}
+        />
+      </div>
 
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,19,30,.97)_0%,rgba(7,19,30,.86)_39%,rgba(7,19,30,.34)_72%,rgba(7,19,30,.2)_100%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,19,30,.24)_0%,transparent_35%,rgba(7,19,30,.76)_100%)]" />
@@ -117,14 +107,7 @@ export function HeroCarousel({ experienceCount }: { experienceCount: number }) {
 
       <Container className="relative flex flex-col justify-start pb-8 pt-24 sm:min-h-[790px] sm:justify-center sm:pb-44 sm:pt-28">
         <div className="max-w-3xl" aria-live="off">
-          <AnimatePresence initial={false} mode="wait">
-            <motion.div
-              key={active}
-              initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reduceMotion ? undefined : { opacity: 0, y: -14 }}
-              transition={{ duration: reduceMotion ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] }}
-            >
+          <div key={active} className={cn(active > 0 && !reduceMotion && 'hero-content-enter')}>
               <div className="mb-6 flex flex-wrap items-center gap-3">
                 <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-brand-secondary backdrop-blur-md">
                   <Sparkles className="size-3.5" aria-hidden="true" /> {slide.eyebrow}
@@ -159,8 +142,7 @@ export function HeroCarousel({ experienceCount }: { experienceCount: number }) {
                 <span className="h-1 w-1 rounded-full bg-white/40" aria-hidden="true" />
                 <span>Tours, events and tailored travel support</span>
               </div>
-            </motion.div>
-          </AnimatePresence>
+          </div>
         </div>
 
         <div className="mt-6 flex items-center gap-2 self-end sm:absolute sm:bottom-[9.5rem] sm:right-6 sm:mt-0 lg:right-8">
@@ -239,17 +221,29 @@ export function HeroCarousel({ experienceCount }: { experienceCount: number }) {
 
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/12" aria-hidden="true">
         {!paused && !reduceMotion && (
-          <motion.div
+          <div
             key={`progress-${active}`}
-            className="h-full origin-left bg-brand-secondary"
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: SLIDE_INTERVAL / 1000, ease: 'linear' }}
+            className="hero-progress h-full origin-left bg-brand-secondary"
+            style={{ animationDuration: `${SLIDE_INTERVAL}ms` }}
           />
         )}
       </div>
     </section>
   )
+}
+
+function useReducedMotionPreference() {
+  const [reduced, setReduced] = useState(false)
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () => setReduced(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
+
+  return reduced
 }
 
 function SearchField({
