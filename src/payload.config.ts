@@ -35,6 +35,7 @@ import { CustomTripRequests } from './collections/CustomTripRequests'
 import { TravelServiceRequests } from './collections/TravelServiceRequests'
 // Globals
 import { SiteSettings } from './globals/SiteSettings'
+import { getTrustedOrigins } from './lib/trusted-origins'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -44,6 +45,8 @@ const cloudinaryEnabled = Boolean(
   process.env.CLOUDINARY_API_KEY &&
   process.env.CLOUDINARY_API_SECRET,
 )
+
+const trustedOrigins = getTrustedOrigins()
 
 export default buildConfig({
   admin: {
@@ -130,6 +133,8 @@ export default buildConfig({
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
+  cors: trustedOrigins,
+  csrf: trustedOrigins,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
