@@ -19,11 +19,11 @@ const LOGOS: Record<Exclude<LogoVariant, 'adaptive'>, string> = {
 export function Wordmark({
   variant = 'adaptive',
   className,
-  priority = false,
+  preload = false,
 }: {
   variant?: LogoVariant
   className?: string
-  priority?: boolean
+  preload?: boolean
 }) {
   if (variant === 'adaptive') {
     return (
@@ -33,7 +33,7 @@ export function Wordmark({
           alt="Trivoxo"
           width={301}
           height={96}
-          priority={priority}
+          preload={preload}
           className={cn('h-auto w-auto object-contain dark:hidden', className)}
         />
         <Image
@@ -41,7 +41,7 @@ export function Wordmark({
           alt=""
           width={301}
           height={96}
-          priority={priority}
+          preload={preload}
           className={cn('hidden h-auto w-auto object-contain dark:block', className)}
         />
       </span>
@@ -54,7 +54,7 @@ export function Wordmark({
       alt="Trivoxo"
       width={301}
       height={96}
-      priority={priority}
+      preload={preload}
       className={cn('h-auto w-auto object-contain', className)}
     />
   )

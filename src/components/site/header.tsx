@@ -44,7 +44,7 @@ export function Header() {
 
       <Container className="flex h-[4.5rem] items-center justify-between gap-4">
         <Link href="/" aria-label="Trivoxo home" className="inline-flex min-h-11 shrink-0 items-center">
-          <Wordmark className="h-9 w-auto sm:h-10" priority />
+          <Wordmark className="h-9 w-auto sm:h-10" />
         </Link>
 
         <nav className="hidden items-center gap-1 xl:flex" aria-label="Primary navigation">

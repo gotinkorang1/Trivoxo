@@ -101,7 +101,8 @@ export function HeroCarousel({ experienceCount }: { experienceCount: number }) {
             src={slide.image.src}
             alt={slide.image.alt}
             fill
-            priority={active === 0}
+            fetchPriority={active === 0 ? 'high' : 'auto'}
+            loading={active === 0 ? 'eager' : 'lazy'}
             sizes="100vw"
             className={cn('hero-ken-burns object-cover', slide.imagePosition)}
           />

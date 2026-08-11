@@ -34,10 +34,12 @@ export function TurnstileWidget({
   action,
   resetKey,
   className,
+  defer = false,
 }: {
   action: TurnstileAction
   resetKey?: unknown
   className?: string
+  defer?: boolean
 }) {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
   const containerRef = useRef<HTMLDivElement>(null)
@@ -97,7 +99,7 @@ export function TurnstileWidget({
       <Script
         id="cloudflare-turnstile"
         src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
-        strategy="afterInteractive"
+        strategy={defer ? 'lazyOnload' : 'afterInteractive'}
         onLoad={renderWidget}
         onReady={renderWidget}
       />

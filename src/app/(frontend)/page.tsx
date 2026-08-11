@@ -671,6 +671,7 @@ function Newsletter() {
             </div>
             <TurnstileWidget
               action="newsletter_subscribe"
+              defer
               className="rounded-2xl bg-white/90 p-3 text-brand-navy [&_p]:text-slate-600"
             />
           </form>
