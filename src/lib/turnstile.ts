@@ -2,6 +2,8 @@ import { randomUUID } from 'node:crypto'
 
 const SITEVERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
 const TOKEN_FIELD = 'cf-turnstile-response'
+const CLOUDFLARE_ALWAYS_PASS_TEST_SITE_KEY = '1x00000000000000000000AA'
+const CLOUDFLARE_ALWAYS_PASS_TEST_SECRET_KEY = '1x0000000000000000000000000000000AA'
 
 export const TURNSTILE_ACTIONS = [
   'booking_create',
@@ -33,6 +35,14 @@ export type TurnstileVerification = {
 
 function isProduction(): boolean {
   return process.env.VERCEL_ENV === 'production' || process.env.NODE_ENV === 'production'
+}
+
+function usesOfficialTestKeys(secret: string, siteKey: string): boolean {
+  return (
+    !isProduction() &&
+    siteKey === CLOUDFLARE_ALWAYS_PASS_TEST_SITE_KEY &&
+    secret === CLOUDFLARE_ALWAYS_PASS_TEST_SECRET_KEY
+  )
 }
 
 function requestIP(headers: HeadersLike): string | undefined {
@@ -129,6 +139,14 @@ export async function verifyTurnstile(
       success: false,
       error: 'The security check expired or was not accepted. Please try it again.',
     }
+  }
+
+  // Cloudflare's official always-pass test credentials intentionally return
+  // placeholder metadata. Accept them only outside production so automated
+  // staging flows can exercise the real server action without weakening the
+  // production action and hostname checks below.
+  if (usesOfficialTestKeys(secret, siteKey)) {
+    return { success: true, bypassed: true }
   }
   if (result.action !== expectedAction) {
     console.warn('Turnstile action mismatch.', { expectedAction, receivedAction: result.action })

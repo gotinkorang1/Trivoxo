@@ -4,6 +4,7 @@ import { verifyTurnstile } from '@/lib/turnstile'
 const originalSecret = process.env.TURNSTILE_SECRET_KEY
 const originalSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 const originalServerURL = process.env.NEXT_PUBLIC_SERVER_URL
+const originalVercelEnv = process.env.VERCEL_ENV
 
 const requestHeaders = new Headers({
   host: 'trivoxogh.com',
@@ -21,12 +22,14 @@ describe('Cloudflare Turnstile verification', () => {
     process.env.TURNSTILE_SECRET_KEY = 'test-secret'
     process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY = 'test-site-key'
     process.env.NEXT_PUBLIC_SERVER_URL = 'https://trivoxogh.com'
+    delete process.env.VERCEL_ENV
   })
 
   afterEach(() => {
     process.env.TURNSTILE_SECRET_KEY = originalSecret
     process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY = originalSiteKey
     process.env.NEXT_PUBLIC_SERVER_URL = originalServerURL
+    process.env.VERCEL_ENV = originalVercelEnv
   })
 
   it('accepts a successful token only for the expected action and hostname', async () => {
@@ -62,5 +65,21 @@ describe('Cloudflare Turnstile verification', () => {
       })
       expect(result.success).toBe(false)
     }
+  })
+
+  it('accepts Cloudflare official always-pass keys only outside production', async () => {
+    process.env.TURNSTILE_SECRET_KEY = '1x0000000000000000000000000000000AA'
+    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY = '1x00000000000000000000AA'
+
+    const stagingResult = await verifyTurnstile(form(), 'booking_create', requestHeaders, {
+      fetch: async () => Response.json({ success: true }),
+    })
+    expect(stagingResult).toEqual({ success: true, bypassed: true })
+
+    process.env.VERCEL_ENV = 'production'
+    const productionResult = await verifyTurnstile(form(), 'booking_create', requestHeaders, {
+      fetch: async () => Response.json({ success: true }),
+    })
+    expect(productionResult.success).toBe(false)
   })
 })
