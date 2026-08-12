@@ -9,7 +9,9 @@ import { getExperienceBySlug } from '@/lib/payload/experiences'
 
 export async function generateMetadata({
   params,
-}: PageProps<'/experiences/[slug]/book'>): Promise<Metadata> {
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
   const { slug } = await params
   const experience = await getExperienceBySlug(slug)
   return { title: experience ? `Book ${experience.name}` : 'Book', robots: { index: false } }
@@ -18,7 +20,10 @@ export async function generateMetadata({
 export default async function BookExperiencePage({
   params,
   searchParams,
-}: PageProps<'/experiences/[slug]/book'>) {
+}: {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ date?: string }>
+}) {
   const [{ slug }, query] = await Promise.all([params, searchParams])
   const experience = await getExperienceBySlug(slug)
   if (!experience) notFound()

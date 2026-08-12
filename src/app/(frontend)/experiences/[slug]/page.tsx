@@ -46,7 +46,9 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<'/experiences/[slug]'>): Promise<Metadata> {
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
   const { slug } = await params
   const experience = await getExperienceBySlug(slug)
   if (!experience) return { title: 'Experience not found' }
@@ -72,7 +74,11 @@ export async function generateMetadata({
   }
 }
 
-export default async function ExperienceDetailPage({ params }: PageProps<'/experiences/[slug]'>) {
+export default async function ExperienceDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
   const { slug } = await params
   const experience = await getExperienceBySlug(slug)
   if (!experience) notFound()
