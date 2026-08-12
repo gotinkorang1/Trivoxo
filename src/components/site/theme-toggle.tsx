@@ -29,7 +29,7 @@ function subscribeToTheme(callback: () => void) {
 }
 
 export function ThemeToggle({ className }: { className?: string }) {
-  const theme = useSyncExternalStore(subscribeToTheme, readActiveTheme, () => 'light')
+  const theme = useSyncExternalStore<Theme>(subscribeToTheme, readActiveTheme, () => 'light')
 
   function toggleTheme() {
     const nextTheme: Theme = readActiveTheme() === 'dark' ? 'light' : 'dark'

@@ -32,7 +32,7 @@ function getTheme(): Theme {
 }
 
 export function ThemeFavicon() {
-  const theme = useSyncExternalStore(subscribe, getTheme, () => 'light')
+  const theme = useSyncExternalStore<Theme>(subscribe, getTheme, () => 'light')
 
   useEffect(() => {
     updateFavicon(theme)
