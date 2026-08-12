@@ -3,31 +3,37 @@
 import { useSyncExternalStore } from 'react'
 import { Moon, Sun } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-type Theme = 'light' | 'dark'
-
-function activeTheme(): Theme {
-  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
-}
+import {
+  applyTheme,
+  readActiveTheme,
+  syncThemeFromStorage,
+  THEME_CHANGE_EVENT,
+  THEME_STORAGE_KEY,
+  type Theme,
+} from '@/lib/theme'
 
 function subscribeToTheme(callback: () => void) {
-  window.addEventListener('trivoxo-theme-change', callback)
-  window.addEventListener('storage', callback)
+  function onStorage(event: StorageEvent) {
+    if (event.key === THEME_STORAGE_KEY) {
+      syncThemeFromStorage()
+    }
+    callback()
+  }
+
+  window.addEventListener(THEME_CHANGE_EVENT, callback)
+  window.addEventListener('storage', onStorage)
   return () => {
-    window.removeEventListener('trivoxo-theme-change', callback)
-    window.removeEventListener('storage', callback)
+    window.removeEventListener(THEME_CHANGE_EVENT, callback)
+    window.removeEventListener('storage', onStorage)
   }
 }
 
 export function ThemeToggle({ className }: { className?: string }) {
-  const theme = useSyncExternalStore(subscribeToTheme, activeTheme, () => 'light')
+  const theme = useSyncExternalStore(subscribeToTheme, readActiveTheme, () => 'light')
 
   function toggleTheme() {
-    const nextTheme = activeTheme() === 'dark' ? 'light' : 'dark'
-    document.documentElement.dataset.theme = nextTheme
-    document.documentElement.style.colorScheme = nextTheme
-    localStorage.setItem('trivoxo-theme', nextTheme)
-    window.dispatchEvent(new Event('trivoxo-theme-change'))
+    const nextTheme: Theme = readActiveTheme() === 'dark' ? 'light' : 'dark'
+    applyTheme(nextTheme)
   }
 
   const isDark = theme === 'dark'
