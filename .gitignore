@@ -63,3 +63,6 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# stray installers/binaries accidentally dropped in public/
+/public/**/*.exe

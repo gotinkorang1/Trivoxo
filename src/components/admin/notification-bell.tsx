@@ -192,7 +192,7 @@ export function NotificationBell() {
             </span>
           )}
         </span>
-        <span className="nav__link-label">Notifications</span>
+        <span>Notifications</span>
       </button>
 
       {open && (

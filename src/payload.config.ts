@@ -71,7 +71,6 @@ export default buildConfig({
           path: '/check-in',
         },
       },
-      beforeNavLinks: ['/components/admin/nav-rail-toggle#NavRailToggle'],
       afterNavLinks: [
         '/components/admin/notification-bell#NotificationBell',
         '/components/admin/check-in-nav#CheckInNavLink',
