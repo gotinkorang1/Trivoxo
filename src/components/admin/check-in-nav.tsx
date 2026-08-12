@@ -13,7 +13,8 @@ export function CheckInNavLink() {
       className="nav__link"
       style={{ display: 'flex', alignItems: 'center', gap: 8 }}
     >
-      🎟️ Event check-in
+      <span aria-hidden="true">🎟️</span>
+      <span className="nav__link-label">Event check-in</span>
     </Link>
   )
 }
