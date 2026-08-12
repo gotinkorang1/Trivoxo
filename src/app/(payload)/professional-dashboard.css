@@ -1784,3 +1784,35 @@ html[data-theme='dark'] .ops-dashboard {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Minimal / neutral (user-directed 2026-08-12)
+   Monochrome dashboard icons and data-viz; a single restrained orange accent
+   kept for primary actions. Selectors match the per-variant specificity above
+   and load last, so they win without !important.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ops-dashboard .tvx-stat-card .tvx-stat-card__icon,
+.ops-dashboard .tvx-quick-action .tvx-quick-action__icon {
+  background: var(--ops-surface-muted);
+  color: var(--ops-text-muted);
+}
+.ops-dashboard .tvx-stat-card .tvx-stat-card__footer svg,
+.ops-dashboard .tvx-quick-action .tvx-quick-action__arrow {
+  color: var(--ops-text-subtle);
+}
+.ops-dashboard .tvx-performance-chart__bar {
+  background: var(--ops-brand);
+  box-shadow: none;
+}
+.ops-dashboard .tvx-source-row__track > span {
+  background: var(--ops-text-muted);
+}
+.ops-dashboard .tvx-status-pill {
+  background: var(--ops-surface-muted);
+  color: var(--ops-text-muted);
+}
+.ops-dashboard .tvx-booking-avatar {
+  border-color: var(--ops-border);
+  background: var(--ops-surface-muted);
+  color: var(--ops-text);
+}
