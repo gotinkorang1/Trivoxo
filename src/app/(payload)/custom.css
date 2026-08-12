@@ -70,10 +70,14 @@ html[data-theme='dark'] {
   --tvx-shadow-md: 0 18px 44px #00000052;
 }
 
-/* Align the Payload shell's own dark background to the neutral slate so the
-   page canvas and our surfaces read as one system. */
-html[data-theme='dark'] body {
-  --theme-bg: #0f1216;
+/* Give every admin page a canvas so white/dark cards lift off it, instead of
+   flat same-on-same surfaces — applied to Payload's own chrome, not just the
+   dashboard, so the change is visible on every list and edit screen. */
+html[data-theme='light'] {
+  --theme-bg: #f4f6f8;
+}
+html[data-theme='dark'] {
+  --theme-bg: #101216;
 }
 
 /* Payload shell */
