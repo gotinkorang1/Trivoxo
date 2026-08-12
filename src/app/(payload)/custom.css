@@ -1,25 +1,27 @@
 :root {
-  --tvx-orange: #f15a29;
-  --tvx-orange-strong: #c2410c;
-  --tvx-orange-soft: #fff0e9;
-  --tvx-gold: #f9b233;
-  --tvx-gold-soft: #fff5de;
-  --tvx-navy: #0e1c2b;
-  --tvx-navy-soft: #eef2f5;
-  --tvx-green: #167d62;
-  --tvx-green-soft: #e5f5ef;
-  --tvx-purple: #7657c8;
-  --tvx-purple-soft: #f0ecfb;
-  --tvx-danger: #c83f46;
-  --tvx-danger-soft: #fff0f1;
-  --tvx-warning-text: #8a5700;
-  --tvx-surface: #fff;
-  --tvx-surface-subtle: #f7f8f6;
-  --tvx-border: #e4e7e3;
-  --tvx-text: #14202c;
-  --tvx-text-muted: #63707c;
-  --tvx-shadow-sm: 0 1px 2px #0e1c2b0a, 0 5px 18px #0e1c2b0a;
-  --tvx-shadow-md: 0 18px 45px #0e1c2b1a;
+  /* Professional palette — one warm brand accent on cool-neutral surfaces.
+     Non-brand accents are muted; text/borders are contrast-checked (see below). */
+  --tvx-orange: #ea580c; /* brand accent (buttons, active) */
+  --tvx-orange-strong: #c2410c; /* accent text/hover — 4.9:1 on white */
+  --tvx-orange-soft: #fff1ea;
+  --tvx-gold: #b7791f; /* muted amber for secondary accents */
+  --tvx-gold-soft: #faf3e3;
+  --tvx-navy: #1b2735;
+  --tvx-navy-soft: #eef1f5;
+  --tvx-green: #15803d; /* 4.6:1 on white */
+  --tvx-green-soft: #e9f6ee;
+  --tvx-purple: #6d5ac0;
+  --tvx-purple-soft: #efecfb;
+  --tvx-danger: #dc2626;
+  --tvx-danger-soft: #fdeeee;
+  --tvx-warning-text: #92600a;
+  --tvx-surface: #ffffff;
+  --tvx-surface-subtle: #f4f6f8; /* cool neutral, not greenish */
+  --tvx-border: #e5e8ec;
+  --tvx-text: #1a2330; /* ~14:1 on white */
+  --tvx-text-muted: #5c6773; /* ~5.2:1 on white */
+  --tvx-shadow-sm: 0 1px 2px #1a23300f, 0 4px 14px #1a23300a;
+  --tvx-shadow-md: 0 16px 40px #1a233016;
   --tvx-motion-fast: 150ms;
   --tvx-motion-base: 260ms;
   --tvx-motion-slow: 560ms;
@@ -43,24 +45,35 @@
 }
 
 html[data-theme='dark'] {
-  --tvx-orange-strong: #ff8a5b;
-  --tvx-orange-soft: #361d14;
-  --tvx-gold-soft: #352912;
-  --tvx-navy-soft: #162534;
-  --tvx-green: #58d3ae;
-  --tvx-green-soft: #102c25;
-  --tvx-purple: #aa90ee;
-  --tvx-purple-soft: #241d3b;
-  --tvx-danger: #ff8085;
-  --tvx-danger-soft: #381b1e;
-  --tvx-warning-text: #ffd170;
-  --tvx-surface: #0c1d2a;
-  --tvx-surface-subtle: #102432;
-  --tvx-border: #263a48;
-  --tvx-text: #f7f9f7;
-  --tvx-text-muted: #a9b5bd;
-  --tvx-shadow-sm: 0 1px 2px #0003, 0 5px 18px #0000002e;
-  --tvx-shadow-md: 0 20px 50px #00000047;
+  /* True neutral-slate dark (not tinted navy) with clear elevation steps.
+     Accents brightened for legibility on dark; text ≥ 12:1, muted ≥ 6:1. */
+  --tvx-orange: #f97316;
+  --tvx-orange-strong: #fdba74;
+  --tvx-orange-soft: #2a1a10;
+  --tvx-gold: #e0b050;
+  --tvx-gold-soft: #2a2110;
+  --tvx-navy: #cdd6e0;
+  --tvx-navy-soft: #1f242c;
+  --tvx-green: #4ade80;
+  --tvx-green-soft: #10261a;
+  --tvx-purple: #a78bfa;
+  --tvx-purple-soft: #1f1b2e;
+  --tvx-danger: #f87171;
+  --tvx-danger-soft: #2a1516;
+  --tvx-warning-text: #fbbf24;
+  --tvx-surface: #16191e; /* raised surface */
+  --tvx-surface-subtle: #1e232b;
+  --tvx-border: #2b313a;
+  --tvx-text: #e8eaed; /* ~13:1 on surface */
+  --tvx-text-muted: #9aa4b0; /* ~6:1 on surface */
+  --tvx-shadow-sm: 0 1px 2px #00000038, 0 4px 14px #0000002e;
+  --tvx-shadow-md: 0 18px 44px #00000052;
+}
+
+/* Align the Payload shell's own dark background to the neutral slate so the
+   page canvas and our surfaces read as one system. */
+html[data-theme='dark'] body {
+  --theme-bg: #0f1216;
 }
 
 /* Payload shell */
@@ -2619,5 +2632,63 @@ html[data-theme='dark'] .tvx-admin-icon__logo--dark {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Professional refinements (2026-08-12)
+   Calmer motion and less decoration. Business dashboards read as professional
+   through restraint: purposeful entrance fades stay; perpetual ambient motion
+   and heavy ornament are removed. Appearance-only; nothing structural.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Drop the tinted glows behind the shell — let surfaces sit on a clean canvas. */
+body {
+  background: var(--theme-bg);
+}
+.nav {
+  background: color-mix(in srgb, var(--tvx-surface) 97%, var(--theme-bg));
+}
+
+/* Remove the hero's orbiting rings, blurred glow and floating glyph. */
+.tvx-dashboard-hero::before,
+.tvx-dashboard-hero::after,
+.tvx-dashboard-hero__glow,
+.tvx-dashboard-hero__symbol {
+  display: none;
+}
+
+/* Flatten the hero to a single clean brand-navy panel (dark in both themes). */
+.tvx-dashboard-hero {
+  border-color: #ffffff1f;
+  background: linear-gradient(120deg, #12202e 0%, #1b2f43 100%);
+}
+
+/* Stat cards: clean flat surface (drop the decorative corner blob). */
+.tvx-stat-card::after {
+  display: none;
+}
+.tvx-stat-card {
+  background: var(--tvx-surface);
+  animation: none;
+}
+
+/* Stop perpetual/ambient animations; keep one-shot entrance fades. */
+.tvx-live-dot,
+.tvx-dashboard-hero,
+.tvx-performance-chart__bar,
+.tvx-source-row__track > span {
+  animation: none;
+}
+
+/* Respect the OS "reduce motion" preference across the whole admin. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }
