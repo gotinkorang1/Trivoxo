@@ -3,6 +3,7 @@ import { Inter, Fraunces } from 'next/font/google'
 import Script from 'next/script'
 import React from 'react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { Analytics } from '@vercel/analytics/next'
 import { AnalyticsConsent } from '@/components/analytics/analytics-consent'
 import { Header } from '@/components/site/header'
 import { Footer } from '@/components/site/footer'
@@ -109,6 +110,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Footer />
         <AnalyticsConsent />
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   )
