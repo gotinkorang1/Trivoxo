@@ -1,6 +1,7 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import { processNotifications } from '@/lib/notifications'
+import { processAdminNotifications } from '@/lib/admin-notification-delivery'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -14,5 +15,6 @@ export async function GET(request: Request): Promise<Response> {
 
   const payload = await getPayload({ config })
   const result = await processNotifications(payload, { limit: 50 })
-  return Response.json({ ok: true, ...result })
+  const staffAlerts = await processAdminNotifications(payload, { limit: 50 })
+  return Response.json({ ok: true, ...result, staffAlerts })
 }

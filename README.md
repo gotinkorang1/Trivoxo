@@ -168,6 +168,40 @@ role-gated (`src/access/roles.ts`):
 Admin collections are grouped in the sidebar (Catalogue, Operations, Events,
 Content, Enquiries, System) to keep it approachable for non-technical staff.
 
+### Staff notifications
+
+Staff are alerted in two ways when something needs attention — a new booking,
+a payment, a review, an enquiry, or an event ticket order:
+
+- **In-app bell** — a 🔔 in the sidebar shows an unread count and a dropdown of
+  recent alerts, each linking straight to the record. It refreshes every 30s.
+  Read state is per-user and enforced server-side (you only ever see your own).
+- **Email** — the same alert is emailed to the relevant staff within ~5 minutes
+  (via the `process-notifications` cron), gated on `RESEND_API_KEY`/`EMAIL_FROM`.
+  Each staff member can turn their own alert emails off with the **Email me
+  staff alerts** switch on their profile; in-app alerts always show.
+
+Alerts are **routed by role** so people only see what's theirs: bookings,
+payments and ticket orders → Operations & Finance (orders also Event Managers);
+reviews → Content & Operations; enquiries → Operations. Super Admins see
+everything. The delivery is idempotent, so a re-fired hook never double-alerts.
+
+Staff also get an email when their **own account** is created or its name, email
+or roles change (always sent when email is configured — it's a security notice).
+
+### Profile pictures & self-service
+
+Every staff member can edit their **own** profile (name, profile picture, alert
+preference) — roles stay locked to Super Admins. Upload a picture in the
+`avatar` field and it appears in the admin header.
+
+### Bulk edits
+
+Payload's built-in **bulk actions** are available in every list view: select
+rows (or "select all"), then **Edit** to change a field across many records at
+once, **Delete**, or **Publish/Unpublish** for versioned collections. Actions
+respect each staff member's role permissions.
+
 ---
 
 ## Data model

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { anyone, hasRole } from '../access/roles'
+import { makeEnquiryNotifier } from '../lib/admin-notification-hooks'
 
 /** Travel services (§70–§73) — airport transfers, flights, accommodation, car
  * rentals. V1 is enquiry-based: leads land here for the team to quote. The
@@ -18,6 +19,9 @@ export const TravelServiceRequests: CollectionConfig = {
     read: hasRole('operations'),
     update: hasRole('operations'),
     delete: hasRole('operations'),
+  },
+  hooks: {
+    afterChange: [makeEnquiryNotifier('travel-service-requests', 'travel service')],
   },
   fields: [
     {

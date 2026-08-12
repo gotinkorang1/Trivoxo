@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { hasRole } from '../access/roles'
+import { notifyNewEventOrder } from '../lib/admin-notification-hooks'
 import { BOOKING_SOURCES } from './Bookings'
 
 /** Event ticket order lifecycle. Mirrors the booking states so the two revenue
@@ -33,6 +34,9 @@ export const EventOrders: CollectionConfig = {
     create: hasRole('operations', 'event-manager'),
     update: hasRole('operations', 'event-manager', 'finance'),
     delete: hasRole('operations'),
+  },
+  hooks: {
+    afterChange: [notifyNewEventOrder],
   },
   fields: [
     {

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { anyone, hasRole } from '../access/roles'
+import { makeEnquiryNotifier } from '../lib/admin-notification-hooks'
 
 /** Corporate & events pipeline (§67, §68). */
 export const CorporateEnquiries: CollectionConfig = {
@@ -16,6 +17,9 @@ export const CorporateEnquiries: CollectionConfig = {
     read: hasRole('operations', 'event-manager', 'finance'),
     update: hasRole('operations', 'event-manager'),
     delete: hasRole('operations'),
+  },
+  hooks: {
+    afterChange: [makeEnquiryNotifier('corporate-enquiries', 'corporate')],
   },
   fields: [
     {

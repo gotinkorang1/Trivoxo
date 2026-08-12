@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { hasRole } from '../access/roles'
+import { notifyPaymentSucceeded } from '../lib/admin-notification-hooks'
 
 export const PAYMENT_STATUSES = [
   { label: 'Initializing', value: 'initializing' },
@@ -46,6 +47,7 @@ export const Payments: CollectionConfig = {
         return data
       },
     ],
+    afterChange: [notifyPaymentSucceeded],
   },
   fields: [
     {

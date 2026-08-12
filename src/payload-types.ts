@@ -88,6 +88,7 @@ export interface Config {
     pages: Page;
     'newsletter-subscribers': NewsletterSubscriber;
     users: User;
+    'admin-notifications': AdminNotification;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -117,6 +118,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     'newsletter-subscribers': NewsletterSubscribersSelect<false> | NewsletterSubscribersSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'admin-notifications': AdminNotificationsSelect<false> | AdminNotificationsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -1080,9 +1082,17 @@ export interface User {
   id: number;
   name: string;
   /**
+   * Shown in the admin header and on your profile.
+   */
+  avatar?: (number | null) | Media;
+  /**
    * Determines what this staff member can access across the admin.
    */
   roles: ('super-admin' | 'operations' | 'content-editor' | 'event-manager' | 'finance' | 'checkin')[];
+  /**
+   * New bookings, reviews and enquiries relevant to your role. In-app alerts always show regardless.
+   */
+  emailAlerts?: boolean | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -1244,6 +1254,29 @@ export interface NewsletterSubscriber {
    */
   source?: string | null;
   active?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * In-app alerts fanned out to staff. Managed automatically.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-notifications".
+ */
+export interface AdminNotification {
+  id: number;
+  recipient: number | User;
+  category: 'booking' | 'payment' | 'review' | 'enquiry' | 'event_order' | 'account';
+  title: string;
+  message?: string | null;
+  /**
+   * Admin path the alert links to, e.g. /admin/collections/bookings/12.
+   */
+  adminURL?: string | null;
+  readAt?: string | null;
+  dedupeKey: string;
+  emailStatus: 'pending' | 'sent' | 'skipped' | 'failed';
+  emailError?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1446,6 +1479,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: number | User;
+      } | null)
+    | ({
+        relationTo: 'admin-notifications';
+        value: number | AdminNotification;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -2110,7 +2147,9 @@ export interface NewsletterSubscribersSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  avatar?: T;
   roles?: T;
+  emailAlerts?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -2127,6 +2166,23 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-notifications_select".
+ */
+export interface AdminNotificationsSelect<T extends boolean = true> {
+  recipient?: T;
+  category?: T;
+  title?: T;
+  message?: T;
+  adminURL?: T;
+  readAt?: T;
+  dedupeKey?: T;
+  emailStatus?: T;
+  emailError?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

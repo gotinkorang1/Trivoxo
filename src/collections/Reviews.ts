@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { hasRole } from '../access/roles'
+import { notifyNewReview } from '../lib/admin-notification-hooks'
 
 /**
  * Reviews (§77). Only approved reviews are public. Verified reviews originate
@@ -21,6 +22,9 @@ export const Reviews: CollectionConfig = {
     create: hasRole('operations', 'content-editor'),
     update: hasRole('operations', 'content-editor'),
     delete: hasRole('operations'),
+  },
+  hooks: {
+    afterChange: [notifyNewReview],
   },
   fields: [
     { name: 'title', type: 'text', required: true },

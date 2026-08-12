@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { anyone, hasRole } from '../access/roles'
+import { makeEnquiryNotifier } from '../lib/admin-notification-hooks'
 
 /** Custom / tailor-made trip requests (§69). */
 export const CustomTripRequests: CollectionConfig = {
@@ -15,6 +16,9 @@ export const CustomTripRequests: CollectionConfig = {
     read: hasRole('operations'),
     update: hasRole('operations'),
     delete: hasRole('operations'),
+  },
+  hooks: {
+    afterChange: [makeEnquiryNotifier('custom-trip-requests', 'custom trip')],
   },
   fields: [
     {

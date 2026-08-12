@@ -9,6 +9,7 @@ import sharp from 'sharp'
 // System / media
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
+import { AdminNotifications } from './collections/AdminNotifications'
 // Catalogue
 import { Destinations } from './collections/Destinations'
 import { ExperienceCategories } from './collections/ExperienceCategories'
@@ -52,6 +53,7 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
+    avatar: { Component: '/components/admin/user-avatar#UserAvatar' },
     meta: {
       titleSuffix: '— Trivoxo Admin',
     },
@@ -69,7 +71,10 @@ export default buildConfig({
           path: '/check-in',
         },
       },
-      afterNavLinks: ['/components/admin/check-in-nav#CheckInNavLink'],
+      afterNavLinks: [
+        '/components/admin/notification-bell#NotificationBell',
+        '/components/admin/check-in-nav#CheckInNavLink',
+      ],
     },
   },
   collections: [
@@ -100,6 +105,7 @@ export default buildConfig({
     NewsletterSubscribers,
     // System
     Users,
+    AdminNotifications,
   ],
   globals: [SiteSettings],
   plugins: cloudinaryEnabled
