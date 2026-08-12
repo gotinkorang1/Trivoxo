@@ -18,6 +18,7 @@ import {
   Plus,
   ReceiptText,
   Sparkles,
+  Star,
   TicketCheck,
   UsersRound,
   type LucideIcon,
@@ -122,6 +123,22 @@ type ContentData = {
   draftExperiences: number
   publishedExperiences: number
   publishedGuides: number
+  pendingReviews: number
+}
+
+type EventSummary = {
+  id: number | string
+  title: string
+  startsAt: string
+  sold: number
+  capacity: number
+}
+
+type EventSalesData = {
+  ticketsSoldPeriod: number
+  revenuePeriod: number
+  ordersInReview: number
+  upcoming: EventSummary[]
 }
 
 const ROLE_LABELS: Record<StaffRole, string> = {
@@ -471,15 +488,89 @@ async function loadEnquiryData(payload: Payload, roles: StaffRole[]): Promise<En
 }
 
 async function loadContentData(payload: Payload): Promise<ContentData> {
-  const [publishedExperiences, draftExperiences, publishedGuides] = await Promise.all([
-    payload.count({ collection: 'experiences', where: { _status: { equals: 'published' } } }),
-    payload.count({ collection: 'experiences', where: { _status: { equals: 'draft' } } }),
-    payload.count({ collection: 'posts', where: { _status: { equals: 'published' } } }),
-  ])
+  const [publishedExperiences, draftExperiences, publishedGuides, pendingReviews] =
+    await Promise.all([
+      payload.count({ collection: 'experiences', where: { _status: { equals: 'published' } } }),
+      payload.count({ collection: 'experiences', where: { _status: { equals: 'draft' } } }),
+      payload.count({ collection: 'posts', where: { _status: { equals: 'published' } } }),
+      payload.count({ collection: 'reviews', where: { status: { equals: 'pending' } } }),
+    ])
   return {
     draftExperiences: draftExperiences.totalDocs,
     publishedExperiences: publishedExperiences.totalDocs,
     publishedGuides: publishedGuides.totalDocs,
+    pendingReviews: pendingReviews.totalDocs,
+  }
+}
+
+/** Event ticketing summary — sales this period plus upcoming events with sold/capacity. */
+async function loadEventSalesData(
+  payload: Payload,
+  periodStart: Date,
+  end: Date,
+): Promise<EventSalesData> {
+  const nowISO = new Date().toISOString()
+  const [upcomingEvents, periodOrders, ordersInReview] = await Promise.all([
+    payload.find({
+      collection: 'events',
+      depth: 0,
+      limit: 6,
+      sort: 'startsAt',
+      where: {
+        and: [{ startsAt: { greater_than_equal: nowISO } }, { _status: { equals: 'published' } }],
+      },
+    }),
+    payload.find({
+      collection: 'event-orders',
+      depth: 0,
+      limit: 5000,
+      where: {
+        and: [
+          { status: { equals: 'paid' } },
+          { createdAt: { greater_than_equal: periodStart.toISOString() } },
+          { createdAt: { less_than: end.toISOString() } },
+        ],
+      },
+    }),
+    payload.count({
+      collection: 'event-orders',
+      where: { status: { equals: 'payment_review' } },
+    }),
+  ])
+
+  const ticketsSoldPeriod = periodOrders.docs.reduce((t, o) => t + (o.quantityTotal ?? 0), 0)
+  const revenuePeriod = periodOrders.docs.reduce((t, o) => t + (o.totalAmount ?? 0), 0)
+
+  const upcomingIDs = upcomingEvents.docs.map((event) => event.id)
+  const soldByEvent = new Map<string, number>()
+  if (upcomingIDs.length > 0) {
+    const paid = await payload.find({
+      collection: 'event-orders',
+      depth: 0,
+      limit: 5000,
+      where: { and: [{ event: { in: upcomingIDs } }, { status: { equals: 'paid' } }] },
+    })
+    for (const order of paid.docs) {
+      const id = getRelationshipID(order.event)
+      if (id === undefined) continue
+      const key = String(id)
+      soldByEvent.set(key, (soldByEvent.get(key) ?? 0) + (order.quantityTotal ?? 0))
+    }
+  }
+
+  const upcoming: EventSummary[] = upcomingEvents.docs.map((event) => ({
+    id: event.id,
+    title: event.title,
+    startsAt: event.startsAt,
+    sold: soldByEvent.get(String(event.id)) ?? 0,
+    capacity: (event.ticketTypes ?? []).reduce((t, ticket) => t + (ticket.quantity ?? 0), 0),
+  }))
+
+  return {
+    ticketsSoldPeriod,
+    revenuePeriod,
+    ordersInReview: ordersInReview.totalDocs,
+    upcoming,
   }
 }
 
@@ -918,6 +1009,90 @@ export function AdminIcon() {
   )
 }
 
+function EventsSalesPanel({ data, period }: { data: EventSalesData; period: ReportingPeriod }) {
+  return (
+    <section className="tvx-panel" aria-labelledby="events-heading">
+      <div className="tvx-section-heading">
+        <SectionTitle
+          icon={TicketCheck}
+          id="events-heading"
+          kicker={`Last ${period} days`}
+          title="Events & ticket sales"
+        />
+        <Link href="/admin/collections/event-orders" className="tvx-section-link">
+          View orders <ArrowRight size={15} aria-hidden="true" />
+        </Link>
+      </div>
+      <div className="tvx-channel-summary">
+        <span>
+          <small>Tickets sold</small>
+          <strong>{numberFormatter.format(data.ticketsSoldPeriod)}</strong>
+        </span>
+        <span>
+          <small>Ticket revenue</small>
+          <strong>GHS {currencyFormatter.format(data.revenuePeriod)}</strong>
+        </span>
+      </div>
+      {data.upcoming.length > 0 ? (
+        <div className="tvx-departure-list">
+          {data.upcoming.map((event) => {
+            const percentage =
+              event.capacity > 0
+                ? Math.min(100, Math.round((event.sold / event.capacity) * 100))
+                : 0
+            const remaining = Math.max(0, event.capacity - event.sold)
+            const availability =
+              event.capacity === 0
+                ? 'open'
+                : remaining === 0
+                  ? 'full'
+                  : remaining <= Math.max(2, Math.ceil(event.capacity * 0.2))
+                    ? 'limited'
+                    : 'open'
+            return (
+              <Link
+                href={`/admin/collections/events/${event.id}`}
+                className="tvx-departure-row"
+                key={event.id}
+              >
+                <span className="tvx-departure-row__date">
+                  <strong>{formatDepartureTime(event.startsAt)}</strong>
+                  <small>{formatDepartureDate(event.startsAt)}</small>
+                </span>
+                <span className="tvx-departure-row__main">
+                  <strong>{event.title}</strong>
+                  <span className="tvx-capacity-bar" aria-hidden="true">
+                    <span style={{ width: `${percentage}%` }} />
+                  </span>
+                </span>
+                <span className="tvx-departure-row__capacity">
+                  <small className={`tvx-availability-pill tvx-availability-pill--${availability}`}>
+                    {event.capacity === 0
+                      ? 'Uncapped'
+                      : remaining === 0
+                        ? 'Sold out'
+                        : availability === 'limited'
+                          ? 'Selling fast'
+                          : 'On sale'}
+                  </small>
+                  <strong>
+                    {event.capacity > 0 ? `${event.sold}/${event.capacity} sold` : `${event.sold} sold`}
+                  </strong>
+                </span>
+                <ArrowRight className="tvx-departure-row__arrow" size={17} aria-hidden="true" />
+              </Link>
+            )
+          })}
+        </div>
+      ) : (
+        <EmptyState>
+          No upcoming published events. Create an event to start selling tickets.
+        </EmptyState>
+      )}
+    </section>
+  )
+}
+
 /** Role-aware operations cockpit replacing Payload's generic card dashboard. */
 export async function AdminDashboard({ payload, searchParams, user }: AdminViewServerProps) {
   const staff = user as User | null | undefined
@@ -926,6 +1101,7 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
   const canViewEnquiries = hasAnyRole(roles, 'operations', 'event-manager', 'finance')
   const canViewContent = hasAnyRole(roles, 'operations', 'content-editor')
   const canViewEvents = hasAnyRole(roles, 'operations', 'event-manager')
+  const canSeeEventSales = hasAnyRole(roles, 'operations', 'event-manager', 'finance')
   const canManageOperations = hasAnyRole(roles, 'operations')
   const canManageContent = hasAnyRole(roles, 'operations', 'content-editor')
   const canManageEvents = hasAnyRole(roles, 'operations', 'event-manager')
@@ -933,7 +1109,7 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
   const { end, inSevenDays, inThirtyDays, start } = ghanaDayBounds()
   const reportingStart = periodStartFor(start, reportingPeriod)
 
-  const [operations, enquiries, content, upcomingEvents] = await Promise.all([
+  const [operations, enquiries, content, upcomingEvents, eventSales] = await Promise.all([
     canViewOperations
       ? loadOperationsData(
           payload,
@@ -948,6 +1124,9 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
     canViewEnquiries ? loadEnquiryData(payload, roles) : Promise.resolve<EnquiryData | null>(null),
     canViewContent ? loadContentData(payload) : Promise.resolve<ContentData | null>(null),
     canViewEvents ? loadUpcomingEvents(payload) : Promise.resolve<number | null>(null),
+    canSeeEventSales
+      ? loadEventSalesData(payload, reportingStart, end)
+      : Promise.resolve<EventSalesData | null>(null),
   ])
 
   const now = new Date()
@@ -1084,6 +1263,24 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
       label: 'New travel service requests',
       tone: 'info',
       value: enquiries.travelServices,
+    })
+  if (eventSales?.ordersInReview)
+    tasks.push({
+      description: 'Event ticket payments completed but need an operations decision.',
+      href: '/admin/collections/event-orders',
+      icon: TicketCheck,
+      label: 'Ticket orders need review',
+      tone: 'warning',
+      value: eventSales.ordersInReview,
+    })
+  if (content?.pendingReviews)
+    tasks.push({
+      description: 'Guest reviews are awaiting moderation before they go public.',
+      href: '/admin/collections/reviews',
+      icon: Star,
+      label: 'Reviews to moderate',
+      tone: 'info',
+      value: content.pendingReviews,
     })
 
   const quickActions: Array<DashboardQuickAction | null> = [
@@ -1347,6 +1544,12 @@ export async function AdminDashboard({ payload, searchParams, user }: AdminViewS
           )}
         </section>
       </div>
+
+      {eventSales ? (
+        <div className="tvx-dashboard-grid tvx-dashboard-grid--single">
+          <EventsSalesPanel data={eventSales} period={reportingPeriod} />
+        </div>
+      ) : null}
 
       {operations ? <RecentBookingsPanel bookings={operations.recentBookings} /> : null}
 
