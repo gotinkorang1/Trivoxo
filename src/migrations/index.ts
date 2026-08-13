@@ -6,6 +6,7 @@ import * as migration_20260811_050125_cloudinary_media_storage from './20260811_
 import * as migration_20260811_094425_event_ticket_notifications from './20260811_094425_event_ticket_notifications';
 import * as migration_20260811_200530_revoke_public_api_grants from './20260811_200530_revoke_public_api_grants';
 import * as migration_20260812_003415_admin_notifications_and_profile from './20260812_003415_admin_notifications_and_profile';
+import * as migration_20260813_002650_booking_identity_and_traveller_fields from './20260813_002650_booking_identity_and_traveller_fields';
 
 export const migrations = [
   {
@@ -46,6 +47,11 @@ export const migrations = [
   {
     up: migration_20260812_003415_admin_notifications_and_profile.up,
     down: migration_20260812_003415_admin_notifications_and_profile.down,
-    name: '20260812_003415_admin_notifications_and_profile'
+    name: '20260812_003415_admin_notifications_and_profile',
+  },
+  {
+    up: migration_20260813_002650_booking_identity_and_traveller_fields.up,
+    down: migration_20260813_002650_booking_identity_and_traveller_fields.down,
+    name: '20260813_002650_booking_identity_and_traveller_fields'
   },
 ];

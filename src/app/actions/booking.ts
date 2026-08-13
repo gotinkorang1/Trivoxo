@@ -40,25 +40,41 @@ export async function createBookingAction(
   const lastName = get('lastName')
   const email = get('email')
   const phone = get('phone')
+  const nationality = get('nationality')
   const country = get('country')
+  const ghanaCardNumber = get('ghanaCardNumber')
+  const passportNumber = get('passportNumber')
+  const bookerAge = get('bookerAge')
+  const consentAdultName = get('consentAdultName')
+  const consentAdultPhone = get('consentAdultPhone')
   const date = get('date')
   const pickup = get('pickup')
+  const pickupTime = get('pickupTime')
   const specialRequest = get('specialRequest')
-  const adults = Number(formData.get('adults') ?? 2)
+  const adults = Number(formData.get('adults') ?? 4)
   const children = Number(formData.get('children') ?? 0)
-  const partySize = adults + children
+  const youngChildren = Number(formData.get('youngChildren') ?? 0)
+  const partySize = adults + children + youngChildren
 
   const values = {
     firstName,
     lastName,
     email,
     phone,
+    nationality,
     country,
+    ghanaCardNumber,
+    passportNumber,
+    bookerAge,
+    consentAdultName,
+    consentAdultPhone,
     date,
     pickup,
+    pickupTime,
     specialRequest,
     adults: String(adults),
     children: String(children),
+    youngChildren: String(youngChildren),
   }
   const fieldErrors: Record<string, string> = {}
   if (!firstName) fieldErrors.firstName = 'Required'
@@ -68,13 +84,45 @@ export async function createBookingAction(
   if (!phone) fieldErrors.phone = 'Required'
   if (!date) fieldErrors.date = 'Choose a date'
   else if (!isIsoDate(date)) fieldErrors.date = 'Choose a valid date'
-  if (!Number.isInteger(adults) || adults < 1 || !Number.isInteger(children) || children < 0) {
+  if (
+    !Number.isInteger(adults) ||
+    adults < 1 ||
+    !Number.isInteger(children) ||
+    children < 0 ||
+    !Number.isInteger(youngChildren) ||
+    youngChildren < 0
+  ) {
     fieldErrors.party = 'Choose a valid number of travellers'
   } else if (partySize < CAPACITY.minGuests) {
-    fieldErrors.party = `A minimum of ${CAPACITY.minGuests} travellers is required`
+    fieldErrors.party = `Groups of ${CAPACITY.minGuests}–${CAPACITY.maxGuests} book online. For a smaller group, request a custom trip.`
   } else if (partySize > CAPACITY.maxGuests) {
-    fieldErrors.party = `Online requests are limited to ${CAPACITY.maxGuests} travellers`
+    fieldErrors.party = `Online bookings run up to ${CAPACITY.maxGuests} travellers. For a larger group, request a custom trip.`
   }
+
+  // Identity: Ghanaians provide a Ghana Card; foreign nationals provide country + passport.
+  if (nationality !== 'ghanaian' && nationality !== 'foreign') {
+    fieldErrors.nationality = 'Select your nationality'
+  } else if (nationality === 'ghanaian' && !ghanaCardNumber) {
+    fieldErrors.ghanaCardNumber = 'Enter your Ghana Card number'
+  } else if (nationality === 'foreign') {
+    if (!country) fieldErrors.country = 'Enter your country'
+    if (!passportNumber) fieldErrors.passportNumber = 'Enter your passport number'
+  }
+
+  // Booking age: 18+ book freely; 13–17 need adult consent; under-13 cannot book.
+  if (bookerAge !== '18-plus' && bookerAge !== '13-17') {
+    fieldErrors.bookerAge =
+      bookerAge === 'under-13'
+        ? 'Travellers under 13 must be booked by a parent or guardian.'
+        : 'Confirm the lead traveller’s age'
+  } else if (bookerAge === '13-17') {
+    if (!consentAdultName) fieldErrors.consentAdultName = 'Enter the consenting adult’s name'
+    if (!consentAdultPhone) fieldErrors.consentAdultPhone = 'Enter the consenting adult’s phone'
+  }
+
+  // Pickup must be provided (customer-chosen, within Greater Accra) with a time.
+  if (!pickup) fieldErrors.pickup = 'Enter a pickup area within Greater Accra'
+  if (!pickupTime) fieldErrors.pickupTime = 'Enter a preferred pickup time'
 
   if (Object.keys(fieldErrors).length > 0) {
     return { error: 'Please correct the highlighted fields.', fieldErrors, values }
@@ -100,20 +148,6 @@ export async function createBookingAction(
       return { error: 'That experience could not be found.', values }
     }
 
-    const minGuests = experience.minGuests ?? CAPACITY.minGuests
-    const maxGuests = experience.maxGuests ?? CAPACITY.maxGuests
-    if (partySize < minGuests || partySize > maxGuests) {
-      return {
-        error: 'Please adjust the number of travellers.',
-        fieldErrors: {
-          party:
-            partySize < minGuests
-              ? `This experience requires at least ${minGuests} travellers.`
-              : `Online requests are limited to ${maxGuests} travellers. Contact Trivoxo for a larger group.`,
-        },
-        values,
-      }
-    }
 
     const availabilityRules = {
       availabilityType: experience.availabilityType,
@@ -140,11 +174,21 @@ export async function createBookingAction(
       date,
       adults,
       children,
+      youngChildren,
       booker: { firstName, lastName, email, phone, country: country || undefined },
       pickup: pickup || undefined,
+      pickupTime: pickupTime || undefined,
+      travellerIdentity: {
+        nationality: nationality as 'ghanaian' | 'foreign',
+        ghanaCardNumber: nationality === 'ghanaian' ? ghanaCardNumber : undefined,
+        passportNumber: nationality === 'foreign' ? passportNumber : undefined,
+        bookerAge: bookerAge as '18-plus' | '13-17',
+        consentAdultName: bookerAge === '13-17' ? consentAdultName : undefined,
+        consentAdultPhone: bookerAge === '13-17' ? consentAdultPhone : undefined,
+      },
       specialRequest: specialRequest || undefined,
-      // Estimate from the group-pricing rules (§32) — confirmed at checkout.
-      totalAmount: quoteBooking(experience.priceFrom ?? 0, adults, children).total,
+      // Estimate from the group-pricing rules — confirmed at checkout.
+      totalAmount: quoteBooking(experience.priceFrom ?? 0, adults, children, youngChildren).total,
     })
     reference = booking.reference ?? undefined
   } catch (err) {

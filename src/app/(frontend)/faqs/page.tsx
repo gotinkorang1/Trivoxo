@@ -19,11 +19,11 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: 'Is there a discount for groups?',
-    a: 'Yes. Standard pricing assumes at least two travellers, and groups of three or more can receive reduced per-person rates. Your exact group price is confirmed with your quote.',
+    a: 'Yes. Parties of 10 or more travellers receive a 5% group discount, applied automatically to your quote. Children aged 6–12 pay 60% of the adult rate and children 5 and under travel free.',
   },
   {
-    q: 'What’s the minimum group size?',
-    a: 'Most experiences run from two travellers. Some experiences also offer private options — just ask.',
+    q: 'What’s the group size for an online booking?',
+    a: 'Standard online bookings run from 4 to 30 travellers (the smallest vehicle seats 4 passengers, the largest 30). For a smaller or larger group, request a custom or private trip and we’ll arrange it. Pickup is within Greater Accra, at a location and time you choose.',
   },
   {
     q: 'What’s included in the price?',

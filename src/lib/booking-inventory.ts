@@ -51,9 +51,14 @@ export type CreateHoldInput = {
   experience: Experience
   date: string
   adults: number
+  /** Children aged 6–12 (charged the child rate). */
   children: number
+  /** Young children aged 0–5 (free, but occupy a seat). */
+  youngChildren?: number
   booker: Booking['booker']
   pickup?: string
+  pickupTime?: string
+  travellerIdentity?: Booking['travellerIdentity']
   specialRequest?: string
   totalAmount: number
   source?: Booking['source']
@@ -95,8 +100,13 @@ function isAutoProvisionedType(type: Experience['availabilityType']): boolean {
   return type !== 'specific-dates'
 }
 
-function bookingSeats(booking: Pick<Booking, 'adults' | 'capacitySeats' | 'children'>): number {
-  return Number(booking.capacitySeats ?? (booking.adults ?? 0) + (booking.children ?? 0))
+function bookingSeats(
+  booking: Pick<Booking, 'adults' | 'capacitySeats' | 'children' | 'youngChildren'>,
+): number {
+  return Number(
+    booking.capacitySeats ??
+      (booking.adults ?? 0) + (booking.children ?? 0) + (booking.youngChildren ?? 0),
+  )
 }
 
 export function isBookingHoldActive(
@@ -610,7 +620,8 @@ export async function createBookingHold(
   input: CreateHoldInput,
 ): Promise<{ booking: Booking; departure: Departure }> {
   const now = input.now ?? new Date()
-  const partySize = input.adults + input.children
+  const youngChildren = input.youngChildren ?? 0
+  const partySize = input.adults + input.children + youngChildren
   const holdMinutes = input.holdMinutes ?? BOOKING_HOLD.minutes
 
   if (!Number.isInteger(partySize) || partySize < 1 || holdMinutes <= 0) {
@@ -640,11 +651,14 @@ export async function createBookingHold(
         departureDate: departure.startsAt,
         adults: input.adults,
         children: input.children,
+        youngChildren,
         capacitySeats: partySize,
         inventoryState: 'held',
         holdExpiresAt,
         booker: input.booker,
         pickup: input.pickup,
+        pickupTime: input.pickupTime,
+        travellerIdentity: input.travellerIdentity,
         specialRequest: input.specialRequest,
         totalAmount: input.totalAmount,
         paymentState: 'outstanding',
@@ -784,7 +798,8 @@ export const enforceBookingInventory: CollectionBeforeChangeHook = async ({
   const departureID = relationshipID(data.departure ?? originalDoc?.departure)
   const adults = Number(data.adults ?? originalDoc?.adults ?? 0)
   const children = Number(data.children ?? originalDoc?.children ?? 0)
-  const capacitySeats = adults + children
+  const youngChildren = Number(data.youngChildren ?? originalDoc?.youngChildren ?? 0)
+  const capacitySeats = adults + children + youngChildren
   const now = new Date()
 
   if (!Number.isInteger(capacitySeats) || capacitySeats < 1) {

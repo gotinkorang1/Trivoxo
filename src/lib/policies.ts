@@ -8,9 +8,9 @@
  * on Trivoxo's cost data.
  */
 
-/* ── Group pricing (§32, §33) ────────────────────────────────────────────────
- * Standard price assumes 2 travellers; 3+ get a reduced per-person rate because
- * transport + guide are largely fixed costs spread across the group. */
+/* ── Group pricing ───────────────────────────────────────────────────────────
+ * A single group discount: parties of 10+ travellers get 5% off, reflecting the
+ * transport + guide costs spread across a fuller vehicle. */
 export type DiscountTier = {
   minGuests: number
   maxGuests: number | null
@@ -19,20 +19,35 @@ export type DiscountTier = {
 }
 
 export const GROUP_DISCOUNT_TIERS: DiscountTier[] = [
-  { minGuests: 3, maxGuests: 4, discountPct: 10 },
-  { minGuests: 5, maxGuests: 8, discountPct: 15 },
-  { minGuests: 9, maxGuests: 14, discountPct: 20 },
-  { minGuests: 15, maxGuests: null, discountPct: 25, requestQuote: true },
+  { minGuests: 10, maxGuests: null, discountPct: 5 },
 ]
 
-/** Children 3–11 pay this share of the adult per-person rate; infants 0–2 free. */
+/**
+ * Age brackets. Total headcount (all ages) counts toward capacity and the group
+ * discount, because every traveller occupies a vehicle seat.
+ * - 0–5 years: free
+ * - 6–12 years: pay {@link CHILD_RATE} (40% off the adult rate)
+ * - 13+ years: charged as an adult
+ */
 export const CHILD_RATE = 0.6
-export const CHILD_AGES = { infantMax: 2, childMax: 11 } as const
+export const CHILD_AGES = { freeMax: 5, childMax: 12 } as const
 
-/* ── Capacity & booking window (§37) ─────────────────────────────────────── */
+/**
+ * Who may make a booking. 18+ can book unaccompanied; 13–17 may book only with
+ * the consent of an accompanying adult (18+); under-13s cannot book.
+ */
+export const BOOKING_AGE = { minUnaccompanied: 18, minWithConsent: 13 } as const
+
+/** Pickup is customer-chosen but must fall within this region. */
+export const PICKUP = { region: 'Greater Accra' } as const
+
+/* ── Capacity & booking window ───────────────────────────────────────────────
+ * Standard shared-vehicle bookings run from 4 to 30 travellers — the smallest
+ * vehicle seats 4 passengers, the largest 30. Parties outside that range need a
+ * custom/private arrangement. */
 export const CAPACITY = {
-  minGuests: 2,
-  maxGuests: 15,
+  minGuests: 4,
+  maxGuests: 30,
   minNoticeHours: 24, // day tours; multi-day needs more (see BOOKING_NOTICE)
   maxAdvanceDays: 180,
 } as const
@@ -74,7 +89,7 @@ export const GUIDE_LANGUAGES = {
 
 /* ── Pricing engine ──────────────────────────────────────────────────────── */
 
-/** Per-person group-discount percentage for a given party size (0 for 1–2). */
+/** Group-discount percentage for a given headcount (0 below the group threshold). */
 export function groupDiscountPct(groupSize: number): number {
   const tier = GROUP_DISCOUNT_TIERS.find(
     (t) => groupSize >= t.minGuests && (t.maxGuests == null || groupSize <= t.maxGuests),
@@ -87,19 +102,33 @@ export function perPersonPrice(baseFrom: number, groupSize: number): number {
   return Math.round(baseFrom * (1 - groupDiscountPct(groupSize) / 100))
 }
 
+/** True when a headcount falls outside the standard shared-vehicle range (4–30). */
+export function needsCustomBooking(groupSize: number): boolean {
+  return groupSize < CAPACITY.minGuests || groupSize > CAPACITY.maxGuests
+}
+
 export type Quote = {
+  /** Total travellers of all ages (each occupies a seat). */
   groupSize: number
   discountPct: number
   adultUnit: number
   childUnit: number
   total: number
-  /** True for 15+ parties — the total is an estimate; a custom group quote applies. */
+  /** True when the party is outside 4–30 and needs a custom/private booking. */
   requestQuote: boolean
 }
 
-/** Estimate a booking total from the "from" price and party composition. */
-export function quoteBooking(baseFrom: number, adults: number, children = 0): Quote {
-  const groupSize = Math.max(1, adults + children)
+/**
+ * Estimate a booking total from the "from" price and party composition.
+ * `children` are 6–12 (charged {@link CHILD_RATE}); `youngChildren` are 0–5 (free).
+ */
+export function quoteBooking(
+  baseFrom: number,
+  adults: number,
+  children = 0,
+  youngChildren = 0,
+): Quote {
+  const groupSize = Math.max(1, adults + children + youngChildren)
   const discountPct = groupDiscountPct(groupSize)
   const adultUnit = perPersonPrice(baseFrom, groupSize)
   const childUnit = Math.round(adultUnit * CHILD_RATE)
@@ -109,6 +138,6 @@ export function quoteBooking(baseFrom: number, adults: number, children = 0): Qu
     adultUnit,
     childUnit,
     total: adultUnit * adults + childUnit * children,
-    requestQuote: groupSize >= 15,
+    requestQuote: needsCustomBooking(groupSize),
   }
 }

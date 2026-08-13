@@ -114,12 +114,34 @@ export const Bookings: CollectionConfig = {
       relationTo: 'customers',
       admin: { position: 'sidebar' },
     },
+    { name: 'departureDate', type: 'date', required: true },
     {
       type: 'row',
       fields: [
-        { name: 'departureDate', type: 'date', required: true, admin: { width: '34%' } },
-        { name: 'adults', type: 'number', defaultValue: 2, min: 1, admin: { width: '33%' } },
-        { name: 'children', type: 'number', defaultValue: 0, min: 0, admin: { width: '33%' } },
+        {
+          name: 'adults',
+          label: 'Adults (13+)',
+          type: 'number',
+          defaultValue: 4,
+          min: 1,
+          admin: { width: '33%' },
+        },
+        {
+          name: 'children',
+          label: 'Children (6–12)',
+          type: 'number',
+          defaultValue: 0,
+          min: 0,
+          admin: { width: '33%', description: '40% off the adult rate.' },
+        },
+        {
+          name: 'youngChildren',
+          label: 'Young children (0–5)',
+          type: 'number',
+          defaultValue: 0,
+          min: 0,
+          admin: { width: '34%', description: 'Travel free.' },
+        },
       ],
     },
     {
@@ -184,7 +206,70 @@ export const Bookings: CollectionConfig = {
         },
       ],
     },
-    { name: 'pickup', type: 'text' },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'pickup',
+          label: 'Pickup area (Greater Accra)',
+          type: 'text',
+          admin: { width: '50%', description: 'Must be within the Greater Accra region.' },
+        },
+        {
+          name: 'pickupTime',
+          label: 'Preferred pickup time',
+          type: 'text',
+          admin: { width: '50%', placeholder: 'e.g. 07:30' },
+        },
+      ],
+    },
+    {
+      name: 'travellerIdentity',
+      label: 'Lead traveller identity & consent',
+      type: 'group',
+      admin: {
+        description:
+          'Ghanaians provide a Ghana Card number; foreign nationals provide country and passport. 13–17s need consent from an accompanying adult.',
+      },
+      fields: [
+        {
+          name: 'nationality',
+          type: 'select',
+          options: [
+            { label: 'Ghanaian', value: 'ghanaian' },
+            { label: 'Foreign national', value: 'foreign' },
+          ],
+        },
+        {
+          name: 'ghanaCardNumber',
+          label: 'Ghana Card number',
+          type: 'text',
+          admin: { condition: (_, sib) => sib?.nationality === 'ghanaian' },
+        },
+        {
+          name: 'passportNumber',
+          type: 'text',
+          admin: { condition: (_, sib) => sib?.nationality === 'foreign' },
+        },
+        {
+          name: 'bookerAge',
+          label: 'Lead traveller age',
+          type: 'select',
+          options: [
+            { label: '18 or older', value: '18-plus' },
+            { label: '13–17 (with adult consent)', value: '13-17' },
+          ],
+        },
+        {
+          type: 'row',
+          admin: { condition: (_, sib) => sib?.bookerAge === '13-17' },
+          fields: [
+            { name: 'consentAdultName', label: 'Consenting adult name', type: 'text', admin: { width: '50%' } },
+            { name: 'consentAdultPhone', label: 'Consenting adult phone', type: 'text', admin: { width: '50%' } },
+          ],
+        },
+      ],
+    },
     { name: 'specialRequest', type: 'textarea' },
     { name: 'dietary', type: 'text' },
     {

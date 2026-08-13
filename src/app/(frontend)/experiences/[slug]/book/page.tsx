@@ -6,6 +6,7 @@ import { BookingForm } from '@/components/booking/booking-form'
 import { Container } from '@/components/ui/container'
 import { evaluateDateAvailability, getBookingWindow, isIsoDate } from '@/lib/availability'
 import { getExperienceBySlug } from '@/lib/payload/experiences'
+import { CAPACITY } from '@/lib/policies'
 
 export async function generateMetadata({
   params,
@@ -91,8 +92,8 @@ export default async function BookExperiencePage({
           weekdays={experience.weekdays}
           minNoticeHours={experience.minNoticeHours}
           soldOut={experience.soldOut}
-          minGuests={experience.minGuests ?? 2}
-          maxGuests={experience.maxGuests ?? 15}
+          minGuests={CAPACITY.minGuests}
+          maxGuests={CAPACITY.maxGuests}
         />
       </Container>
     </div>

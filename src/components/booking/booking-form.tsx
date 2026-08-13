@@ -42,12 +42,20 @@ type FormValues = {
   date: string
   adults: string
   children: string
+  youngChildren: string
   firstName: string
   lastName: string
   email: string
   phone: string
+  nationality: string
   country: string
+  ghanaCardNumber: string
+  passportNumber: string
+  bookerAge: string
+  consentAdultName: string
+  consentAdultPhone: string
   pickup: string
+  pickupTime: string
   specialRequest: string
 }
 
@@ -105,24 +113,33 @@ export function BookingForm({
   )
   const [values, setValues] = useState<FormValues>({
     date: initialDate,
-    adults: '2',
+    adults: '4',
     children: '0',
+    youngChildren: '0',
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
+    nationality: '',
     country: '',
+    ghanaCardNumber: '',
+    passportNumber: '',
+    bookerAge: '',
+    consentAdultName: '',
+    consentAdultPhone: '',
     pickup: '',
+    pickupTime: '',
     specialRequest: '',
   })
   const stepHeadingRef = useRef<HTMLHeadingElement>(null)
   const reduceMotion = useReducedMotion()
   const adults = Number(values.adults)
   const children = Number(values.children)
-  const partySize = adults + children
+  const youngChildren = Number(values.youngChildren)
+  const partySize = adults + children + youngChildren
   const quote = useMemo(
-    () => quoteBooking(baseFrom, adults, children),
-    [baseFrom, adults, children],
+    () => quoteBooking(baseFrom, adults, children, youngChildren),
+    [baseFrom, adults, children, youngChildren],
   )
   const dateWindow = useMemo<DateWindow>(() => ({ minDate, maxDate }), [minDate, maxDate])
   const dateStatus = values.date
@@ -217,9 +234,9 @@ export function BookingForm({
     else if (!dateStatus?.requestable) errors.date = dateStatus?.reason ?? 'Choose another date.'
     else if (liveAvailability?.available === false) errors.date = liveAvailability.message
     if (partySize < minGuests)
-      errors.party = `This experience requires at least ${minGuests} travellers.`
-    if (partySize > maxGuests)
-      errors.party = `Online requests are limited to ${maxGuests} travellers.`
+      errors.party = `Groups of ${minGuests}–${maxGuests} book online. For ${minGuests > 1 ? `${minGuests - 1} or fewer` : 'a smaller group'}, request a custom trip.`
+    else if (partySize > maxGuests)
+      errors.party = `Online bookings run up to ${maxGuests} travellers. For a larger group, request a custom trip.`
     setClientErrors(errors)
     return Object.keys(errors).length === 0
   }
@@ -231,6 +248,28 @@ export function BookingForm({
     if (!values.email.trim()) errors.email = 'Enter your email address.'
     else if (!EMAIL_RE.test(values.email)) errors.email = 'Enter a valid email address.'
     if (!values.phone.trim()) errors.phone = 'Enter a phone or WhatsApp number.'
+
+    if (!values.nationality) errors.nationality = 'Select your nationality.'
+    else if (values.nationality === 'ghanaian' && !values.ghanaCardNumber.trim())
+      errors.ghanaCardNumber = 'Enter your Ghana Card number.'
+    else if (values.nationality === 'foreign') {
+      if (!values.country.trim()) errors.country = 'Enter your country.'
+      if (!values.passportNumber.trim()) errors.passportNumber = 'Enter your passport number.'
+    }
+
+    if (!values.bookerAge) errors.bookerAge = 'Confirm the lead traveller’s age.'
+    else if (values.bookerAge === 'under-13')
+      errors.bookerAge = 'Travellers under 13 must be booked by a parent or guardian.'
+    else if (values.bookerAge === '13-17') {
+      if (!values.consentAdultName.trim())
+        errors.consentAdultName = 'Enter the consenting adult’s name.'
+      if (!values.consentAdultPhone.trim())
+        errors.consentAdultPhone = 'Enter the consenting adult’s phone.'
+    }
+
+    if (!values.pickup.trim()) errors.pickup = 'Enter a pickup area within Greater Accra.'
+    if (!values.pickupTime.trim()) errors.pickupTime = 'Enter a preferred pickup time.'
+
     setClientErrors(errors)
     return Object.keys(errors).length === 0
   }
@@ -402,13 +441,36 @@ export function BookingForm({
                       <Field
                         id="booking-children"
                         label="Children"
-                        hint="Ages 3–11"
+                        hint="Ages 6–12 · 40% off"
                         error={combinedErrors.children}
                       >
                         <select
                           id="booking-children"
                           value={values.children}
                           onChange={(event) => update('children', event.target.value)}
+                          aria-invalid={Boolean(combinedErrors.party)}
+                          aria-describedby={combinedErrors.party ? 'party-error' : undefined}
+                          className={inputCls()}
+                        >
+                          {Array.from({ length: maxGuests }, (_, index) => index).map((count) => (
+                            <option key={count} value={count}>
+                              {count}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+
+                      <Field
+                        id="booking-young-children"
+                        label="Young children"
+                        hint="Ages 0–5 · free"
+                        error={combinedErrors.youngChildren}
+                        className="sm:col-span-2"
+                      >
+                        <select
+                          id="booking-young-children"
+                          value={values.youngChildren}
+                          onChange={(event) => update('youngChildren', event.target.value)}
                           aria-invalid={Boolean(combinedErrors.party)}
                           aria-describedby={combinedErrors.party ? 'party-error' : undefined}
                           className={inputCls()}
@@ -429,12 +491,12 @@ export function BookingForm({
                           <p className="text-sm font-bold text-text-primary">
                             {quote.discountPct > 0
                               ? `${quote.discountPct}% group saving applied`
-                              : 'Group savings start at 3 travellers'}
+                              : 'Groups of 10+ save 5%'}
                           </p>
                           <p className="mt-1 text-xs leading-5 text-text-secondary">
                             {partySize} traveller{partySize === 1 ? '' : 's'} · Adult rate{' '}
-                            {formatPrice(quote.adultUnit)} each · Children{' '}
-                            {formatPrice(quote.childUnit)} each
+                            {formatPrice(quote.adultUnit)} each · Children (6–12){' '}
+                            {formatPrice(quote.childUnit)} · Under 5 free
                           </p>
                         </div>
                       </div>
@@ -499,22 +561,111 @@ export function BookingForm({
                         inputMode="tel"
                         onChange={(value) => update('phone', value)}
                       />
-                      <TextField
-                        id="booking-country"
-                        label="Country"
-                        optional
-                        value={values.country}
-                        autoComplete="country-name"
-                        onChange={(value) => update('country', value)}
-                      />
+                      <Field
+                        id="booking-nationality"
+                        label="Nationality"
+                        error={combinedErrors.nationality}
+                      >
+                        <select
+                          id="booking-nationality"
+                          value={values.nationality}
+                          onChange={(event) => update('nationality', event.target.value)}
+                          aria-invalid={Boolean(combinedErrors.nationality)}
+                          className={inputCls(combinedErrors.nationality)}
+                        >
+                          <option value="">Select…</option>
+                          <option value="ghanaian">Ghanaian</option>
+                          <option value="foreign">Foreign national</option>
+                        </select>
+                      </Field>
+
+                      {values.nationality === 'ghanaian' ? (
+                        <TextField
+                          id="booking-ghana-card"
+                          label="Ghana Card number"
+                          value={values.ghanaCardNumber}
+                          error={combinedErrors.ghanaCardNumber}
+                          placeholder="GHA-XXXXXXXXX-X"
+                          onChange={(value) => update('ghanaCardNumber', value)}
+                        />
+                      ) : null}
+
+                      {values.nationality === 'foreign' ? (
+                        <>
+                          <TextField
+                            id="booking-country"
+                            label="Country"
+                            value={values.country}
+                            error={combinedErrors.country}
+                            autoComplete="country-name"
+                            onChange={(value) => update('country', value)}
+                          />
+                          <TextField
+                            id="booking-passport"
+                            label="Passport number"
+                            value={values.passportNumber}
+                            error={combinedErrors.passportNumber}
+                            onChange={(value) => update('passportNumber', value)}
+                          />
+                        </>
+                      ) : null}
+
+                      <Field
+                        id="booking-age"
+                        label="Lead traveller age"
+                        error={combinedErrors.bookerAge}
+                      >
+                        <select
+                          id="booking-age"
+                          value={values.bookerAge}
+                          onChange={(event) => update('bookerAge', event.target.value)}
+                          aria-invalid={Boolean(combinedErrors.bookerAge)}
+                          className={inputCls(combinedErrors.bookerAge)}
+                        >
+                          <option value="">Select…</option>
+                          <option value="18-plus">18 or older</option>
+                          <option value="13-17">13–17 (needs adult consent)</option>
+                          <option value="under-13">Under 13</option>
+                        </select>
+                      </Field>
+
+                      {values.bookerAge === '13-17' ? (
+                        <>
+                          <TextField
+                            id="booking-consent-name"
+                            label="Consenting adult name"
+                            value={values.consentAdultName}
+                            error={combinedErrors.consentAdultName}
+                            onChange={(value) => update('consentAdultName', value)}
+                          />
+                          <TextField
+                            id="booking-consent-phone"
+                            label="Consenting adult phone"
+                            type="tel"
+                            inputMode="tel"
+                            value={values.consentAdultPhone}
+                            error={combinedErrors.consentAdultPhone}
+                            onChange={(value) => update('consentAdultPhone', value)}
+                          />
+                        </>
+                      ) : null}
+
                       <TextField
                         id="booking-pickup"
-                        label="Preferred pickup area"
-                        optional
+                        label="Pickup area (Greater Accra)"
                         value={values.pickup}
+                        error={combinedErrors.pickup}
                         autoComplete="street-address"
                         placeholder="e.g. Osu, Airport Residential"
                         onChange={(value) => update('pickup', value)}
+                      />
+                      <TextField
+                        id="booking-pickup-time"
+                        label="Preferred pickup time"
+                        value={values.pickupTime}
+                        error={combinedErrors.pickupTime}
+                        placeholder="e.g. 07:30"
+                        onChange={(value) => update('pickupTime', value)}
                       />
                       <Field
                         id="booking-special-request"

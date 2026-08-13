@@ -1,32 +1,34 @@
-import { GROUP_DISCOUNT_TIERS, perPersonPrice } from '@/lib/policies'
+import { CAPACITY, perPersonPrice } from '@/lib/policies'
 import { formatPrice } from '@/lib/format'
 
-/** Per-person price by group size (§33) — the group-discount ladder made
- * visible at booking time. Server-rendered from the "from" price. */
+/** Per-person adult price by group size — the group discount made visible at
+ * booking time. Server-rendered from the "from" price. A single tier applies:
+ * parties of 10+ save 5%. */
 export function GroupPricingTable({ baseFrom }: { baseFrom: number }) {
   const rows = [
-    { label: '2 travellers', size: 2, requestQuote: false },
-    ...GROUP_DISCOUNT_TIERS.map((t) => ({
-      label: t.maxGuests ? `${t.minGuests}–${t.maxGuests}` : `${t.minGuests}+`,
-      size: t.minGuests,
-      requestQuote: Boolean(t.requestQuote),
-    })),
+    { label: `${CAPACITY.minGuests}–9 travellers`, size: CAPACITY.minGuests },
+    { label: `10–${CAPACITY.maxGuests} travellers`, size: 10 },
   ]
 
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Per person by group size</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+        Adult price per person
+      </p>
       <dl className="mt-2 space-y-1.5 text-sm">
         {rows.map((r) => (
           <div key={r.label} className="flex items-center justify-between gap-3">
             <dt className="text-text-secondary">{r.label}</dt>
             <dd className="font-medium text-text-primary">
-              {r.requestQuote ? 'Group quote' : formatPrice(perPersonPrice(baseFrom, r.size))}
+              {formatPrice(perPersonPrice(baseFrom, r.size))}
             </dd>
           </div>
         ))}
       </dl>
-      <p className="mt-2 text-xs text-text-muted">Children (3–11) pay 60% of the adult rate; infants free.</p>
+      <p className="mt-2 text-xs text-text-muted">
+        Children 6–12 pay 60% of the adult rate; under 5 travel free. Groups of{' '}
+        {CAPACITY.minGuests}–{CAPACITY.maxGuests} book online.
+      </p>
     </div>
   )
 }

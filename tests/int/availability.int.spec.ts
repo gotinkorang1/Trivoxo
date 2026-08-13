@@ -40,12 +40,31 @@ describe('availability rules', () => {
 })
 
 describe('live booking quote', () => {
-  it('applies the agreed 3-person discount to the estimate', () => {
-    expect(quoteBooking(1400, 3)).toMatchObject({ discountPct: 10, adultUnit: 1260, total: 3780 })
+  it('charges full adult rate below the 10-person group threshold', () => {
+    // Standard party (4 adults): no group discount, full rate.
+    expect(quoteBooking(1400, 4)).toMatchObject({ discountPct: 0, adultUnit: 1400, total: 5600 })
   })
 
-  it('uses the child rate and flags 15-person groups for a quote', () => {
-    expect(quoteBooking(1400, 2, 1)).toMatchObject({ discountPct: 10, childUnit: 756, total: 3276 })
-    expect(quoteBooking(1400, 15)).toMatchObject({ requestQuote: true, discountPct: 25 })
+  it('applies the single 5% group discount at 10+ travellers', () => {
+    expect(quoteBooking(1400, 10)).toMatchObject({
+      discountPct: 5,
+      adultUnit: 1330,
+      total: 13300,
+      requestQuote: false,
+    })
+  })
+
+  it('charges 6–12s at 60% and 0–5s free, counting all toward headcount', () => {
+    // 8 adults + 1 child (6–12) + 1 free (0–5) = 10 headcount → 5% discount.
+    const quote = quoteBooking(1400, 8, 1, 1)
+    expect(quote).toMatchObject({ groupSize: 10, discountPct: 5, adultUnit: 1330, childUnit: 798 })
+    expect(quote.total).toBe(1330 * 8 + 798) // young child is free
+  })
+
+  it('flags parties outside 4–30 for a custom booking', () => {
+    expect(quoteBooking(1400, 3)).toMatchObject({ requestQuote: true })
+    expect(quoteBooking(1400, 31)).toMatchObject({ requestQuote: true })
+    expect(quoteBooking(1400, 4)).toMatchObject({ requestQuote: false })
+    expect(quoteBooking(1400, 30)).toMatchObject({ requestQuote: false })
   })
 })

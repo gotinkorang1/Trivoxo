@@ -593,7 +593,14 @@ export interface Booking {
   customer?: (number | null) | Customer;
   departureDate: string;
   adults?: number | null;
+  /**
+   * 40% off the adult rate.
+   */
   children?: number | null;
+  /**
+   * Travel free.
+   */
+  youngChildren?: number | null;
   /**
    * Managed automatically from the booking status.
    */
@@ -608,7 +615,22 @@ export interface Booking {
     country?: string | null;
     emergencyContact?: string | null;
   };
+  /**
+   * Must be within the Greater Accra region.
+   */
   pickup?: string | null;
+  pickupTime?: string | null;
+  /**
+   * Ghanaians provide a Ghana Card number; foreign nationals provide country and passport. 13–17s need consent from an accompanying adult.
+   */
+  travellerIdentity?: {
+    nationality?: ('ghanaian' | 'foreign') | null;
+    ghanaCardNumber?: string | null;
+    passportNumber?: string | null;
+    bookerAge?: ('18-plus' | '13-17') | null;
+    consentAdultName?: string | null;
+    consentAdultPhone?: string | null;
+  };
   specialRequest?: string | null;
   dietary?: string | null;
   guests?:
@@ -1558,6 +1580,7 @@ export interface BookingsSelect<T extends boolean = true> {
   departureDate?: T;
   adults?: T;
   children?: T;
+  youngChildren?: T;
   inventoryState?: T;
   capacitySeats?: T;
   holdExpiresAt?: T;
@@ -1572,6 +1595,17 @@ export interface BookingsSelect<T extends boolean = true> {
         emergencyContact?: T;
       };
   pickup?: T;
+  pickupTime?: T;
+  travellerIdentity?:
+    | T
+    | {
+        nationality?: T;
+        ghanaCardNumber?: T;
+        passportNumber?: T;
+        bookerAge?: T;
+        consentAdultName?: T;
+        consentAdultPhone?: T;
+      };
   specialRequest?: T;
   dietary?: T;
   guests?:

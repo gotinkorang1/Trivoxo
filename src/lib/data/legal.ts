@@ -11,6 +11,8 @@ import {
   GROUP_DISCOUNT_TIERS,
   CHILD_RATE,
   CAPACITY,
+  BOOKING_AGE,
+  PICKUP,
   BOOKING_NOTICE,
   DEPOSIT,
   CANCELLATION,
@@ -33,9 +35,7 @@ const LEGAL_REVIEW_NOTICE: LegalSection = {
 }
 
 const childPct = Math.round(CHILD_RATE * 100)
-const discountLadder = GROUP_DISCOUNT_TIERS.filter((t) => !t.requestQuote)
-  .map((t) => `${t.discountPct}% for ${t.minGuests}–${t.maxGuests}`)
-  .join(', ')
+const groupTier = GROUP_DISCOUNT_TIERS[0]
 
 export const LEGAL_PAGES: LegalPage[] = [
   {
@@ -48,11 +48,11 @@ export const LEGAL_PAGES: LegalPage[] = [
       },
       {
         heading: 'Bookings & confirmation',
-        text: `Submit a booking request with your date, number of travellers and contact details. We confirm availability and share payment details; a booking is confirmed once payment (or the required deposit) is received. Most experiences run from a minimum of ${CAPACITY.minGuests} travellers, with private options available for solo travellers on request.`,
+        text: `Submit a booking request with your date, number of travellers, pickup details and contact information. We confirm availability and share payment details; a booking is confirmed once payment (or the required deposit) is received. Standard online bookings run from ${CAPACITY.minGuests} to ${CAPACITY.maxGuests} travellers — groups outside that range are arranged as a custom or private trip. You must be ${BOOKING_AGE.minUnaccompanied} or older to book; ${BOOKING_AGE.minWithConsent}–${BOOKING_AGE.minUnaccompanied - 1} year-olds may book only with the consent of an accompanying adult. Ghanaian travellers provide a Ghana Card number and foreign nationals provide their country and passport details. Pickup location and time are chosen by you and must be within the ${PICKUP.region} region.`,
       },
       {
         heading: 'Pricing & group discounts',
-        text: `Prices are per person in Ghanaian Cedi and assume ${CAPACITY.minGuests} travellers. Groups of 3 or more receive a reduced per-person rate (${discountLadder}; groups of 15+ are priced by custom quote). Children aged 3–11 pay ${childPct}% of the adult rate and infants under 3 travel free. Payment processing fees are already included in our prices — you are not surcharged.`,
+        text: `Prices are per person in Ghanaian Cedi. A single group discount applies: parties of ${groupTier.minGuests} or more travellers receive ${groupTier.discountPct}% off. Children aged 6–12 pay ${childPct}% of the adult rate, children aged 5 and under travel free, and travellers 13 and over are charged as adults (every traveller occupies a vehicle seat). Payment processing fees are already included in our prices — you are not surcharged.`,
       },
       {
         heading: 'Payment & deposits',
