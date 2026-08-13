@@ -1,8 +1,25 @@
+import type { ComponentType } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react'
+import { ArrowRight, ArrowUp, Instagram, Linkedin, Mail, MessageCircle, Phone, MapPin } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { Wordmark } from '@/components/site/wordmark'
-import { BRAND, CONTACT, SOCIALS } from '@/lib/constants'
+import { BRAND, CONTACT, SOCIALS, whatsappLink } from '@/lib/constants'
+
+/** TikTok has no lucide brand icon, so we inline a minimal glyph. */
+function TikTokIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+      <path d="M16.5 3c.3 2.1 1.5 3.4 3.5 3.6v2.4c-1.2.1-2.3-.2-3.5-.9v5.6a5.4 5.4 0 1 1-5.4-5.4c.2 0 .4 0 .6.1v2.5a2.9 2.9 0 1 0 2.3 2.8V3h2.4Z" />
+    </svg>
+  )
+}
+
+const SOCIAL_LINKS: { label: string; href: string; Icon: ComponentType<{ className?: string }> }[] = [
+  { label: 'Instagram', href: SOCIALS.instagram, Icon: Instagram },
+  { label: 'TikTok', href: SOCIALS.tiktok, Icon: TikTokIcon },
+  { label: 'LinkedIn', href: SOCIALS.linkedin, Icon: Linkedin },
+  { label: 'WhatsApp', href: whatsappLink('Hi Trivoxo, I have a question.'), Icon: MessageCircle },
+]
 
 const COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
   {
@@ -82,24 +99,18 @@ export function Footer() {
               </p>
             </div>
             <div className="mt-5 flex gap-3">
-              <a
-                href={SOCIALS.instagram}
-                aria-label="Instagram"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex size-11 items-center justify-center rounded-full border border-white/20 text-white/75 transition hover:-translate-y-0.5 hover:border-brand-secondary hover:text-brand-secondary"
-              >
-                <Instagram className="size-4" />
-              </a>
-              <a
-                href={SOCIALS.linkedin}
-                aria-label="LinkedIn"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex size-11 items-center justify-center rounded-full border border-white/20 text-white/75 transition hover:-translate-y-0.5 hover:border-brand-secondary hover:text-brand-secondary"
-              >
-                <Linkedin className="size-4" />
-              </a>
+              {SOCIAL_LINKS.map(({ label, href, Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex size-11 items-center justify-center rounded-full border border-white/20 text-white/75 transition hover:-translate-y-0.5 hover:border-brand-secondary hover:text-brand-secondary"
+                >
+                  <Icon className="size-4" />
+                </a>
+              ))}
             </div>
           </div>
 
@@ -119,11 +130,20 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-sm text-white/55 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-sm text-white/55 sm:flex-row">
           <p>
             © {new Date().getFullYear()} {BRAND.name}. All rights reserved.
           </p>
-          <p>{BRAND.domain}</p>
+          <div className="flex items-center gap-5">
+            <p>{BRAND.domain}</p>
+            <a
+              href="#top"
+              className="group inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 font-medium text-white/70 transition hover:border-brand-secondary hover:text-brand-secondary"
+            >
+              Back to top
+              <ArrowUp className="size-3.5 transition-transform group-hover:-translate-y-0.5" aria-hidden="true" />
+            </a>
+          </div>
         </div>
       </Container>
     </footer>
