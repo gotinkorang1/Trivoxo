@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Clock } from 'lucide-react'
 import { Container } from '@/components/ui/container'
+import { PageHero } from '@/components/site/page-hero'
 import { getAllArticles, guideCategories } from '@/lib/payload/guide'
 import { formatDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -27,18 +28,15 @@ export default async function GuidePage({
     : [...all].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
 
   return (
-    <Container className="py-10 sm:py-14">
-      <header className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand-link">
-          Ghana Guide
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Plan like a local</h1>
-        <p className="mt-2 max-w-2xl text-text-secondary">
-          Practical tips, destination know-how and the stories behind the experiences.
-        </p>
-      </header>
-
-      {/* Category chips */}
+    <>
+      <PageHero
+        eyebrow="Ghana Guide"
+        title="Plan like a local"
+        description="Practical tips, destination know-how and the stories behind the experiences."
+        image={{ src: '/images/arts-centre-crafts.jpg', alt: 'Crafts at the Arts Centre market in Accra' }}
+      />
+      <Container className="py-10 sm:py-14">
+        {/* Category chips */}
       <div className="mb-8 flex flex-wrap gap-2">
         <Chip href="/guide" active={!category} label="All" />
         {categories.map((c) => (
@@ -90,7 +88,8 @@ export default async function GuidePage({
           </Link>
         ))}
       </div>
-    </Container>
+      </Container>
+    </>
   )
 }
 

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Compass, HeartHandshake, Route } from 'lucide-react'
 import { Container } from '@/components/ui/container'
+import { HeroBackground } from '@/components/site/hero-background'
 import { CustomTripForm } from '@/components/forms/custom-trip-form'
 
 export const metadata: Metadata = {
@@ -23,10 +24,14 @@ export default function CustomTripsPage() {
   return (
     <>
       <section
-        className="relative overflow-hidden text-white"
+        className="relative isolate overflow-hidden text-white"
         style={{ background: 'linear-gradient(120deg,#7a2e12,#e85d2a 70%,#f5b133)' }}
       >
-        <Container className="py-16 sm:py-20">
+        <HeroBackground
+          src="/images/cape-coast-town.jpg"
+          alt="The coast at Cape Coast, Ghana"
+        />
+        <Container className="relative py-16 sm:py-20">
           <p className="text-sm font-semibold uppercase tracking-widest text-white/85">
             Your Ghana. Your way.
           </p>

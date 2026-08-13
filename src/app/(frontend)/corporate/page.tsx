@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Building2, Users, CalendarCheck, Truck } from 'lucide-react'
 import { Container } from '@/components/ui/container'
+import { HeroBackground } from '@/components/site/hero-background'
 import { CorporateForm } from '@/components/forms/corporate-form'
 
 export const metadata: Metadata = {
@@ -25,10 +26,14 @@ export default function CorporatePage() {
     <>
       {/* Hero */}
       <section
-        className="relative overflow-hidden text-white"
+        className="relative isolate overflow-hidden text-white"
         style={{ background: 'linear-gradient(120deg,#0e1c2b,#13273a 60%,#1e3350)' }}
       >
-        <Container className="py-16 sm:py-20">
+        <HeroBackground
+          src="/images/corporate-travel-retreat.jpg"
+          alt="A corporate travel retreat in Ghana"
+        />
+        <Container className="relative py-16 sm:py-20">
           <p className="text-sm font-semibold uppercase tracking-widest text-brand-secondary">
             Corporate & Groups
           </p>

@@ -20,6 +20,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { Container } from '@/components/ui/container'
+import { HeroBackground } from '@/components/site/hero-background'
 import { ButtonLink } from '@/components/ui/button'
 import { BRAND } from '@/lib/constants'
 import { MANAGEMENT } from '@/lib/site-media'
@@ -126,13 +127,10 @@ const VALUES: { icon: LucideIcon; title: string; body: string }[] = [
 export default function AboutPage() {
   return (
     <>
-      <section className="relative overflow-hidden bg-brand-navy text-white">
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(120% 120% at 20% 10%, rgba(232,93,42,0.5), transparent 45%), linear-gradient(160deg,#0e1c2b,#10202e)',
-          }}
+      <section className="relative isolate overflow-hidden bg-brand-navy text-white">
+        <HeroBackground
+          src="/images/black-star-gate.jpg"
+          alt="Black Star Gate, Independence Square, Accra"
         />
         <Container className="relative py-16 sm:py-24">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-brand-secondary">

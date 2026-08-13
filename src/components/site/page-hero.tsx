@@ -1,6 +1,6 @@
-import Image from 'next/image'
 import { Sparkles } from 'lucide-react'
 import { Container } from '@/components/ui/container'
+import { HeroBackground } from '@/components/site/hero-background'
 
 type HeroImage = {
   src: string
@@ -28,26 +28,7 @@ export function PageHero({
       }`}
     >
       {image ? (
-        <>
-          <Image
-            src={image.src}
-            alt={image.alt ?? ''}
-            fill
-            priority
-            sizes="100vw"
-            className="-z-20 object-cover"
-          />
-          {/* Legibility: dark on the text (left) side, easing to reveal the photo;
-              plus a base wash and a bottom fade into the page. */}
-          <div
-            className="absolute inset-0 -z-10 bg-gradient-to-r from-brand-navy/95 via-brand-navy/75 to-brand-navy/40"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-brand-navy to-transparent"
-            aria-hidden="true"
-          />
-        </>
+        <HeroBackground src={image.src} alt={image.alt} />
       ) : (
         <>
           <div className="soft-grid absolute inset-0 -z-10 opacity-70" aria-hidden="true" />
