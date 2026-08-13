@@ -2881,7 +2881,8 @@ body {
 
 /* ── Branded header band: brand mark + welcome intro bleed to the card edges ── */
 .login.template-minimal .login__brand {
-  margin: calc(var(--lp) * -1) calc(var(--lp) * -1) 0;
+  width: calc(100% + var(--lp) * 2);
+  margin: calc(var(--lp) * -1) 0 0 calc(var(--lp) * -1);
   padding: 1.9rem var(--lp) 1.15rem;
   display: flex;
   justify-content: center;
@@ -2909,7 +2910,8 @@ body {
 
 /* welcome intro continues the band (solid = matches the band's bottom colour) */
 .tvx-login-intro {
-  margin: 0 calc(var(--lp) * -1) var(--lp);
+  width: calc(100% + var(--lp) * 2);
+  margin: 0 0 var(--lp) calc(var(--lp) * -1);
   padding: 0 var(--lp) 1.5rem;
   text-align: center;
   background: #0f2136;
