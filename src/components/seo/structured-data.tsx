@@ -5,9 +5,32 @@ import type { GuideArticle } from '@/lib/data/guide'
 
 const BASE = process.env.NEXT_PUBLIC_SERVER_URL || 'https://trivoxogh.com'
 
-/** Renders a JSON-LD <script>. Data is trusted (built server-side from our own content). */
+/**
+ * Serialise JSON-LD safely for embedding in a <script> tag. JSON.stringify does
+ * not escape `<`, so CMS-authored fields (titles, descriptions) containing
+ * `</script>` could otherwise break out of the script element. Replacing the
+ * angle brackets and ampersand with their JSON \uXXXX escapes closes that XSS
+ * vector while keeping the JSON valid for consumers.
+ *
+ * String.fromCharCode(92) is the backslash — used directly to avoid any
+ * source-level backslash-escaping ambiguity.
+ */
+function serializeJsonLd(data: Record<string, unknown>): string {
+  const bs = String.fromCharCode(92)
+  return JSON.stringify(data)
+    .split('<')
+    .join(bs + 'u003c')
+    .split('>')
+    .join(bs + 'u003e')
+    .split('&')
+    .join(bs + 'u0026')
+}
+
+/** Renders a JSON-LD <script> with the payload safely escaped. */
 export function JsonLd({ data }: { data: Record<string, unknown> }) {
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  return (
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(data) }} />
+  )
 }
 
 export function organizationSchema(): Record<string, unknown> {
@@ -20,7 +43,12 @@ export function organizationSchema(): Record<string, unknown> {
     slogan: BRAND.tagline,
     telephone: CONTACT.primaryPhone,
     email: CONTACT.email,
-    address: { '@type': 'PostalAddress', streetAddress: CONTACT.address, addressLocality: 'Accra', addressCountry: 'GH' },
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: CONTACT.address,
+      addressLocality: 'Accra',
+      addressCountry: 'GH',
+    },
     areaServed: 'Ghana',
     sameAs: [SOCIALS.instagram, SOCIALS.linkedin],
   }
@@ -37,11 +65,20 @@ export function experienceSchema(exp: Experience): Record<string, unknown> {
       '@type': 'Offer',
       price: exp.priceFrom,
       priceCurrency: 'GHS',
-      availability: exp.badge === 'Limited' ? 'https://schema.org/LimitedAvailability' : 'https://schema.org/InStock',
+      availability:
+        exp.badge === 'Limited'
+          ? 'https://schema.org/LimitedAvailability'
+          : 'https://schema.org/InStock',
       url: `${BASE}/experiences/${exp.slug}`,
     },
     ...(exp.rating != null
-      ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: exp.rating, reviewCount: exp.reviews ?? 0 } }
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: exp.rating,
+            reviewCount: exp.reviews ?? 0,
+          },
+        }
       : {}),
   }
 }

@@ -32,6 +32,16 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: contentSecurityPolicy,
   },
+  // Force HTTPS for two years, including subdomains, and allow browser-preload
+  // list inclusion. Set explicitly so it doesn't depend on a platform default.
+  ...(isDevelopment
+    ? []
+    : [
+        {
+          key: 'Strict-Transport-Security',
+          value: 'max-age=63072000; includeSubDomains; preload',
+        },
+      ]),
   {
     key: 'X-Content-Type-Options',
     value: 'nosniff',
