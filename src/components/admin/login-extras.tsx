@@ -13,3 +13,19 @@ export function LoginIntro() {
     </div>
   )
 }
+
+/**
+ * Rendered below the login form (`admin.components.afterLogin`) — a quiet
+ * footer with a route back to the public site and a staff-only note.
+ */
+export function LoginFooter() {
+  return (
+    <div className="tvx-login-footer">
+      {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- hard nav out of the admin to the public site */}
+      <a href="/" className="tvx-login-footer__link">
+        ← Back to trivoxogh.com
+      </a>
+      <p className="tvx-login-footer__note">Authorised staff only</p>
+    </div>
+  )
+}

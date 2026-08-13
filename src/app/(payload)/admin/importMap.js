@@ -24,6 +24,7 @@ import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0
 import { UserAvatar as UserAvatar_3e56ab97813c76ec4dca10d8c98293b3 } from '../../../components/admin/user-avatar'
 import { AdminIcon as AdminIcon_2dac2c04795ce60b8dff94e714211602 } from '../../../components/admin/dashboard-stats'
 import { AdminLogo as AdminLogo_2dac2c04795ce60b8dff94e714211602 } from '../../../components/admin/dashboard-stats'
+import { LoginFooter as LoginFooter_c9f160f2a4a097b54691f8f9de4fe177 } from '../../../components/admin/login-extras'
 import { NotificationBell as NotificationBell_30f6ed48d1f6793e07a5e73de280de4d } from '../../../components/admin/notification-bell'
 import { CheckInNavLink as CheckInNavLink_d3aef865c6ea6f811bbed1456dc4e212 } from '../../../components/admin/check-in-nav'
 import { TwoFactorNavLink as TwoFactorNavLink_9e57831d7f8254ee1685e050a00507c2 } from '../../../components/admin/two-factor/nav'
@@ -63,6 +64,7 @@ export const importMap = {
   "/components/admin/user-avatar#UserAvatar": UserAvatar_3e56ab97813c76ec4dca10d8c98293b3,
   "/components/admin/dashboard-stats#AdminIcon": AdminIcon_2dac2c04795ce60b8dff94e714211602,
   "/components/admin/dashboard-stats#AdminLogo": AdminLogo_2dac2c04795ce60b8dff94e714211602,
+  "/components/admin/login-extras#LoginFooter": LoginFooter_c9f160f2a4a097b54691f8f9de4fe177,
   "/components/admin/notification-bell#NotificationBell": NotificationBell_30f6ed48d1f6793e07a5e73de280de4d,
   "/components/admin/check-in-nav#CheckInNavLink": CheckInNavLink_d3aef865c6ea6f811bbed1456dc4e212,
   "/components/admin/two-factor/nav#TwoFactorNavLink": TwoFactorNavLink_9e57831d7f8254ee1685e050a00507c2,

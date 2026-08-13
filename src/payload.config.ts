@@ -85,6 +85,7 @@ export default buildConfig({
         '/components/admin/login-extras#LoginIntro',
         '/components/admin/two-factor/login#TwoFactorLogin',
       ],
+      afterLogin: ['/components/admin/login-extras#LoginFooter'],
       providers: ['/components/admin/two-factor/gate#TwoFactorGate'],
     },
   },
