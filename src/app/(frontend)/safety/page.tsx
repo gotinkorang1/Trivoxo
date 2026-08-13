@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { ShieldCheck, Users, MapPinned, HeartPulse, Backpack } from 'lucide-react'
 import { Container } from '@/components/ui/container'
+import { PageHero } from '@/components/site/page-hero'
 import { ButtonLink } from '@/components/ui/button'
 
 export const metadata: Metadata = {
@@ -17,17 +18,15 @@ const PRINCIPLES = [
 
 export default function SafetyPage() {
   return (
-    <Container className="py-12 sm:py-16">
-      <header className="max-w-2xl">
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand-link">Safety</p>
-        <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Adventure with confidence</h1>
-        <p className="mt-3 text-text-secondary">
-          Great experiences should also be well-run and safe. Here’s how we plan and coordinate every trip so you
-          can focus on enjoying it.
-        </p>
-      </header>
-
-      <div className="mt-10 grid gap-5 sm:grid-cols-2">
+    <>
+      <PageHero
+        eyebrow="Safety"
+        title="Adventure with confidence"
+        description="Great experiences should also be well-run and safe. Here’s how we plan and coordinate every trip so you can focus on enjoying it."
+        image={{ src: '/images/avatime-volta.jpg', alt: 'The Avatime hills in the Volta Region' }}
+      />
+      <Container className="py-12 sm:py-16">
+        <div className="grid gap-5 sm:grid-cols-2">
         {PRINCIPLES.map((p) => (
           <div key={p.title} className="flex gap-4 rounded-card border border-border bg-surface-elevated p-6">
             <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-brand-accent-soft text-brand-accent">
@@ -54,6 +53,7 @@ export default function SafetyPage() {
           Talk to us about your trip
         </ButtonLink>
       </div>
-    </Container>
+      </Container>
+    </>
   )
 }

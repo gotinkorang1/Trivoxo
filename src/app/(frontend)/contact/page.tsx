@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Phone, Mail, MapPin, MessageCircle, Instagram, Linkedin } from 'lucide-react'
 import { Container } from '@/components/ui/container'
+import { PageHero } from '@/components/site/page-hero'
 import { ButtonLink } from '@/components/ui/button'
 import { CONTACT, SOCIALS, whatsappLink } from '@/lib/constants'
 
@@ -12,16 +13,15 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   const wa = whatsappLink('Hi Trivoxo, I have a question about your experiences.')
   return (
-    <Container className="py-12 sm:py-16">
-      <header className="mb-10 max-w-2xl">
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand-link">Contact</p>
-        <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Let’s talk</h1>
-        <p className="mt-2 text-text-secondary">
-          Questions, bookings or a big idea for an event? We’re happy to help — WhatsApp is usually fastest.
-        </p>
-      </header>
-
-      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+    <>
+      <PageHero
+        eyebrow="Contact"
+        title="Let’s talk"
+        description="Questions, bookings or a big idea for an event? We’re happy to help — WhatsApp is usually fastest."
+        image={{ src: '/images/akosombo-riverfront.jpg', alt: 'The Akosombo riverfront on Volta Lake' }}
+      />
+      <Container className="py-12 sm:py-16">
+        <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <div className="grid gap-4 sm:grid-cols-2">
           <Card icon={Phone} title="Call us" value={CONTACT.primaryPhone} href={`tel:${CONTACT.primaryPhone}`} />
           <Card icon={MessageCircle} title="WhatsApp" value="Chat with us" href={wa} external />
@@ -46,7 +46,8 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
-    </Container>
+      </Container>
+    </>
   )
 }
 

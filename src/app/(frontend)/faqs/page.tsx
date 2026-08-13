@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { ChevronDown } from 'lucide-react'
 import { Container } from '@/components/ui/container'
+import { PageHero } from '@/components/site/page-hero'
 import { ButtonLink } from '@/components/ui/button'
 
 export const metadata: Metadata = {
@@ -49,13 +50,15 @@ const FAQS: { q: string; a: string }[] = [
 
 export default function FaqsPage() {
   return (
-    <Container className="max-w-3xl py-12 sm:py-16">
-      <header className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand-link">FAQs</p>
-        <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Frequently asked questions</h1>
-      </header>
-
-      <div className="divide-y divide-border rounded-card border border-border bg-surface-elevated">
+    <>
+      <PageHero
+        eyebrow="FAQs"
+        title="Frequently asked questions"
+        description="Answers to common questions about booking, pricing, groups, safety and more."
+        image={{ src: '/images/aburi-hills.avif', alt: 'The Aburi hills in the Eastern Region' }}
+      />
+      <Container className="max-w-3xl py-12 sm:py-16">
+        <div className="divide-y divide-border rounded-card border border-border bg-surface-elevated">
         {FAQS.map((item) => (
           <details key={item.q} className="group px-5">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-medium text-text-primary marker:hidden">
@@ -71,6 +74,7 @@ export default function FaqsPage() {
         <p className="font-semibold text-text-primary">Still have a question?</p>
         <ButtonLink href="/contact">Get in touch</ButtonLink>
       </div>
-    </Container>
+      </Container>
+    </>
   )
 }

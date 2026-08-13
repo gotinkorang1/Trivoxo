@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Luggage } from 'lucide-react'
 import { Container } from '@/components/ui/container'
+import { PageHero } from '@/components/site/page-hero'
 import { MyTripsForm } from '@/components/trips/my-trips-form'
 
 export const metadata: Metadata = {
@@ -12,18 +12,15 @@ export const metadata: Metadata = {
 
 export default function MyTripsPage() {
   return (
-    <Container className="max-w-xl py-14 sm:py-20">
-      <header className="text-center">
-        <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-brand-primary-soft text-brand-primary">
-          <Luggage className="size-6" />
-        </span>
-        <h1 className="mt-4 text-3xl font-semibold sm:text-4xl">My Trips</h1>
-        <p className="mt-2 text-text-secondary">
-          Enter your booking reference and email to view and manage your trip.
-        </p>
-      </header>
-
-      <div className="mt-8 rounded-card border border-border bg-surface-elevated p-6 sm:p-8">
+    <>
+      <PageHero
+        eyebrow="My Trips"
+        title="My Trips"
+        description="Enter your booking reference and email to view and manage your trip."
+        image={{ src: '/images/car-rental.jpg', alt: 'A Trivoxo car ready for pickup' }}
+      />
+      <Container className="max-w-xl py-14 sm:py-20">
+        <div className="rounded-card border border-border bg-surface-elevated p-6 sm:p-8">
         <MyTripsForm />
       </div>
 
@@ -34,6 +31,7 @@ export default function MyTripsPage() {
         </Link>{' '}
         and we’ll help.
       </p>
-    </Container>
+      </Container>
+    </>
   )
 }
