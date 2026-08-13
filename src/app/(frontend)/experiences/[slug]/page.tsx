@@ -25,7 +25,7 @@ import type { Experience } from '@/lib/data/experiences'
 import { AvailabilityCalendar } from '@/components/experiences/availability-calendar'
 import { ExperienceCard } from '@/components/experiences/experience-card'
 import { GroupPricingTable } from '@/components/experiences/group-pricing'
-import { JsonLd, experienceSchema } from '@/components/seo/structured-data'
+import { JsonLd, experienceSchema, breadcrumbSchema } from '@/components/seo/structured-data'
 import { Badge } from '@/components/ui/badge'
 import { ButtonLink } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
@@ -106,6 +106,13 @@ export default async function ExperienceDetailPage({
   return (
     <article className="pb-24 lg:pb-0">
       <JsonLd data={experienceSchema(experience)} />
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: 'Home', path: '/' },
+          { name: 'Experiences', path: '/experiences' },
+          { name: experience.name, path: `/experiences/${experience.slug}` },
+        ])}
+      />
 
       <header className="relative overflow-hidden bg-brand-navy text-white">
         <div className="soft-grid absolute inset-0 opacity-40" />

@@ -6,6 +6,7 @@ import { ChevronRight, MapPin } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { ButtonLink } from '@/components/ui/button'
 import { ExperienceCard } from '@/components/experiences/experience-card'
+import { JsonLd, breadcrumbSchema } from '@/components/seo/structured-data'
 import {
   getAllDestinations,
   getDestinationBySlug,
@@ -59,6 +60,13 @@ export default async function DestinationDetailPage({
 
   return (
     <article>
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: 'Home', path: '/' },
+          { name: 'Destinations', path: '/destinations' },
+          { name: dest.title, path: `/destinations/${dest.slug}` },
+        ])}
+      />
       {/* Hero */}
       <div className="relative overflow-hidden text-white" style={{ background: dest.gradient }}>
         {dest.image && (

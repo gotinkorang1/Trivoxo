@@ -3,6 +3,7 @@ import { ChevronDown } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { PageHero } from '@/components/site/page-hero'
 import { ButtonLink } from '@/components/ui/button'
+import { JsonLd, faqSchema, breadcrumbSchema } from '@/components/seo/structured-data'
 
 export const metadata: Metadata = {
   title: 'FAQs',
@@ -51,6 +52,13 @@ const FAQS: { q: string; a: string }[] = [
 export default function FaqsPage() {
   return (
     <>
+      <JsonLd data={faqSchema(FAQS)} />
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: 'Home', path: '/' },
+          { name: 'FAQs', path: '/faqs' },
+        ])}
+      />
       <PageHero
         eyebrow="FAQs"
         title="Frequently asked questions"

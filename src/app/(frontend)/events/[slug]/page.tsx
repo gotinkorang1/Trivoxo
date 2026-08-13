@@ -7,7 +7,7 @@ import { Container } from '@/components/ui/container'
 import { TicketCheckoutCard } from '@/components/events/ticket-checkout-card'
 import { getAllEvents, getEventBySlug } from '@/lib/payload/events'
 import { formatDateTime } from '@/lib/format'
-import { JsonLd, eventSchema } from '@/components/seo/structured-data'
+import { JsonLd, eventSchema, breadcrumbSchema } from '@/components/seo/structured-data'
 import { getEventStatus } from '@/lib/event-status'
 
 export const revalidate = 60
@@ -56,6 +56,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   return (
     <article>
       <JsonLd data={eventSchema(event)} />
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: 'Home', path: '/' },
+          { name: 'Events', path: '/events' },
+          { name: event.title, path: `/events/${event.slug}` },
+        ])}
+      />
       <div className="relative overflow-hidden text-white" style={{ background: event.gradient }}>
         {event.image && (
           <Image

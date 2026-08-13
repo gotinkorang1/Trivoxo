@@ -22,6 +22,8 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react'
+import type { Metadata } from 'next'
+import { JsonLd, websiteSchema } from '@/components/seo/structured-data'
 import { HeroCarousel } from '@/components/home/hero-carousel'
 import { ExperienceCard } from '@/components/experiences/experience-card'
 import { Button, ButtonLink } from '@/components/ui/button'
@@ -65,6 +67,13 @@ const ICONS: Record<string, LucideIcon> = {
 
 export const revalidate = 60
 
+// The root layout's relative canonical ('./') resolves to '/index' on the
+// homepage; pin it to the site root explicitly.
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+  openGraph: { url: '/' },
+}
+
 export default async function HomePage() {
   const [featured, allExperiences, destinations, events, articles, reviews, reviewStats] =
     await Promise.all([
@@ -79,6 +88,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={websiteSchema()} />
       <HeroCarousel experienceCount={allExperiences.length} />
       <TrustStrip
         experienceCount={allExperiences.length}

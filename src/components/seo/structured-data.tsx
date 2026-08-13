@@ -37,20 +37,108 @@ export function organizationSchema(): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
     '@type': 'TravelAgency',
+    '@id': `${BASE}/#organization`,
     name: `${BRAND.name} Limited`,
+    legalName: `${BRAND.name} Limited Company`,
     description: BRAND.description,
     url: BASE,
     slogan: BRAND.tagline,
-    telephone: CONTACT.primaryPhone,
+    logo: `${BASE}/logo/colored.webp`,
+    image: `${BASE}/icon-512.png`,
+    telephone: `+233${CONTACT.primaryPhone.replace(/^0/, '')}`,
     email: CONTACT.email,
+    priceRange: '$$',
     address: {
       '@type': 'PostalAddress',
       streetAddress: CONTACT.address,
       addressLocality: 'Accra',
+      addressRegion: 'Greater Accra',
       addressCountry: 'GH',
     },
-    areaServed: 'Ghana',
-    sameAs: [SOCIALS.instagram, SOCIALS.linkedin],
+    areaServed: { '@type': 'Country', name: 'Ghana' },
+    foundingLocation: { '@type': 'Place', name: 'Accra, Ghana' },
+    contactPoint: [
+      {
+        '@type': 'ContactPoint',
+        contactType: 'customer service',
+        telephone: `+233${CONTACT.primaryPhone.replace(/^0/, '')}`,
+        email: CONTACT.email,
+        areaServed: 'GH',
+        availableLanguage: ['en'],
+      },
+    ],
+    knowsAbout: [
+      'Ghana tours',
+      'travel and tourism',
+      'event planning',
+      'corporate retreats',
+      'airport transfers',
+      'ticketing',
+    ],
+    sameAs: [SOCIALS.instagram, SOCIALS.tiktok, SOCIALS.linkedin],
+  }
+}
+
+/** WebSite schema with a Sitelinks Search Box action (Google/Bing). */
+export function websiteSchema(): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${BASE}/#website`,
+    url: BASE,
+    name: BRAND.name,
+    description: BRAND.description,
+    inLanguage: 'en-GH',
+    publisher: { '@id': `${BASE}/#organization` },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${BASE}/experiences?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  }
+}
+
+/** BreadcrumbList — pass ordered crumbs from home to the current page. */
+export function breadcrumbSchema(items: { name: string; path: string }[]): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: `${BASE}${item.path}`,
+    })),
+  }
+}
+
+/** Service schema for a travel-service page (airport transfers, etc.). */
+export function serviceSchema(s: { title: string; blurb: string; slug: string }): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: s.title,
+    serviceType: s.title,
+    description: s.blurb,
+    url: `${BASE}/travel-services/${s.slug}`,
+    areaServed: { '@type': 'Country', name: 'Ghana' },
+    provider: { '@id': `${BASE}/#organization` },
+  }
+}
+
+/** FAQPage — rich results for a question/answer list. */
+export function faqSchema(faqs: { q: string; a: string }[]): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
   }
 }
 

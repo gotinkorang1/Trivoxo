@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter, Fraunces } from 'next/font/google'
 import Script from 'next/script'
 import React from 'react'
@@ -60,12 +60,26 @@ export const metadata: Metadata = {
     template: `%s — ${BRAND.name}`,
   },
   description: BRAND.description,
+  applicationName: BRAND.name,
+  manifest: '/manifest.webmanifest',
   icons: {
-    icon: [{ url: FAVICON.light, type: 'image/png' }],
+    icon: [
+      { url: FAVICON.light, type: 'image/png' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
     shortcut: FAVICON.light,
-    apple: FAVICON.light,
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   alternates: { canonical: './' },
+  formatDetection: { telephone: true, address: false, email: false },
+  // Search Console (Google) + Bing Webmaster Tools — set the codes as env vars.
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+    other: process.env.BING_SITE_VERIFICATION
+      ? { 'msvalidate.01': process.env.BING_SITE_VERIFICATION }
+      : {},
+  },
   openGraph: {
     title: `${BRAND.name} — ${BRAND.headline}`,
     description: BRAND.description,
@@ -88,6 +102,14 @@ export const metadata: Metadata = {
     description: BRAND.description,
     images: ['/og'],
   },
+}
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f4f6f8' },
+    { media: '(prefers-color-scheme: dark)', color: '#0e1a27' },
+  ],
+  colorScheme: 'light dark',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

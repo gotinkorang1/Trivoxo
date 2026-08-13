@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { ServiceRequestForm } from '@/components/forms/service-request-form'
+import { JsonLd, serviceSchema, breadcrumbSchema } from '@/components/seo/structured-data'
 import { TRAVEL_SERVICES, getServiceBySlug } from '@/lib/data/travel-services'
 
 export function generateStaticParams() {
@@ -33,6 +34,14 @@ export default async function TravelServicePage({
 
   return (
     <>
+      <JsonLd data={serviceSchema(s)} />
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: 'Home', path: '/' },
+          { name: 'Travel Services', path: '/travel-services' },
+          { name: s.title, path: `/travel-services/${s.slug}` },
+        ])}
+      />
       <section className="relative overflow-hidden text-white" style={{ background: s.gradient }}>
         <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-black/15" />
         <Container className="relative py-14 sm:py-16">

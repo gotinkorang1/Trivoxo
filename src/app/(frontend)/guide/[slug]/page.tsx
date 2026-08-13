@@ -6,7 +6,7 @@ import { ChevronRight, Clock, ArrowRight } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { getAllArticles, getArticleBySlug } from '@/lib/payload/guide'
 import { formatDate } from '@/lib/format'
-import { JsonLd, articleSchema } from '@/components/seo/structured-data'
+import { JsonLd, articleSchema, breadcrumbSchema } from '@/components/seo/structured-data'
 
 export const revalidate = 60
 
@@ -56,6 +56,13 @@ export default async function GuideArticlePage({ params }: { params: Promise<{ s
   return (
     <article>
       <JsonLd data={articleSchema(article)} />
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: 'Home', path: '/' },
+          { name: 'Ghana Guide', path: '/guide' },
+          { name: article.title, path: `/guide/${article.slug}` },
+        ])}
+      />
       {/* Hero */}
       <div className="relative overflow-hidden text-white" style={{ background: article.gradient }}>
         {article.image && (
