@@ -22,6 +22,7 @@ export default async function DestinationsPage() {
         eyebrow="Destinations"
         title="Explore Ghana, one rhythm at a time"
         description="Follow the capital’s pulse, the coast’s stories, highland waterfalls and slow lakeside escapes."
+        image={{ src: '/images/boti-falls-umbrella-rock.jpg', alt: 'Umbrella Rock above Boti Falls in the Eastern Region' }}
       />
       <Container className="py-16 sm:py-20">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

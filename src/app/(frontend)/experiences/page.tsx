@@ -42,6 +42,7 @@ export default async function ExperiencesPage({ searchParams }: { searchParams: 
         eyebrow="Experiences"
         title={activeCategory ? activeCategory.title : 'Find your next Ghana story'}
         description="Browse curated tours, outdoor adventures, culture, cruises and premium escapes across Ghana."
+        image={{ src: '/images/amedzofe-mount-gemi.jpg', alt: 'The highlands around Amedzofe and Mount Gemi in the Volta Region' }}
       >
         <p className="inline-flex rounded-full border border-white/18 bg-white/10 px-4 py-2 text-sm font-semibold text-white/82 backdrop-blur-sm">
           {results.length} experience{results.length === 1 ? '' : 's'}

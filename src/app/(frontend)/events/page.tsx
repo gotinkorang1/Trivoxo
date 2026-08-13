@@ -29,6 +29,7 @@ export default async function EventsPage() {
         eyebrow="Events"
         title="Good energy deserves a date"
         description="Adventure weekends, sunset sessions and memorable Ghana moments — with clear dates and honest availability."
+        image={{ src: '/images/accra-night.jpg', alt: 'Accra lit up at night' }}
       />
       <Container className="py-16 sm:py-20">
         <section aria-labelledby="upcoming-events">

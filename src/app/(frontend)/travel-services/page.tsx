@@ -19,6 +19,7 @@ export default function TravelServicesPage() {
         eyebrow="Travel services"
         title="Every detail, already handled"
         description="Transfers, ticketing, accommodation and rentals — tell us what you need and travel with less friction."
+        image={{ src: '/images/airport-transfer.jpg', alt: 'An airport transfer vehicle ready for pickup' }}
       />
       <Container className="py-16 sm:py-20">
         <div className="grid gap-6 sm:grid-cols-2">
