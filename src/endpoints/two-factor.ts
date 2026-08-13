@@ -13,8 +13,21 @@ import {
   totpKeyUri,
   verifyTotp,
 } from '../lib/two-factor'
+import {
+  checkRateLimit,
+  rateLimitMessage,
+  rateLimitResponseHeaders,
+  type RateLimitPolicyName,
+} from '../lib/rate-limit'
 
 const USERS = 'users'
+
+/** Returns a 429 response if the caller is over the limit, else null. */
+async function rateLimited(req: PayloadRequest, policy: RateLimitPolicyName): Promise<Response | null> {
+  const result = await checkRateLimit(policy, req.headers)
+  if (result.allowed) return null
+  return json({ error: rateLimitMessage(result) }, 429, rateLimitResponseHeaders(result))
+}
 
 type UserRecord = {
   id: string | number
@@ -77,6 +90,8 @@ const login: Endpoint = {
   path: '/two-factor/login',
   method: 'post',
   handler: async (req) => {
+    const limited = await rateLimited(req, 'twoFactorLogin')
+    if (limited) return limited
     await addDataAndFileToRequest(req)
     const { email, password } = (req.data ?? {}) as { email?: string; password?: string }
     if (!email || !password) return json({ error: 'Email and password are required.' }, 400)
@@ -106,6 +121,8 @@ const verify: Endpoint = {
   path: '/two-factor/verify',
   method: 'post',
   handler: async (req) => {
+    const limited = await rateLimited(req, 'twoFactorVerify')
+    if (limited) return limited
     await addDataAndFileToRequest(req)
     const { challenge, code } = (req.data ?? {}) as { challenge?: string; code?: string }
     if (!challenge || !code) return json({ error: 'Missing code.' }, 400)
@@ -148,6 +165,8 @@ const enrollVerify: Endpoint = {
   method: 'post',
   handler: async (req) => {
     if (!req.user) return json({ error: 'Unauthorized' }, 401)
+    const limited = await rateLimited(req, 'twoFactorVerify')
+    if (limited) return limited
     await addDataAndFileToRequest(req)
     const { code } = (req.data ?? {}) as { code?: string }
     const user = await loadUser(req, req.user.id)
@@ -178,6 +197,8 @@ const disable: Endpoint = {
   method: 'post',
   handler: async (req) => {
     if (!req.user) return json({ error: 'Unauthorized' }, 401)
+    const limited = await rateLimited(req, 'twoFactorVerify')
+    if (limited) return limited
     await addDataAndFileToRequest(req)
     const { code } = (req.data ?? {}) as { code?: string }
     const user = await loadUser(req, req.user.id)
