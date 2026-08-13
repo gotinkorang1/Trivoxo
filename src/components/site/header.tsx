@@ -25,18 +25,36 @@ export function Header() {
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 
-  // Auto-hide on scroll down, reveal on scroll up or near the top.
+  // Auto-hide on scroll down, reveal on scroll up or near the top. Publish the
+  // header's live visible height as --header-h so sticky sub-navs can track it.
   useEffect(() => {
     lastY.current = window.scrollY
+    let isHidden = false
+    function publishOffset() {
+      const el = headerRef.current
+      const offset = isHidden || !el ? 0 : el.offsetHeight
+      document.documentElement.style.setProperty('--header-h', `${offset}px`)
+    }
     function onScroll() {
       const y = window.scrollY
       setScrolled(y > 8)
       const goingDown = y > lastY.current
-      setHidden(goingDown && y > HIDE_AFTER)
+      isHidden = goingDown && y > HIDE_AFTER
+      setHidden(isHidden)
+      publishOffset()
       lastY.current = y
     }
+    function onResize() {
+      publishOffset()
+    }
+    publishOffset()
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    window.addEventListener('resize', onResize)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onResize)
+      document.documentElement.style.removeProperty('--header-h')
+    }
   }, [])
 
   // Close the mobile menu on Escape.

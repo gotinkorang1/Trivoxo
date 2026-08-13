@@ -75,6 +75,7 @@ export default buildConfig({
         '/components/admin/notification-bell#NotificationBell',
         '/components/admin/check-in-nav#CheckInNavLink',
       ],
+      beforeLogin: ['/components/admin/login-extras#LoginIntro'],
     },
   },
   collections: [

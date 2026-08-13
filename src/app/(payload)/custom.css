@@ -2826,3 +2826,106 @@ body {
 .localizer {
   display: none;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Login screen — branded backdrop + elevated form card (2026-08-13)
+   Replaces the flat empty canvas with an intentional, on-brand sign-in.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.login.template-minimal {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1.25rem;
+  background:
+    radial-gradient(circle at 14% 12%, color-mix(in srgb, #f97316 24%, transparent), transparent 42%),
+    radial-gradient(circle at 88% 90%, color-mix(in srgb, #b7791f 20%, transparent), transparent 46%),
+    linear-gradient(150deg, #0e1a27 0%, #16273a 55%, #0a1420 100%);
+}
+
+/* faint grid texture, faded toward the edges */
+.login.template-minimal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(color-mix(in srgb, #ffffff 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, #ffffff 5%, transparent) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask-image: radial-gradient(circle at 50% 38%, #000, transparent 78%);
+  mask-image: radial-gradient(circle at 50% 38%, #000, transparent 78%);
+}
+
+/* the centred wrap becomes the form card */
+.login.template-minimal .template-minimal__wrap {
+  width: 100%;
+  max-width: 27rem;
+  margin: 0;
+  padding: 2.25rem 2rem 2rem;
+  background: var(--tvx-surface);
+  border: 1px solid var(--tvx-border);
+  border-radius: 20px;
+  box-shadow: var(--tvx-shadow-md), 0 0 0 1px #ffffff0a;
+  animation: tvx-login-rise var(--tvx-motion-slow, 560ms) var(--tvx-ease-out, ease-out) both;
+}
+
+@keyframes tvx-login-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* centre the brand mark at the top of the card */
+.login.template-minimal .login__brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+.login.template-minimal .tvx-admin-brand {
+  flex-direction: column;
+  gap: 8px;
+}
+.login.template-minimal .tvx-admin-brand__logo {
+  width: 152px;
+}
+.login.template-minimal .tvx-admin-brand__label {
+  padding-left: 0;
+  border-left: 0;
+}
+
+/* welcome intro (beforeLogin component) */
+.tvx-login-intro {
+  text-align: center;
+  margin: 1rem 0 1.5rem;
+}
+.tvx-login-intro__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--tvx-text);
+}
+.tvx-login-intro__subtitle {
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--tvx-text-muted);
+}
+
+/* full-width, centred submit for a balanced card */
+.login.template-minimal .login__form { width: 100%; }
+.login.template-minimal .form-submit { margin-top: 0.5rem; }
+.login.template-minimal .form-submit .btn {
+  width: 100%;
+  margin: 0;
+  justify-content: center;
+}
+.login.template-minimal .login__form .btn__content { justify-content: center; }
+
+@media (max-width: 480px) {
+  .login.template-minimal .template-minimal__wrap {
+    padding: 1.75rem 1.35rem 1.5rem;
+    border-radius: 16px;
+  }
+}

@@ -163,7 +163,8 @@ export default async function ExperienceDetailPage({
 
       <nav
         aria-label="On this page"
-        className="sticky top-[4.5rem] z-30 border-b border-border bg-background/92 shadow-sm backdrop-blur-xl lg:top-[6.75rem]"
+        style={{ top: 'var(--header-h, 4.5rem)' }}
+        className="sticky z-30 border-b border-border bg-background/92 shadow-sm backdrop-blur-xl transition-[top] duration-300"
       >
         <Container className="flex gap-1 overflow-x-auto py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {[
