@@ -1,8 +1,9 @@
 import type { ComponentType } from 'react'
 import Link from 'next/link'
-import { ArrowRight, ArrowUp, Instagram, Linkedin, Mail, MessageCircle, Phone, MapPin } from 'lucide-react'
+import { ArrowRight, Instagram, Linkedin, Mail, MessageCircle, Phone, MapPin } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { Wordmark } from '@/components/site/wordmark'
+import { BackToTop } from '@/components/site/back-to-top'
 import { BRAND, CONTACT, SOCIALS, whatsappLink } from '@/lib/constants'
 
 /** TikTok has no lucide brand icon, so we inline a minimal glyph. */
@@ -136,13 +137,7 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-5">
             <p>{BRAND.domain}</p>
-            <a
-              href="#top"
-              className="group inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 font-medium text-white/70 transition hover:border-brand-secondary hover:text-brand-secondary"
-            >
-              Back to top
-              <ArrowUp className="size-3.5 transition-transform group-hover:-translate-y-0.5" aria-hidden="true" />
-            </a>
+            <BackToTop />
           </div>
         </div>
       </Container>
