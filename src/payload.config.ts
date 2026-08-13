@@ -37,6 +37,7 @@ import { TravelServiceRequests } from './collections/TravelServiceRequests'
 // Globals
 import { SiteSettings } from './globals/SiteSettings'
 import { getTrustedOrigins } from './lib/trusted-origins'
+import { twoFactorEndpoints } from './endpoints/two-factor'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -70,12 +71,21 @@ export default buildConfig({
           Component: '/components/admin/check-in-view#CheckInView',
           path: '/check-in',
         },
+        security: {
+          Component: '/components/admin/two-factor/view#TwoFactorSecurityView',
+          path: '/security',
+        },
       },
       afterNavLinks: [
         '/components/admin/notification-bell#NotificationBell',
         '/components/admin/check-in-nav#CheckInNavLink',
+        '/components/admin/two-factor/nav#TwoFactorNavLink',
       ],
-      beforeLogin: ['/components/admin/login-extras#LoginIntro'],
+      beforeLogin: [
+        '/components/admin/login-extras#LoginIntro',
+        '/components/admin/two-factor/login#TwoFactorLogin',
+      ],
+      providers: ['/components/admin/two-factor/gate#TwoFactorGate'],
     },
   },
   collections: [
@@ -109,6 +119,7 @@ export default buildConfig({
     AdminNotifications,
   ],
   globals: [SiteSettings],
+  endpoints: twoFactorEndpoints,
   plugins: cloudinaryEnabled
     ? [
         cloudinaryStorage({

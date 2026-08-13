@@ -26,9 +26,13 @@ import { AdminIcon as AdminIcon_2dac2c04795ce60b8dff94e714211602 } from '../../.
 import { AdminLogo as AdminLogo_2dac2c04795ce60b8dff94e714211602 } from '../../../components/admin/dashboard-stats'
 import { NotificationBell as NotificationBell_30f6ed48d1f6793e07a5e73de280de4d } from '../../../components/admin/notification-bell'
 import { CheckInNavLink as CheckInNavLink_d3aef865c6ea6f811bbed1456dc4e212 } from '../../../components/admin/check-in-nav'
+import { TwoFactorNavLink as TwoFactorNavLink_9e57831d7f8254ee1685e050a00507c2 } from '../../../components/admin/two-factor/nav'
 import { LoginIntro as LoginIntro_c9f160f2a4a097b54691f8f9de4fe177 } from '../../../components/admin/login-extras'
+import { TwoFactorLogin as TwoFactorLogin_b66f1cdd2fe8a10920ea8411b5b2aa41 } from '../../../components/admin/two-factor/login'
+import { TwoFactorGate as TwoFactorGate_2f7339197d82d490782683c6a134aabb } from '../../../components/admin/two-factor/gate'
 import { AdminDashboard as AdminDashboard_2dac2c04795ce60b8dff94e714211602 } from '../../../components/admin/dashboard-stats'
 import { CheckInView as CheckInView_ed35424729df7c5e36a744ceb905850e } from '../../../components/admin/check-in-view'
+import { TwoFactorSecurityView as TwoFactorSecurityView_11e60d125fa59ef0f3e2bd36c7247102 } from '../../../components/admin/two-factor/view'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -61,8 +65,12 @@ export const importMap = {
   "/components/admin/dashboard-stats#AdminLogo": AdminLogo_2dac2c04795ce60b8dff94e714211602,
   "/components/admin/notification-bell#NotificationBell": NotificationBell_30f6ed48d1f6793e07a5e73de280de4d,
   "/components/admin/check-in-nav#CheckInNavLink": CheckInNavLink_d3aef865c6ea6f811bbed1456dc4e212,
+  "/components/admin/two-factor/nav#TwoFactorNavLink": TwoFactorNavLink_9e57831d7f8254ee1685e050a00507c2,
   "/components/admin/login-extras#LoginIntro": LoginIntro_c9f160f2a4a097b54691f8f9de4fe177,
+  "/components/admin/two-factor/login#TwoFactorLogin": TwoFactorLogin_b66f1cdd2fe8a10920ea8411b5b2aa41,
+  "/components/admin/two-factor/gate#TwoFactorGate": TwoFactorGate_2f7339197d82d490782683c6a134aabb,
   "/components/admin/dashboard-stats#AdminDashboard": AdminDashboard_2dac2c04795ce60b8dff94e714211602,
   "/components/admin/check-in-view#CheckInView": CheckInView_ed35424729df7c5e36a744ceb905850e,
+  "/components/admin/two-factor/view#TwoFactorSecurityView": TwoFactorSecurityView_11e60d125fa59ef0f3e2bd36c7247102,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

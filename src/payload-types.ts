@@ -1115,6 +1115,18 @@ export interface User {
    * New bookings, reviews and enquiries relevant to your role. In-app alerts always show regardless.
    */
   emailAlerts?: boolean | null;
+  twoFactorEnabled?: boolean | null;
+  twoFactorSecret?: string | null;
+  twoFactorPendingSecret?: string | null;
+  twoFactorRecoveryCodes?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -2184,6 +2196,10 @@ export interface UsersSelect<T extends boolean = true> {
   avatar?: T;
   roles?: T;
   emailAlerts?: T;
+  twoFactorEnabled?: T;
+  twoFactorSecret?: T;
+  twoFactorPendingSecret?: T;
+  twoFactorRecoveryCodes?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

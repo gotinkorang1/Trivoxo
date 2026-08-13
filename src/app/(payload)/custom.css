@@ -2929,3 +2929,189 @@ body {
     border-radius: 16px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Two-factor authentication — login step, enrolment gate & settings
+   ═══════════════════════════════════════════════════════════════════════════ */
+.tvx-2fa__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  width: 100%;
+}
+.tvx-2fa__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--tvx-text-muted);
+}
+.tvx-2fa__input {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.95rem;
+  color: var(--tvx-text);
+  background: var(--tvx-surface-subtle);
+  border: 1px solid var(--tvx-border);
+  border-radius: 10px;
+  outline: none;
+  transition: border-color var(--tvx-motion-fast, 150ms), box-shadow var(--tvx-motion-fast, 150ms);
+}
+.tvx-2fa__input:focus {
+  border-color: var(--tvx-orange);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tvx-orange) 22%, transparent);
+}
+.tvx-2fa__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 1.1rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--tvx-orange);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background var(--tvx-motion-fast, 150ms), transform var(--tvx-motion-fast, 150ms);
+}
+.tvx-2fa__btn:hover:not(:disabled) {
+  background: var(--tvx-orange-strong);
+  transform: translateY(-1px);
+}
+.tvx-2fa__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.tvx-2fa__btn--ghost {
+  color: var(--tvx-text);
+  background: transparent;
+  border: 1px solid var(--tvx-border);
+}
+.tvx-2fa__btn--ghost:hover:not(:disabled) {
+  background: var(--tvx-surface-subtle);
+}
+.tvx-2fa__link {
+  align-self: center;
+  padding: 0.25rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--tvx-text-muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.tvx-2fa__link:hover {
+  color: var(--tvx-orange-strong);
+}
+.tvx-2fa__error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--tvx-danger);
+}
+.tvx-2fa__muted {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--tvx-text-muted);
+}
+.tvx-2fa__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--tvx-text);
+}
+.tvx-2fa__eyebrow {
+  margin: 0 0 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tvx-orange-strong);
+}
+.tvx-2fa__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  text-align: left;
+}
+.tvx-2fa__steps,
+.tvx-2fa__codes {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--tvx-text-muted);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+.tvx-2fa__qr {
+  align-self: center;
+  width: 180px;
+  height: 180px;
+  border-radius: 14px;
+  border: 1px solid var(--tvx-border);
+  background: #fff;
+  padding: 8px;
+}
+.tvx-2fa__secret {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--tvx-text-muted);
+}
+.tvx-2fa__secret code {
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  color: var(--tvx-text);
+  word-break: break-all;
+}
+.tvx-2fa__codes {
+  list-style: none;
+  padding: 0.9rem 1rem;
+  background: var(--tvx-surface-subtle);
+  border: 1px dashed var(--tvx-border);
+  border-radius: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.95rem;
+  color: var(--tvx-text);
+  column-count: 2;
+  column-gap: 1.5rem;
+}
+.tvx-2fa__check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--tvx-text);
+}
+/* Mandatory enrolment gate — full-screen branded backdrop */
+.tvx-2fa__gate {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1.25rem;
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 14% 12%, color-mix(in srgb, #f97316 22%, transparent), transparent 42%),
+    linear-gradient(150deg, #0e1a27 0%, #16273a 55%, #0a1420 100%);
+}
+.tvx-2fa__gate-card {
+  width: 100%;
+  max-width: 30rem;
+  padding: 2rem;
+  background: var(--tvx-surface);
+  border: 1px solid var(--tvx-border);
+  border-radius: 20px;
+  box-shadow: var(--tvx-shadow-md);
+}
+.tvx-2fa__status {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--tvx-text);
+}

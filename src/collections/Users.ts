@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload'
+import { Forbidden } from 'payload'
 import { ROLES, isSuperAdmin } from '../access/roles'
 import { notifyAccountChange } from '../lib/account-notifications'
+import { isTwoFactorEnforced } from '../lib/two-factor'
 
 /**
  * Staff / admin users (§80). Customers are NOT stored here — see the
@@ -31,6 +33,16 @@ export const Users: CollectionConfig = {
   },
   hooks: {
     afterChange: [notifyAccountChange],
+    // When enforcement is on, block the native password-only login endpoint so
+    // the second factor can't be bypassed via the REST/GraphQL API. Every login
+    // must go through the /two-factor/login flow, which sets `twoFactorFlow`.
+    beforeLogin: [
+      ({ req }) => {
+        if (!isTwoFactorEnforced()) return
+        if ((req.context as { twoFactorFlow?: boolean })?.twoFactorFlow) return
+        throw new Forbidden(req.t)
+      },
+    ],
   },
   fields: [
     {
@@ -73,6 +85,36 @@ export const Users: CollectionConfig = {
         description:
           'New bookings, reviews and enquiries relevant to your role. In-app alerts always show regardless.',
       },
+    },
+    // ── Two-factor (TOTP) — all fields are server-managed via overrideAccess.
+    // Readable so the UI can show enrolment status; never user-writable.
+    {
+      name: 'twoFactorEnabled',
+      type: 'checkbox',
+      defaultValue: false,
+      access: { update: () => false, create: () => false },
+      admin: { hidden: true, readOnly: true },
+    },
+    // Encrypted TOTP secret (active). Never exposed through API or admin.
+    {
+      name: 'twoFactorSecret',
+      type: 'text',
+      access: { read: () => false, update: () => false, create: () => false },
+      admin: { hidden: true },
+    },
+    // Encrypted secret staged during enrolment, promoted on confirmation.
+    {
+      name: 'twoFactorPendingSecret',
+      type: 'text',
+      access: { read: () => false, update: () => false, create: () => false },
+      admin: { hidden: true },
+    },
+    // SHA-256 hashes of one-time recovery codes.
+    {
+      name: 'twoFactorRecoveryCodes',
+      type: 'json',
+      access: { read: () => false, update: () => false, create: () => false },
+      admin: { hidden: true },
     },
   ],
   versions: false,
