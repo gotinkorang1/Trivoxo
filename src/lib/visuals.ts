@@ -49,7 +49,8 @@ function hashCode(str: string): number {
 /** Stable, deterministic gradient for any slug — used where content has no
  * curated visual of its own yet. */
 export function gradientForSlug(slug: string): string {
-  return PALETTE[hashCode(slug) % PALETTE.length]
+  // Modulo of a non-empty palette is always a valid index.
+  return PALETTE[hashCode(slug) % PALETTE.length]!
 }
 
 export function gradientForDestination(slug: string): string {

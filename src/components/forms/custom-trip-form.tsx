@@ -67,12 +67,14 @@ export function CustomTripForm() {
       .map((value) => TRIP_INTERESTS.find((item) => item.value === value)?.label)
       .filter(Boolean)
       .join(', ')
-    const needs = [
-      ['accommodation', 'Accommodation'],
-      ['transport', 'Transport'],
-      ['airportTransfer', 'Airport transfer'],
-      ['privateGuide', 'Private guide'],
-    ]
+    const needs = (
+      [
+        ['accommodation', 'Accommodation'],
+        ['transport', 'Transport'],
+        ['airportTransfer', 'Airport transfer'],
+        ['privateGuide', 'Private guide'],
+      ] as const
+    )
       .filter(([name]) => data.has(name))
       .map(([, label]) => label)
       .join(', ')

@@ -255,18 +255,16 @@ function buildPerformanceSeries(
     const dayIndex = Math.floor(
       (new Date(payment.paidAt).getTime() - periodStart.getTime()) / DAY_MS,
     )
-    const bucketIndex = Math.floor(dayIndex / bucketDays)
-    if (bucketIndex >= 0 && bucketIndex < points.length) {
-      points[bucketIndex].revenue += payment.amountMinor / 100
-    }
+    const bucket = points[Math.floor(dayIndex / bucketDays)]
+    if (bucket) bucket.revenue += payment.amountMinor / 100
   }
 
   for (const booking of bookings) {
     const dayIndex = Math.floor(
       (new Date(booking.createdAt).getTime() - periodStart.getTime()) / DAY_MS,
     )
-    const bucketIndex = Math.floor(dayIndex / bucketDays)
-    if (bucketIndex >= 0 && bucketIndex < points.length) points[bucketIndex].bookings += 1
+    const bucket = points[Math.floor(dayIndex / bucketDays)]
+    if (bucket) bucket.bookings += 1
   }
 
   return points
@@ -877,8 +875,10 @@ function SourceAndCapacityPanel({
           <div className="tvx-channel-summary">
             <span>
               <small>Top booking channel</small>
-              <strong>{topSource.label}</strong>
-              <span>{topSource.percentage}% of period bookings</span>
+              <strong>{topSource?.label ?? '—'}</strong>
+              <span>
+                {topSource ? `${topSource.percentage}% of period bookings` : 'No bookings yet'}
+              </span>
             </span>
             <span>
               <small>Seats still available</small>

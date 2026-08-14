@@ -33,9 +33,10 @@ export const metadata: Metadata = {
 /** First + last initial, for a leadership card without a portrait. */
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return '?'
-  const last = parts.length > 1 ? parts[parts.length - 1][0] : ''
-  return (parts[0][0] + last).toUpperCase()
+  const first = parts[0]
+  if (!first) return '?'
+  const last = parts.length > 1 ? parts[parts.length - 1] : undefined
+  return (first.charAt(0) + (last?.charAt(0) ?? '')).toUpperCase()
 }
 
 const SERVICES: { icon: LucideIcon; title: string; body: string }[] = [

@@ -59,7 +59,8 @@ export function HeroCarousel({ experienceCount }: { experienceCount: number }) {
   const [active, setActive] = useState(0)
   const [paused, setPaused] = useState(false)
   const reduceMotion = useReducedMotionPreference()
-  const slide = SLIDES[active]
+  // `active` is always kept in range; fall back to the first slide defensively.
+  const slide = SLIDES[active] ?? SLIDES[0]!
 
   useEffect(() => {
     if (paused || reduceMotion) return

@@ -345,7 +345,7 @@ function mapExperience(
       description: s.description,
     })),
     category: categoryIds.get(exp.categorySlug),
-    destination: destinationIds.get(EXPERIENCE_TO_DESTINATION[exp.slug]),
+    destination: destinationIds.get(EXPERIENCE_TO_DESTINATION[exp.slug] ?? ''),
     _status: 'published' as const,
   }
 }

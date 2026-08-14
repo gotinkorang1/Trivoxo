@@ -194,7 +194,7 @@ describe('payment and inventory settlement', () => {
         totalAmount: 2800,
       },
     })
-    expect(queued.docs[0].accessExpiresAt).toBeTruthy()
+    expect(queued.docs[0]!.accessExpiresAt).toBeTruthy()
 
     const sender = vi.fn(async (_input: Parameters<BookingConfirmationSender>[0]) => ({
       id: 'email_test_idempotent',
@@ -205,11 +205,11 @@ describe('payment and inventory settlement', () => {
     ])
     expect(deliveries.reduce((total, delivery) => total + delivery.sent, 0)).toBe(1)
     expect(sender).toHaveBeenCalledTimes(1)
-    expect(sender.mock.calls[0][0].idempotencyKey).toBe(`booking-confirmed/${booking.id}/v1`)
+    expect(sender.mock.calls[0]![0].idempotencyKey).toBe(`booking-confirmed/${booking.id}/v1`)
 
     const sent = await payload.findByID({
       collection: 'notifications',
-      id: queued.docs[0].id,
+      id: queued.docs[0]!.id,
       depth: 0,
       overrideAccess: true,
     })
@@ -282,7 +282,7 @@ describe('payment and inventory settlement', () => {
         overrideAccess: true,
         where: { booking: { equals: held.booking.id } },
       })
-    ).docs[0]
+    ).docs[0]!
     expect(notification).toMatchObject({ status: 'failed', attempts: 1 })
     expect(new Date(notification.nextAttemptAt!).getTime()).toBeGreaterThan(now.getTime())
 

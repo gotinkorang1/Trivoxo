@@ -79,7 +79,8 @@ export function evaluateDateAvailability(
 
   const availabilityType = rules.availabilityType ?? 'everyday'
   if (availabilityType === 'weekdays') {
-    const weekday = WEEKDAY_BY_INDEX[new Date(`${date}T12:00:00.000Z`).getUTCDay()]
+    // getUTCDay() is 0–6, and WEEKDAY_BY_INDEX has all seven days.
+    const weekday = WEEKDAY_BY_INDEX[new Date(`${date}T12:00:00.000Z`).getUTCDay()]!
     if (!rules.weekdays?.includes(weekday)) {
       return {
         requestable: false,

@@ -99,6 +99,6 @@ describe('admin notification fan-out', () => {
     const docs = await alertsFor(ops, dedupeBase)
     expect(docs).toHaveLength(1)
     // No RESEND_API_KEY/EMAIL_FROM in the test env → created as skipped, not pending.
-    expect(docs[0].emailStatus).toBe('skipped')
+    expect(docs[0]!.emailStatus).toBe('skipped')
   })
 })

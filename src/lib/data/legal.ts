@@ -35,7 +35,7 @@ const LEGAL_REVIEW_NOTICE: LegalSection = {
 }
 
 const childPct = Math.round(CHILD_RATE * 100)
-const groupTier = GROUP_DISCOUNT_TIERS[0]
+const groupTier = GROUP_DISCOUNT_TIERS[0]!
 
 export const LEGAL_PAGES: LegalPage[] = [
   {

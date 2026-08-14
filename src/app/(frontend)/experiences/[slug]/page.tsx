@@ -183,7 +183,7 @@ export default async function ExperienceDetailPage({
             ['Dates', '#availability'],
             ['Good to know', '#good-to-know'],
           ]
-            .filter((item): item is string[] => Boolean(item))
+            .filter((item): item is [string, string] => Boolean(item))
             .map(([label, href]) => (
               <Link
                 key={href}

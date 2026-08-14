@@ -187,10 +187,10 @@ describe('transactional event ticket inventory', () => {
     const ticket = settled.tickets[0]
     expect(ticket?.reference).toBeTruthy()
 
-    const first = await checkInTicket(payload, { reference: ticket.reference || '', gate: 'Gate 1' })
+    const first = await checkInTicket(payload, { reference: ticket!.reference || '', gate: 'Gate 1' })
     expect(first.result).toBe('valid')
 
-    const second = await checkInTicket(payload, { reference: ticket.reference || '' })
+    const second = await checkInTicket(payload, { reference: ticket!.reference || '' })
     expect(second.result).toBe('already')
 
     const missing = await checkInTicket(payload, { reference: 'TVXE-NOPE9' })
