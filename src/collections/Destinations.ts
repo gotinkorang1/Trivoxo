@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { indexNowOnPublish } from '../lib/indexnow'
 import { anyone, hasRole } from '../access/roles'
 import { slugField } from '../fields/slug'
 import { seoField } from '../fields/seo'
@@ -34,6 +35,9 @@ export const Destinations: CollectionConfig = {
     delete: hasRole('operations'),
   },
   versions: { drafts: true },
+  hooks: {
+    afterChange: [indexNowOnPublish((slug) => `/destinations/${slug}`)],
+  },
   fields: [
     { name: 'title', type: 'text', required: true },
     slugField('title'),

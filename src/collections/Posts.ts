@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { indexNowOnPublish } from '../lib/indexnow'
 import { anyone, hasRole } from '../access/roles'
 import { slugField } from '../fields/slug'
 import { seoField } from '../fields/seo'
@@ -34,6 +35,9 @@ export const Posts: CollectionConfig = {
     delete: hasRole('content-editor', 'operations'),
   },
   versions: { drafts: { schedulePublish: true } },
+  hooks: {
+    afterChange: [indexNowOnPublish((slug) => `/guide/${slug}`)],
+  },
   fields: [
     {
       type: 'tabs',

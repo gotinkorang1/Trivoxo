@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { indexNowOnPublish } from '../lib/indexnow'
 import { anyone, hasRole } from '../access/roles'
 import { slugField } from '../fields/slug'
 import { seoField } from '../fields/seo'
@@ -23,6 +24,9 @@ export const Events: CollectionConfig = {
     delete: hasRole('event-manager', 'operations'),
   },
   versions: { drafts: { schedulePublish: true } },
+  hooks: {
+    afterChange: [indexNowOnPublish((slug) => `/events/${slug}`)],
+  },
   fields: [
     {
       type: 'tabs',

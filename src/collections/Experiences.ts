@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { anyone, hasRole } from '../access/roles'
+import { indexNowOnPublish } from '../lib/indexnow'
 import { slugField } from '../fields/slug'
 import { seoField } from '../fields/seo'
 
@@ -36,6 +37,9 @@ export const Experiences: CollectionConfig = {
   versions: {
     drafts: { autosave: { interval: 800 }, schedulePublish: true },
     maxPerDoc: 25,
+  },
+  hooks: {
+    afterChange: [indexNowOnPublish((slug) => `/experiences/${slug}`)],
   },
   fields: [
     {
