@@ -23,6 +23,7 @@ import { TurnstileWidget } from '@/components/forms/turnstile-widget'
 import { Button } from '@/components/ui/button'
 import { evaluateDateAvailability, type DateWindow } from '@/lib/availability'
 import type { AvailabilityType, Weekday } from '@/lib/data/experiences'
+import { GREATER_ACCRA_AREAS } from '@/lib/data/greater-accra-areas'
 import { formatPrice } from '@/lib/format'
 import { BOOKING_HOLD, quoteBooking } from '@/lib/policies'
 import { cn } from '@/lib/utils'
@@ -650,13 +651,11 @@ export function BookingForm({
                         </>
                       ) : null}
 
-                      <TextField
+                      <PickupAutocomplete
                         id="booking-pickup"
                         label="Pickup area (Greater Accra)"
                         value={values.pickup}
                         error={combinedErrors.pickup}
-                        autoComplete="street-address"
-                        placeholder="e.g. Osu, Airport Residential"
                         onChange={(value) => update('pickup', value)}
                       />
                       <TextField
@@ -1047,6 +1046,132 @@ function TextField({
         onChange={(event) => onChange(event.target.value)}
         className={inputCls(error)}
       />
+    </Field>
+  )
+}
+
+/**
+ * Pickup-location combobox. Suggests only areas within the Greater Accra Region
+ * as the user types, while still allowing free text (e.g. a specific street or
+ * landmark within a suggested area). Keyboard- and pointer-accessible.
+ */
+function PickupAutocomplete({
+  id,
+  label,
+  value,
+  error,
+  onChange,
+}: {
+  id: string
+  label: string
+  value: string
+  error?: string
+  onChange: (value: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(-1)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const listId = `${id}-listbox`
+
+  const suggestions = useMemo(() => {
+    const q = value.trim().toLowerCase()
+    const pool = q
+      ? GREATER_ACCRA_AREAS.filter((area) => area.toLowerCase().includes(q))
+      : GREATER_ACCRA_AREAS
+    // Don't suggest when the field already exactly matches a known area.
+    if (pool.length === 1 && pool[0]?.toLowerCase() === q) return []
+    return pool.slice(0, 8)
+  }, [value])
+
+  useEffect(() => {
+    function onPointerDown(event: PointerEvent) {
+      if (wrapRef.current && !wrapRef.current.contains(event.target as Node)) setOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => document.removeEventListener('pointerdown', onPointerDown)
+  }, [])
+
+  function choose(area: string) {
+    onChange(area)
+    setOpen(false)
+    setActiveIndex(-1)
+  }
+
+  function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (!open || suggestions.length === 0) {
+      if (event.key === 'ArrowDown') setOpen(true)
+      return
+    }
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setActiveIndex((i) => (i + 1) % suggestions.length)
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setActiveIndex((i) => (i <= 0 ? suggestions.length - 1 : i - 1))
+    } else if (event.key === 'Enter' && activeIndex >= 0) {
+      event.preventDefault()
+      const picked = suggestions[activeIndex]
+      if (picked) choose(picked)
+    } else if (event.key === 'Escape') {
+      setOpen(false)
+    }
+  }
+
+  return (
+    <Field id={id} label={label} error={error} hint="Greater Accra only">
+      <div ref={wrapRef} className="relative">
+        <MapPin className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-text-muted" />
+        <input
+          id={id}
+          type="text"
+          role="combobox"
+          aria-expanded={open && suggestions.length > 0}
+          aria-controls={listId}
+          aria-autocomplete="list"
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? `${id}-error` : undefined}
+          autoComplete="off"
+          value={value}
+          placeholder="Start typing an area — e.g. Osu, East Legon"
+          className={inputCls(error, 'pl-11')}
+          onChange={(event) => {
+            onChange(event.target.value)
+            setOpen(true)
+            setActiveIndex(-1)
+          }}
+          onFocus={() => setOpen(true)}
+          onKeyDown={onKeyDown}
+        />
+        {open && suggestions.length > 0 && (
+          <ul
+            id={listId}
+            role="listbox"
+            className="absolute z-20 mt-2 max-h-64 w-full overflow-auto rounded-xl border border-border-strong bg-surface-elevated py-1 shadow-lift"
+          >
+            {suggestions.map((area, index) => (
+              <li
+                key={area}
+                role="option"
+                aria-selected={index === activeIndex}
+                onMouseEnter={() => setActiveIndex(index)}
+                onMouseDown={(event) => {
+                  event.preventDefault()
+                  choose(area)
+                }}
+                className={cn(
+                  'flex cursor-pointer items-center gap-2 px-3.5 py-2.5 text-sm',
+                  index === activeIndex
+                    ? 'bg-brand-primary-soft text-brand-link'
+                    : 'text-text-primary',
+                )}
+              >
+                <MapPin className="size-4 shrink-0 text-text-muted" />
+                {area}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </Field>
   )
 }
