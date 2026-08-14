@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Fast, dependency-free gate — always runs, catches type and lint regressions.
+  quality:
+    name: Type-check & lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: npm
+      - run: npm ci
+      - name: Type-check
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+
+  # Full pipeline against a real Postgres, mirroring local dev (host port 5433).
+  test-build:
+    name: Migrate, test & build
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: trivoxo
+          POSTGRES_PASSWORD: trivoxo
+          POSTGRES_DB: trivoxo
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd="pg_isready -U trivoxo"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      DATABASE_URI: postgres://trivoxo:trivoxo@127.0.0.1:5433/trivoxo
+      PAYLOAD_SECRET: ci-placeholder-secret-not-used-in-production-000000
+      NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: npm
+      - run: npm ci
+      - name: Apply migrations
+        run: npm run migrate:deploy
+      - name: Integration tests
+        run: npm run test:int
+      - name: Production build
+        run: npm run build
