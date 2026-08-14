@@ -13,6 +13,7 @@ export const RATE_LIMIT_POLICIES = {
   eventOrderCreate: { limit: 6, window: '10 m' },
   newsletterSubscribe: { limit: 5, window: '1 h' },
   tripLookup: { limit: 10, window: '10 m' },
+  couponValidate: { limit: 20, window: '10 m' },
   // Admin 2FA: cap password attempts (Payload also locks the account) and,
   // more importantly, cap TOTP/recovery code guesses so a stolen password
   // can't be paired with a brute-forced 6-digit code.

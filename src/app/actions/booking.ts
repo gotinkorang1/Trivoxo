@@ -7,6 +7,7 @@ import config from '@payload-config'
 import { evaluateDateAvailability, getBookingWindow, isIsoDate } from '@/lib/availability'
 import { createBookingHold, InventoryError } from '@/lib/booking-inventory'
 import { CAPACITY, quoteBooking } from '@/lib/policies'
+import { validateCoupon } from '@/lib/coupons'
 import { createBookingAccessToken } from '@/lib/booking-access'
 import { checkRateLimit, rateLimitMessage } from '@/lib/rate-limit'
 import { verifyTurnstile } from '@/lib/turnstile'
@@ -51,6 +52,7 @@ export async function createBookingAction(
   const pickup = get('pickup')
   const pickupTime = get('pickupTime')
   const specialRequest = get('specialRequest')
+  const couponCode = get('couponCode')
   const adults = Number(formData.get('adults') ?? 4)
   const children = Number(formData.get('children') ?? 0)
   const youngChildren = Number(formData.get('youngChildren') ?? 0)
@@ -72,6 +74,7 @@ export async function createBookingAction(
     pickup,
     pickupTime,
     specialRequest,
+    couponCode,
     adults: String(adults),
     children: String(children),
     youngChildren: String(youngChildren),
@@ -169,6 +172,25 @@ export async function createBookingAction(
       }
     }
 
+    // Estimate from the group-pricing rules, then apply a coupon if one is
+    // supplied and still valid at submit time (re-checked authoritatively here).
+    const quoteTotal = quoteBooking(experience.priceFrom ?? 0, adults, children, youngChildren).total
+    let totalAmount = quoteTotal
+    let appliedCoupon: string | undefined
+    let couponDiscount: number | undefined
+    if (couponCode) {
+      const couponResult = await validateCoupon(payload, couponCode, {
+        experienceId: experience.id,
+        subtotal: quoteTotal,
+      })
+      if (!couponResult.ok) {
+        return { error: `Coupon ${couponCode.toUpperCase()}: ${couponResult.reason}`, values }
+      }
+      totalAmount = couponResult.total
+      appliedCoupon = couponResult.code
+      couponDiscount = couponResult.discount
+    }
+
     const { booking } = await createBookingHold(payload, {
       experience,
       date,
@@ -187,8 +209,9 @@ export async function createBookingAction(
         consentAdultPhone: bookerAge === '13-17' ? consentAdultPhone : undefined,
       },
       specialRequest: specialRequest || undefined,
-      // Estimate from the group-pricing rules — confirmed at checkout.
-      totalAmount: quoteBooking(experience.priceFrom ?? 0, adults, children, youngChildren).total,
+      totalAmount,
+      couponCode: appliedCoupon,
+      couponDiscount,
     })
     reference = booking.reference ?? undefined
   } catch (err) {

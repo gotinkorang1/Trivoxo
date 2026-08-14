@@ -61,6 +61,8 @@ export type CreateHoldInput = {
   travellerIdentity?: Booking['travellerIdentity']
   specialRequest?: string
   totalAmount: number
+  couponCode?: string
+  couponDiscount?: number
   source?: Booking['source']
   now?: Date
   holdMinutes?: number
@@ -661,6 +663,8 @@ export async function createBookingHold(
         travellerIdentity: input.travellerIdentity,
         specialRequest: input.specialRequest,
         totalAmount: input.totalAmount,
+        couponCode: input.couponCode,
+        couponDiscount: input.couponDiscount,
         paymentState: 'outstanding',
       },
     })

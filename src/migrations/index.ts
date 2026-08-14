@@ -8,6 +8,7 @@ import * as migration_20260811_200530_revoke_public_api_grants from './20260811_
 import * as migration_20260812_003415_admin_notifications_and_profile from './20260812_003415_admin_notifications_and_profile';
 import * as migration_20260813_002650_booking_identity_and_traveller_fields from './20260813_002650_booking_identity_and_traveller_fields';
 import * as migration_20260813_140000_two_factor_auth from './20260813_140000_two_factor_auth';
+import * as migration_20260814_090000_booking_coupon_fields from './20260814_090000_booking_coupon_fields';
 
 export const migrations = [
   {
@@ -59,5 +60,10 @@ export const migrations = [
     up: migration_20260813_140000_two_factor_auth.up,
     down: migration_20260813_140000_two_factor_auth.down,
     name: '20260813_140000_two_factor_auth'
+  },
+  {
+    up: migration_20260814_090000_booking_coupon_fields.up,
+    down: migration_20260814_090000_booking_coupon_fields.down,
+    name: '20260814_090000_booking_coupon_fields'
   },
 ];

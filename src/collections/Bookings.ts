@@ -309,6 +309,31 @@ export const Bookings: CollectionConfig = {
       ],
     },
     {
+      type: 'row',
+      fields: [
+        {
+          name: 'couponCode',
+          label: 'Coupon',
+          type: 'text',
+          admin: { width: '33%', readOnly: true },
+        },
+        {
+          name: 'couponDiscount',
+          label: 'Discount (GHS)',
+          type: 'number',
+          min: 0,
+          admin: { width: '33%', readOnly: true },
+        },
+        {
+          name: 'couponRedeemed',
+          label: 'Coupon counted',
+          type: 'checkbox',
+          defaultValue: false,
+          admin: { width: '33%', readOnly: true },
+        },
+      ],
+    },
+    {
       name: 'internalNotes',
       type: 'textarea',
       access: { read: fieldHasRole('operations', 'finance') },

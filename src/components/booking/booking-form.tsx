@@ -18,6 +18,7 @@ import {
   WalletCards,
 } from 'lucide-react'
 import { createBookingAction, type BookingFormState } from '@/app/actions/booking'
+import { validateCouponAction } from '@/app/actions/coupon'
 import { GroupPricingTable } from '@/components/experiences/group-pricing'
 import { TurnstileWidget } from '@/components/forms/turnstile-widget'
 import { Button } from '@/components/ui/button'
@@ -58,6 +59,7 @@ type FormValues = {
   pickup: string
   pickupTime: string
   specialRequest: string
+  couponCode: string
 }
 
 type LiveAvailability = {
@@ -131,7 +133,13 @@ export function BookingForm({
     pickup: '',
     pickupTime: '',
     specialRequest: '',
+    couponCode: '',
   })
+  const [coupon, setCoupon] = useState<{ code: string; discount: number; subtotal: number } | null>(
+    null,
+  )
+  const [couponMsg, setCouponMsg] = useState<string | null>(null)
+  const [couponBusy, setCouponBusy] = useState(false)
   const stepHeadingRef = useRef<HTMLHeadingElement>(null)
   const reduceMotion = useReducedMotion()
   const adults = Number(values.adults)
@@ -142,6 +150,9 @@ export function BookingForm({
     () => quoteBooking(baseFrom, adults, children, youngChildren),
     [baseFrom, adults, children, youngChildren],
   )
+  // A coupon only counts while it still matches the current subtotal.
+  const couponActive = coupon !== null && coupon.subtotal === quote.total
+  const payableTotal = couponActive && coupon ? Math.max(0, quote.total - coupon.discount) : quote.total
   const dateWindow = useMemo<DateWindow>(() => ({ minDate, maxDate }), [minDate, maxDate])
   const dateStatus = values.date
     ? evaluateDateAvailability(
@@ -218,7 +229,16 @@ export function BookingForm({
   }, [availabilityKey, partySize, slug, values.date])
 
   function update<K extends keyof FormValues>(key: K, value: FormValues[K]) {
-    setValues((current) => ({ ...current, [key]: value }))
+    const clearsCoupon = key === 'adults' || key === 'children' || key === 'youngChildren'
+    setValues((current) => ({
+      ...current,
+      [key]: value,
+      ...(clearsCoupon ? { couponCode: '' } : {}),
+    }))
+    if (clearsCoupon) {
+      setCoupon(null)
+      setCouponMsg(null)
+    }
     setClientErrors((current) => {
       const clearsParty = (key === 'adults' || key === 'children') && Boolean(current.party)
       if (!current[key] && !clearsParty) return current
@@ -227,6 +247,32 @@ export function BookingForm({
       if (key === 'adults' || key === 'children') delete next.party
       return next
     })
+  }
+
+  async function applyCoupon() {
+    const code = values.couponCode.trim()
+    if (!code) {
+      setCouponMsg('Enter a code.')
+      return
+    }
+    setCouponBusy(true)
+    setCouponMsg(null)
+    const result = await validateCouponAction({ code, slug, adults, children, youngChildren })
+    setCouponBusy(false)
+    if (result.ok) {
+      setCoupon({ code: result.code, discount: result.discount, subtotal: result.subtotal })
+      setValues((current) => ({ ...current, couponCode: result.code }))
+      setCouponMsg(null)
+    } else {
+      setCoupon(null)
+      setCouponMsg(result.reason)
+    }
+  }
+
+  function removeCoupon() {
+    setCoupon(null)
+    setCouponMsg(null)
+    setValues((current) => ({ ...current, couponCode: '' }))
   }
 
   function validateTrip() {
@@ -743,6 +789,54 @@ export function BookingForm({
                       )}
                     </div>
 
+                    {!quote.requestQuote && (
+                      <div className="mt-6 rounded-card border border-border bg-surface p-4 sm:p-5">
+                        <label htmlFor="booking-coupon" className="text-sm font-bold text-text-primary">
+                          Promo code
+                        </label>
+                        <div className="mt-2 flex gap-2">
+                          <input
+                            id="booking-coupon"
+                            value={values.couponCode}
+                            onChange={(event) => update('couponCode', event.target.value.toUpperCase())}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Enter') {
+                                event.preventDefault()
+                                if (!couponActive) applyCoupon()
+                              }
+                            }}
+                            placeholder="Enter code"
+                            autoComplete="off"
+                            disabled={couponBusy || couponActive}
+                            className={inputCls(undefined, 'uppercase tracking-wide')}
+                          />
+                          {couponActive ? (
+                            <Button type="button" variant="ghost" onClick={removeCoupon}>
+                              Remove
+                            </Button>
+                          ) : (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={applyCoupon}
+                              disabled={couponBusy || !values.couponCode.trim()}
+                            >
+                              {couponBusy ? <Loader2 className="size-4 animate-spin" /> : 'Apply'}
+                            </Button>
+                          )}
+                        </div>
+                        {couponActive && coupon && (
+                          <p className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-brand-link">
+                            <CircleCheck className="size-4" /> {coupon.code} applied — you save{' '}
+                            {formatPrice(coupon.discount)}
+                          </p>
+                        )}
+                        {couponMsg && (
+                          <p className="mt-2 text-sm font-semibold text-danger">{couponMsg}</p>
+                        )}
+                      </div>
+                    )}
+
                     <div className="mt-6 rounded-card bg-brand-navy p-5 text-white sm:p-6">
                       <div className="flex items-start justify-between gap-4">
                         <div>
@@ -750,8 +844,16 @@ export function BookingForm({
                             {quote.requestQuote ? 'Planning estimate' : 'Estimated total'}
                           </p>
                           <p className="mt-1 text-3xl font-bold text-white">
-                            {formatPrice(quote.total)}
+                            {formatPrice(payableTotal)}
                           </p>
+                          {couponActive && coupon && (
+                            <p className="mt-1 text-sm text-white/70">
+                              <span className="line-through">{formatPrice(quote.total)}</span>{' '}
+                              <span className="font-semibold text-brand-secondary">
+                                −{formatPrice(coupon.discount)} · {coupon.code}
+                              </span>
+                            </p>
+                          )}
                         </div>
                         {quote.discountPct > 0 && (
                           <span className="rounded-full bg-brand-accent px-3 py-1.5 text-xs font-bold text-white">
@@ -807,7 +909,7 @@ export function BookingForm({
                 {partySize} travellers · {selectedDateLabel}
               </p>
               <p className="font-bold text-text-primary">
-                {quote.requestQuote ? 'Group quote' : formatPrice(quote.total)}
+                {quote.requestQuote ? 'Group quote' : formatPrice(payableTotal)}
               </p>
             </div>
             {step > 0 && (
@@ -872,8 +974,13 @@ export function BookingForm({
                 {quote.requestQuote ? 'Planning estimate' : 'Estimated total'}
               </p>
               <p className="mt-1 text-3xl font-bold text-text-primary">
-                {formatPrice(quote.total)}
+                {formatPrice(payableTotal)}
               </p>
+              {couponActive && coupon && (
+                <p className="mt-1 text-xs font-semibold text-brand-link">
+                  {coupon.code}: −{formatPrice(coupon.discount)}
+                </p>
+              )}
             </div>
             {quote.discountPct > 0 && (
               <span className="rounded-full bg-brand-accent-soft px-3 py-1.5 text-xs font-bold text-brand-accent">

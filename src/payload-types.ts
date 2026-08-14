@@ -642,6 +642,9 @@ export interface Booking {
     | null;
   totalAmount?: number | null;
   paymentState?: ('paid' | 'deposit' | 'outstanding') | null;
+  couponCode?: string | null;
+  couponDiscount?: number | null;
+  couponRedeemed?: boolean | null;
   internalNotes?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1629,6 +1632,9 @@ export interface BookingsSelect<T extends boolean = true> {
       };
   totalAmount?: T;
   paymentState?: T;
+  couponCode?: T;
+  couponDiscount?: T;
+  couponRedeemed?: T;
   internalNotes?: T;
   updatedAt?: T;
   createdAt?: T;

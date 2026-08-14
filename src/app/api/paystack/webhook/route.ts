@@ -4,6 +4,7 @@ import config from '@payload-config'
 import { verifyPaystackWebhookSignature } from '@/lib/paystack'
 import { reconcilePaymentByReference } from '@/lib/payment-dispatch'
 import { processNotifications } from '@/lib/notifications'
+import { redeemCouponForBooking } from '@/lib/coupons'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -39,6 +40,11 @@ export async function POST(request: Request): Promise<Response> {
     if (result.outcome === 'confirmed') {
       const bookingID = result.kind === 'booking' ? result.booking?.id : undefined
       const eventOrderID = result.kind === 'event' ? result.order?.id : undefined
+      // Count the coupon once the booking is paid (idempotent, best-effort).
+      if (result.kind === 'booking' && result.booking?.couponCode) {
+        const paidBooking = result.booking
+        after(() => redeemCouponForBooking(payload, paidBooking))
+      }
       if (bookingID || eventOrderID) {
         after(async () => {
           try {
