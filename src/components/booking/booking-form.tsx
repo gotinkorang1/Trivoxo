@@ -141,6 +141,8 @@ export function BookingForm({
   const [couponMsg, setCouponMsg] = useState<string | null>(null)
   const [couponBusy, setCouponBusy] = useState(false)
   const stepHeadingRef = useRef<HTMLHeadingElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
+  const didMount = useRef(false)
   const reduceMotion = useReducedMotion()
   const adults = Number(values.adults)
   const children = Number(values.children)
@@ -175,9 +177,28 @@ export function BookingForm({
     soldOut || checkingAvailability || liveAvailability?.available === false,
   )
 
+  // On a step change, glide the card into view and move focus for screen
+  // readers — but never hijack focus/scroll on the initial load.
   useEffect(() => {
-    stepHeadingRef.current?.focus()
+    if (!didMount.current) {
+      didMount.current = true
+      return
+    }
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    cardRef.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
+    stepHeadingRef.current?.focus({ preventScroll: true })
   }, [step])
+
+  // A submit error surfaces at the top of the card; the user is usually at the
+  // submit button, so pull the message into view.
+  useEffect(() => {
+    if (!state.error) return
+    requestAnimationFrame(() => {
+      document
+        .querySelector<HTMLElement>('[role="alert"], [aria-invalid="true"]')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+  }, [state])
 
   useEffect(() => {
     if (!availabilityKey) return
@@ -321,14 +342,30 @@ export function BookingForm({
     return Object.keys(errors).length === 0
   }
 
+  // After a failed validation, bring the first problem into view (and focus it).
+  function scrollToFirstError() {
+    requestAnimationFrame(() => {
+      const el = document.querySelector<HTMLElement>('[aria-invalid="true"], [role="alert"]')
+      if (!el) return
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      if (el.matches('input, select, textarea')) el.focus({ preventScroll: true })
+    })
+  }
+
   function continueFromTrip() {
-    if (!validateTrip()) return
+    if (!validateTrip()) {
+      scrollToFirstError()
+      return
+    }
     setClientErrors({})
     setStep(1)
   }
 
   function continueFromDetails() {
-    if (!validateDetails()) return
+    if (!validateDetails()) {
+      scrollToFirstError()
+      return
+    }
     setClientErrors({})
     setStep(2)
   }
@@ -350,7 +387,10 @@ export function BookingForm({
           <input key={key} type="hidden" name={key} value={values[key]} />
         ))}
 
-        <div className="overflow-hidden rounded-card border border-border bg-surface-elevated shadow-lift">
+        <div
+          ref={cardRef}
+          className="scroll-mt-24 overflow-hidden rounded-card border border-border bg-surface-elevated shadow-lift"
+        >
           <StepIndicator currentStep={step} />
 
           <div className="p-5 sm:p-8 lg:p-10">
