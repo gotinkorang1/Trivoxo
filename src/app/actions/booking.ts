@@ -125,7 +125,7 @@ export async function createBookingAction(
 
   // Pickup must be provided (customer-chosen, within Greater Accra) with a time.
   if (!pickup) fieldErrors.pickup = 'Enter a pickup area within Greater Accra'
-  if (!pickupTime) fieldErrors.pickupTime = 'Enter a preferred pickup time'
+  if (!pickupTime) fieldErrors.pickupTime = 'Choose your preferred pickup time'
 
   if (Object.keys(fieldErrors).length > 0) {
     return { error: 'Please correct the highlighted fields.', fieldErrors, values }

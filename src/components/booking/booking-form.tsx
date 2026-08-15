@@ -315,7 +315,7 @@ export function BookingForm({
     }
 
     if (!values.pickup.trim()) errors.pickup = 'Enter a pickup area within Greater Accra.'
-    if (!values.pickupTime.trim()) errors.pickupTime = 'Enter a preferred pickup time.'
+    if (!values.pickupTime.trim()) errors.pickupTime = 'Choose your preferred pickup time.'
 
     setClientErrors(errors)
     return Object.keys(errors).length === 0
@@ -772,16 +772,24 @@ export function BookingForm({
                           `${values.firstName} ${values.lastName}`,
                           values.email,
                           values.phone,
-                          values.country || 'Country not provided',
-                        ]}
+                          values.nationality === 'foreign'
+                            ? [values.country, values.passportNumber && `Passport ${values.passportNumber}`]
+                                .filter(Boolean)
+                                .join(' · ')
+                            : values.ghanaCardNumber
+                              ? `Ghana Card ${values.ghanaCardNumber}`
+                              : '',
+                        ].filter(Boolean)}
                       />
-                      {(values.pickup || values.specialRequest) && (
+                      {(values.pickup || values.pickupTime || values.specialRequest) && (
                         <ReviewCard
                           icon={MapPin}
-                          title="Preferences"
+                          title="Pickup & preferences"
                           onEdit={() => setStep(1)}
                           lines={[
-                            values.pickup || 'Pickup to be agreed',
+                            values.pickup
+                              ? `${values.pickup}${values.pickupTime ? ` · ${values.pickupTime}` : ''}`
+                              : 'Pickup to be agreed',
                             values.specialRequest,
                           ].filter(Boolean)}
                         />
@@ -1323,6 +1331,8 @@ function PickupTimePicker({
         <select
           id={id}
           aria-label="Pickup hour"
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? `${id}-error` : undefined}
           value={h}
           onChange={(event) => set({ h: event.target.value })}
           className={inputCls(error)}
