@@ -704,12 +704,11 @@ export function BookingForm({
                         error={combinedErrors.pickup}
                         onChange={(value) => update('pickup', value)}
                       />
-                      <TextField
+                      <PickupTimePicker
                         id="booking-pickup-time"
                         label="Preferred pickup time"
                         value={values.pickupTime}
                         error={combinedErrors.pickupTime}
-                        placeholder="e.g. 07:30"
                         onChange={(value) => update('pickupTime', value)}
                       />
                       <Field
@@ -1278,6 +1277,86 @@ function PickupAutocomplete({
             ))}
           </ul>
         )}
+      </div>
+    </Field>
+  )
+}
+
+const PICKUP_HOURS = ['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']
+const PICKUP_MINUTES = ['00', '15', '30', '45']
+
+/** Parse "7:30 AM" back into its parts for the controlled selects. */
+function parsePickupTime(value: string): { h: string; m: string; mer: string } {
+  const match = value.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+  if (!match) return { h: '', m: '', mer: '' }
+  return { h: match[1] ?? '', m: match[2] ?? '', mer: (match[3] ?? '').toUpperCase() }
+}
+
+/**
+ * Pickup-time chooser: Hour · Minute · AM/PM selects instead of free text, so
+ * the value is always a clean, unambiguous "7:30 AM". Emits '' until all three
+ * are set, letting the existing required-field validation catch a blank.
+ */
+function PickupTimePicker({
+  id,
+  label,
+  value,
+  error,
+  onChange,
+}: {
+  id: string
+  label: string
+  value: string
+  error?: string
+  onChange: (value: string) => void
+}) {
+  const { h, m, mer } = parsePickupTime(value)
+  function set(part: { h?: string; m?: string; mer?: string }) {
+    const nh = part.h ?? h
+    const nm = part.m ?? m
+    const nmer = part.mer ?? mer
+    onChange(nh && nm && nmer ? `${nh}:${nm} ${nmer}` : '')
+  }
+  return (
+    <Field id={id} label={label} error={error}>
+      <div className="grid grid-cols-3 gap-2">
+        <select
+          id={id}
+          aria-label="Pickup hour"
+          value={h}
+          onChange={(event) => set({ h: event.target.value })}
+          className={inputCls(error)}
+        >
+          <option value="">Hour</option>
+          {PICKUP_HOURS.map((hour) => (
+            <option key={hour} value={hour}>
+              {hour}
+            </option>
+          ))}
+        </select>
+        <select
+          aria-label="Pickup minute"
+          value={m}
+          onChange={(event) => set({ m: event.target.value })}
+          className={inputCls(error)}
+        >
+          <option value="">Min</option>
+          {PICKUP_MINUTES.map((minute) => (
+            <option key={minute} value={minute}>
+              {minute}
+            </option>
+          ))}
+        </select>
+        <select
+          aria-label="AM or PM"
+          value={mer}
+          onChange={(event) => set({ mer: event.target.value })}
+          className={inputCls(error)}
+        >
+          <option value="">AM/PM</option>
+          <option value="AM">AM</option>
+          <option value="PM">PM</option>
+        </select>
       </div>
     </Field>
   )
