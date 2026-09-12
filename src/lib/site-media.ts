@@ -43,7 +43,10 @@ const DESTINATION_IMAGE: Record<string, PublicImage> = {
 const EXPERIENCE_IMAGE: Record<string, PublicImage> = {
   'capital-pulse-tour': { src: '/images/nkrumah-memorial.jpg', alt: 'Kwame Nkrumah Memorial Park, Accra' },
   'accra-by-night': { src: '/images/accra-night.jpg', alt: 'Accra city lights at night' },
-  'heritage-canopy-quest': { src: '/images/cape-coast-town.jpg', alt: 'Cape Coast fishing community by the sea' },
+  'heritage-canopy-quest': {
+    src: '/images/kakum-national-park-canopy.jpg',
+    alt: 'Visitors crossing Kakum National Park’s canopy walkway in Ghana',
+  },
   'remembrance-trail': { src: '/images/elmina-castle.jpg', alt: 'Elmina Castle, a Cape Coast heritage site' },
   'volta-wave-rider-dodi-island': { src: '/images/volta-lake-boat.webp', alt: 'A cruise boat on the Volta Lake toward Dodi Island' },
   'mountain-mist-canopy-cascade': { src: '/images/avatime-volta.jpg', alt: 'Misty Avatime hills in the Volta Region' },
